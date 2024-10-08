@@ -10,7 +10,8 @@ function App() {
     <Router >
       <Routes>
         <Route path="/" element={<Register />} />
-     
+      
+      
       </Routes>
     </Router>
   );
