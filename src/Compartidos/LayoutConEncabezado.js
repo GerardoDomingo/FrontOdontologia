@@ -1,6 +1,6 @@
 // src/componentes/LayoutConEncabezado.js
 import React from 'react';
-import BarraNav from './BarraNav';
+import BarraNav from './Barradenav';
 import PieDePagina from './Footer'; // Asegúrate de importar el Footer correctamente
 import { Layout } from 'antd';
 
