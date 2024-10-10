@@ -91,11 +91,6 @@ const Register = () => {
      // Verificar si la contraseña es segura
      await checkPasswordSafety(formData.password);
 
-     if (!isPasswordSafe || passwordStrength < 3) {
-      showModal('La contraseña no es segura o es muy débil', false);
-      return;
-    }
- 
     // Validar la contraseña antes de proceder
     if (formData.password !== formData.confirmPassword) {
       showModal('Las contraseñas no coinciden', false); // Mostrar modal de error
