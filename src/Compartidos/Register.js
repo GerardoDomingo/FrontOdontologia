@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import 'bulma/css/bulma.css'; // Importar Bulma
 import { FaCheckCircle } from 'react-icons/fa'; // Importar un ícono para la verificación
+import zxcvbn from 'zxcvbn';
+import CryptoJS from 'crypto-js'; // Importar CryptoJS para el hash
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,12 +16,15 @@ const Register = () => {
     confirmPassword: '', // Campo para confirmar contraseña
   });
 
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordError, setPasswordError] = useState('');
   const [emailError, setEmailError] = useState(''); // Estado para el error de correo
   const [isPasswordSafe, setIsPasswordSafe] = useState(false); // Estado para controlar si la contraseña es segura
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado para mostrar el modal
   const [modalMessage, setModalMessage] = useState(''); // Mensaje del modal
   const [isSuccess, setIsSuccess] = useState(false); // Estado para saber si el mensaje es de éxito
+  const [isLoading, setIsLoading] = useState(false); // Estado de carga para verificar la contraseña
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,33 +33,51 @@ const Register = () => {
       [name]: value,
     }));
 
-    // Resetear error de contraseña y estado de seguridad cuando el usuario cambia la contraseña
-    if (name === 'password') {
-      setPasswordError('');
-      setIsPasswordSafe(false); // Resetear la verificación de seguridad
-    }
+   
+      if (name === 'password') {
+        setPasswordError('');
+        setIsPasswordSafe(false);
+  
+        // Evaluar la fortaleza de la contraseña
+        const strength = zxcvbn(value).score;
+        setPasswordStrength(strength);
+      
+         // Verificar la fortaleza de la contraseña
+      if (strength < 3) {
+        setPasswordError('La contraseña debe ser fuerte o muy fuerte');
+      } else {
+        setPasswordError('');
+      }
+      }
+    };
 
-    // Resetear el error de correo cuando el usuario modifica el campo
-    if (name === 'email') {
-      setEmailError('');
-    }
-  };
+    
 
   const checkPasswordSafety = async (password) => {
+    setIsLoading(true); // Iniciar la carga
     try {
-      const hashedPassword = password.toLowerCase();
-      const response = await axios.get(`https://api.pwnedpasswords.com/range/${hashedPassword.slice(0, 5)}`);
+      // Convertir la contraseña a SHA-1
+      const hashedPassword = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
+
+      // Enviar los primeros 5 caracteres del hash
+      const prefix = hashedPassword.slice(0, 5);
+      const suffix = hashedPassword.slice(5);
+
+      const response = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
+      
+      // Comprobar si el hash parcial de la contraseña ha sido filtrado
       const hashes = response.data.split('\n').map(line => line.split(':')[0]);
 
-      // Comprobar si la contraseña ha sido expuesta
-      if (hashes.includes(hashedPassword.slice(5))) {
+      if (hashes.includes(suffix.toUpperCase())) {
         setPasswordError('Contraseña insegura: ha sido filtrada en brechas de datos.');
-        setIsPasswordSafe(false); // Contraseña no es segura
+        setIsPasswordSafe(false);
       } else {
-        setIsPasswordSafe(true); // Contraseña es segura
+        setIsPasswordSafe(true);
       }
     } catch (error) {
       console.error('Error al verificar la contraseña:', error);
+    }finally {
+      setIsLoading(false); // Detener la carga
     }
   };
 
@@ -64,6 +87,15 @@ const Register = () => {
 
     // Verificar si la contraseña es segura
     await checkPasswordSafety(formData.password);
+
+     // Verificar si la contraseña es segura
+     await checkPasswordSafety(formData.password);
+
+     if (!isPasswordSafe || passwordStrength < 3) {
+      showModal('La contraseña no es segura o es muy débil', false);
+      return;
+    }
+ 
     // Validar la contraseña antes de proceder
     if (formData.password !== formData.confirmPassword) {
       showModal('Las contraseñas no coinciden', false); // Mostrar modal de error
@@ -100,6 +132,20 @@ const Register = () => {
 
   const closeModal = () => {
     setIsModalVisible(false);
+  };
+  const getPasswordStrengthColor = () => {
+    switch (passwordStrength) {
+      case 0:
+      case 1:
+        return 'red'; // Muy débil / Débil
+      case 2:
+        return 'yellow'; // Regular
+      case 3:
+      case 4:
+        return 'green'; // Fuerte / Muy fuerte
+      default:
+        return '';
+    }
   };
 
   return (
@@ -146,8 +192,30 @@ const Register = () => {
               <div className="control">
                 <input className="input" type="password" name="password" value={formData.password} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
               </div>
-              {passwordError && <p className="help is-danger">{passwordError}</p>}
-              {isPasswordSafe && <p className="help is-success"><FaCheckCircle style={{ color: 'green' }} /> Contraseña segura</p>}
+              {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
+          {isPasswordSafe && <p><FaCheckCircle style={{ color: 'green' }} /> Contraseña segura</p>}
+
+          <div>
+                {/* Barra de progreso personalizada */}
+                <div style={{
+                  backgroundColor: '#e0e0e0',
+                  borderRadius: '5px',
+                  overflow: 'hidden',
+                  height: '10px',
+                }}>
+                  <div 
+                    style={{
+                      width: `${(passwordStrength / 4) * 100}%`, // Calcular el ancho según la fortaleza
+                      backgroundColor: getPasswordStrengthColor(),
+                      height: '100%',
+                    }} 
+                  />
+                </div>
+                {/* Mensaje de carga o estado de la contraseña */}
+                <p style={{ color: getPasswordStrengthColor() }}>
+                  {isLoading ? 'Verificando contraseña...' : isPasswordSafe ? 'Contraseña segura' : 'Fortaleza: ' + ['Muy débil', 'Débil', 'Regular', 'Fuerte', 'Muy fuerte'][passwordStrength]}
+                </p>
+              </div>
             </div>
             <div className="field">
               <label className="label" style={{ color: '#000000' }}>Confirmar Contraseña:</label>
