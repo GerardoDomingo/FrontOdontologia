@@ -94,6 +94,7 @@ const Register = () => {
       return;
     }
 
+
     // Intentar registrar al usuario
     try {
       const response = await axios.post('http://localhost:3001/api/users/register', formData);
