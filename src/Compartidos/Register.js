@@ -5,6 +5,7 @@ import { FaCheckCircle } from 'react-icons/fa'; // Importar un ícono para la ve
 import zxcvbn from 'zxcvbn';
 import CryptoJS from 'crypto-js'; // Importar CryptoJS para el hash
 //Hola emma
+//hola trozon
 const Register = () => {
   const [formData, setFormData] = useState({
     nombre: '',
