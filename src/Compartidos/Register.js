@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import axios from 'axios';
 import 'bulma/css/bulma.css'; // Importar Bulma
 import { FaCheckCircle } from 'react-icons/fa'; // Importar un ícono para la verificación
@@ -191,7 +191,7 @@ const Register = () => {
               {isPasswordFiltered && <p style={{ color: 'red' }}>Contraseña filtrada. Por favor, elige otra.</p>}
               {isPasswordSafe && <p><FaCheckCircle style={{ color: 'green' }} /> Contraseña segura</p>}
 
-          <div>
+              <div>
                 {/* Barra de progreso personalizada */}
                 <div style={{
                   backgroundColor: '#e0e0e0',
@@ -199,12 +199,12 @@ const Register = () => {
                   overflow: 'hidden',
                   height: '10px',
                 }}>
-                  <div 
+                  <div
                     style={{
                       width: `${(passwordStrength / 4) * 100}%`, // Calcular el ancho según la fortaleza
                       backgroundColor: getPasswordStrengthColor(),
                       height: '100%',
-                    }} 
+                    }}
                   />
                 </div>
                 {/* Mensaje de carga o estado de la contraseña */}
@@ -225,19 +225,19 @@ const Register = () => {
           </form>
         </div>
       </div>
-{/* Modal para mostrar mensajes */}
-{isModalVisible && (
-  <div className="modal is-active">
-    <div className="modal-background" onClick={closeModal}></div>
-    <div className="modal-content" style={{ backgroundColor: isSuccess ? '#d4edda' : '#f8d7da', borderRadius: '8px', padding: '20px', textAlign: 'center' }}>
-      <p style={{ color: isSuccess ? '#155724' : '#721c24', fontWeight: 'bold', marginBottom: '20px' }}>
-        {modalMessage}
-      </p>
-      <button className="button is-info" onClick={closeModal} style={{ margin: '0 auto' }}>Cerrar</button>
-    </div>
-    <button className="modal-close is-large" aria-label="close" onClick={closeModal}></button>
-  </div>
-)}
+      {/* Modal para mostrar mensajes */}
+      {isModalVisible && (
+        <div className="modal is-active">
+          <div className="modal-background" onClick={closeModal}></div>
+          <div className="modal-content" style={{ backgroundColor: isSuccess ? '#d4edda' : '#f8d7da', borderRadius: '8px', padding: '20px', textAlign: 'center' }}>
+            <p style={{ color: isSuccess ? '#155724' : '#721c24', fontWeight: 'bold', marginBottom: '20px' }}>
+              {modalMessage}
+            </p>
+            <button className="button is-info" onClick={closeModal} style={{ margin: '0 auto' }}>Cerrar</button>
+          </div>
+          <button className="modal-close is-large" aria-label="close" onClick={closeModal}></button>
+        </div>
+      )}
 
 
     </div>
