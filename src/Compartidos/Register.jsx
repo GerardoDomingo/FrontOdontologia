@@ -94,7 +94,6 @@ const Register = () => {
       return;
     }
 
-
     // Intentar registrar al usuario
     try {
       const response = await axios.post('http://localhost:3001/api/users/register', formData);
@@ -142,55 +141,102 @@ const Register = () => {
     }
   };
 
-
   return (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div className="card" style={{ backgroundColor: '#FFFFFF', maxWidth: '800px', width: '100%', borderRadius: '10px', border: '1px solid #dcdcdc' }}>
+    <div style={{ backgroundColor: '#14161A', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div className="card" style={{ backgroundColor: '#fff', maxWidth: '800px', width: '100%', borderRadius: '10px', boxShadow: '0 0 15px rgba(0, 0, 0, 0.1)' }}>
         <header className="card-header" style={{ backgroundColor: '#00bcd4', color: '#ffffff', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}>
           <p className="card-header-title has-text-centered">Registro de Paciente</p>
         </header>
         <div className="card-content">
           <form onSubmit={handleSubmit}>
             <div className="field">
-              <label className="label" style={{ color: '#000000' }}>Nombre:</label>
+              <label className="label" style={{ color: '#333' }}>Nombre:</label>
               <div className="control">
-                <input className="input" type="text" name="nombre" value={formData.nombre} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
+                <input className="input" 
+                  type="text" 
+                  name="nombre" 
+                  value={formData.nombre} 
+                  onChange={handleChange} 
+                  required 
+                  style={{ backgroundColor: '#fff', color: '#000', border: '1px solid #ddd', padding: '12px' }}
+                  placeholder="Escribe tu nombre completo" 
+                />
               </div>
             </div>
             <div className="field">
-              <label className="label" style={{ color: '#000000' }}>Apellido Paterno:</label>
+              <label className="label" style={{ color: '#333' }}>Apellido Paterno:</label>
               <div className="control">
-                <input className="input" type="text" name="aPaterno" value={formData.aPaterno} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
+                <input className="input" 
+                  type="text" 
+                  name="aPaterno" 
+                  value={formData.aPaterno} 
+                  onChange={handleChange} 
+                  required 
+                  style={{ backgroundColor: '#fff', color: '#000', border: '1px solid #ddd', padding: '12px' }}
+                  placeholder="Escribe tu apellido paterno" 
+                />
               </div>
             </div>
             <div className="field">
-              <label className="label" style={{ color: '#000000' }}>Apellido Materno:</label>
+              <label className="label" style={{ color: '#333' }}>Apellido Materno:</label>
               <div className="control">
-                <input className="input" type="text" name="aMaterno" value={formData.aMaterno} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
+                <input className="input" 
+                  type="text" 
+                  name="aMaterno" 
+                  value={formData.aMaterno} 
+                  onChange={handleChange} 
+                  required 
+                  style={{ backgroundColor: '#fff', color: '#000', border: '1px solid #ddd', padding: '12px' }}
+                  placeholder="Escribe tu apellido materno" 
+                />
               </div>
             </div>
             <div className="field">
-              <label className="label" style={{ color: '#000000' }}>Teléfono:</label>
+              <label className="label" style={{ color: '#333' }}>Teléfono:</label>
               <div className="control">
-                <input className="input" type="text" name="telefono" value={formData.telefono} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
+                <input className="input" 
+                  type="text" 
+                  name="telefono" 
+                  value={formData.telefono} 
+                  onChange={handleChange} 
+                  required 
+                  style={{ backgroundColor: '#fff', color: '#000', border: '1px solid #ddd', padding: '12px' }}
+                  placeholder="Escribe tu número de teléfono" 
+                />
               </div>
             </div>
             <div className="field">
-              <label className="label" style={{ color: '#000000' }}>Email:</label>
+              <label className="label" style={{ color: '#333' }}>Email:</label>
               <div className="control">
-                <input className="input" type="email" name="email" value={formData.email} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
+                <input className="input" 
+                  type="email" 
+                  name="email" 
+                  value={formData.email} 
+                  onChange={handleChange} 
+                  required 
+                  style={{ backgroundColor: '#fff', color: '#000', border: '1px solid #ddd', padding: '12px' }}
+                  placeholder="Escribe tu correo electrónico" 
+                />
               </div>
-              {emailError && <p className="help is-danger">{emailError}</p>} {/* Mostrar mensaje de error de correo */}
+              {emailError && <p className="help is-danger">{emailError}</p>}
             </div>
             <div className="field">
-              <label className="label" style={{ color: '#000000' }}>Contraseña:</label>
+              <label className="label" style={{ color: '#333' }}>Contraseña:</label>
               <div className="control">
-                <input className="input" type="password" name="password" value={formData.password} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
+                <input className="input" 
+                  type="password" 
+                  name="password" 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  required 
+                  style={{ backgroundColor: '#fff', color: '#000', border: '1px solid #ddd', padding: '12px' }}
+                  placeholder="Crea una contraseña segura" 
+                />
               </div>
               {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
               {isPasswordFiltered && <p style={{ color: 'red' }}>Contraseña filtrada. Por favor, elige otra.</p>}
               {isPasswordSafe && <p><FaCheckCircle style={{ color: 'green' }} /> Contraseña segura</p>}
-
+  
               <div>
                 {/* Barra de progreso personalizada */}
                 <div style={{
@@ -201,47 +247,56 @@ const Register = () => {
                 }}>
                   <div
                     style={{
-                      width: `${(passwordStrength / 4) * 100}%`, // Calcular el ancho según la fortaleza
+                      width: `${(passwordStrength / 4) * 100}%`,
                       backgroundColor: getPasswordStrengthColor(),
                       height: '100%',
                     }}
                   />
                 </div>
-                {/* Mensaje de carga o estado de la contraseña */}
-                <p style={{ color: getPasswordStrengthColor() }}>
+                <p style={{ color: getPasswordStrengthColor(), fontWeight: 'bold', marginTop: '10px' }}>
                   {isLoading ? 'Verificando contraseña...' : 'Fortaleza: ' + ['Muy débil', 'Débil', 'Regular', 'Fuerte', 'Muy fuerte'][passwordStrength]}
                 </p>
               </div>
             </div>
             <div className="field">
-              <label className="label" style={{ color: '#000000' }}>Confirmar Contraseña:</label>
+              <label className="label" style={{ color: '#333' }}>Confirmar Contraseña:</label>
               <div className="control">
-                <input className="input" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required style={{ backgroundColor: '#ffffff', color: '#000000' }} />
+                <input className="input" 
+                  type="password" 
+                  name="confirmPassword" 
+                  value={formData.confirmPassword} 
+                  onChange={handleChange} 
+                  required 
+                  style={{ backgroundColor: '#fff', color: '#000', border: '1px solid #ddd', padding: '12px' }}
+                  placeholder="Confirma tu contraseña" 
+                />
               </div>
             </div>
             <div className="control">
-              <button className="button is-primary" type="submit" style={{ width: '100%' }}>Registrarse</button>
+              <button className="button is-primary" type="submit" style={{ width: '100%', backgroundColor: '#00bcd4', border: 'none', color: '#fff', padding: '15px', fontSize: '16px', cursor: 'pointer', borderRadius: '5px' }}>
+                Registrarse
+              </button>
             </div>
           </form>
         </div>
       </div>
+  
       {/* Modal para mostrar mensajes */}
       {isModalVisible && (
         <div className="modal is-active">
           <div className="modal-background" onClick={closeModal}></div>
-          <div className="modal-content" style={{ backgroundColor: isSuccess ? '#d4edda' : '#f8d7da', borderRadius: '8px', padding: '20px', textAlign: 'center' }}>
+          <div className="modal-content" style={{ backgroundColor: isSuccess ? '#d4edda' : '#f8d7da', borderRadius: '8px', padding: '20px', textAlign: 'center', maxWidth: '400px', margin: 'auto' }}>
             <p style={{ color: isSuccess ? '#155724' : '#721c24', fontWeight: 'bold', marginBottom: '20px' }}>
               {modalMessage}
             </p>
-            <button className="button is-info" onClick={closeModal} style={{ margin: '0 auto' }}>Cerrar</button>
+            <button className="button is-info" onClick={closeModal} style={{ margin: '0 auto', backgroundColor: '#007BFF', color: '#fff', padding: '10px 20px', borderRadius: '5px' }}>Cerrar</button>
           </div>
           <button className="modal-close is-large" aria-label="close" onClick={closeModal}></button>
         </div>
       )}
-
-
     </div>
   );
+  
 };
 
 export default Register;
