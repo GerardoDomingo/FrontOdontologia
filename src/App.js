@@ -12,9 +12,9 @@ function App() {
     <div>
       <Router>
         <Routes>
-          <Route path="/" element={<Home />} /> {/* Página principal */}
-          <Route path="/register" element={<Register />} /> {/* Página de registro */}
-          <Route path="/login" element={<Login />} /> {/* Página de inicio de sesión */}
+          <Route path="/" element={<Home />} /> 
+          <Route path="/register" element={<Register />} /> 
+          <Route path="/login" element={<Login />} /> 
         </Routes>
       </Router>
       <Footer /> {/* Pie de página */}
