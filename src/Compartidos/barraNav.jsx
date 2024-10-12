@@ -1,10 +1,12 @@
-// BarraNav.js
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaHome, FaTooth, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { FaTooth, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const BarraNav = () => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Detectar el tema del sistema
   useEffect(() => {
@@ -22,84 +24,102 @@ const BarraNav = () => {
     };
   }, []);
 
-  // Estilos dinámicos basados en el tema
-  const navbarStyles = {
-    backgroundColor: isDarkTheme ? '#333' : '#f0f0f0',
-    padding: '0.8rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  // Función para abrir/cerrar el Drawer
+  const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
   };
 
-  const navbarListStyles = {
-    listStyle: 'none',
-    display: 'flex',
-    gap: '1.5rem',
-    margin: 0,
-    padding: 0,
-  };
-
-  const navbarLinkStyles = {
-    color: isDarkTheme ? 'white' : '#333',
-    textDecoration: 'none',
-    fontSize: '1rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.4rem',
-    transition: 'color 0.3s ease',
-  };
-
-  const iconStyles = {
-    fontSize: '1.2rem',
-  };
-
-  // Hover siempre de color azul
-  const handleMouseOver = (e) => {
-    e.target.style.color = '#0066cc';
-  };
-
-  const handleMouseOut = (e) => {
-    e.target.style.color = isDarkTheme ? 'white' : '#333';
-  };
+  // Lista de enlaces en el Drawer
+  const drawerList = (
+    <Box
+      sx={{ width: 250 }}
+      role="presentation"
+      onClick={toggleDrawer(false)}
+      onKeyDown={toggleDrawer(false)}
+    >
+      <List>
+        <ListItem button component={Link} to="/">
+          <FaTooth style={{ marginRight: '10px' }} />
+          <ListItemText primary="Odontología Carol" />
+        </ListItem>
+        <ListItem button component={Link} to="/login">
+          <FaSignInAlt style={{ marginRight: '10px' }} />
+          <ListItemText primary="Iniciar sesión" />
+        </ListItem>
+        <ListItem button component={Link} to="/register">
+          <FaUserPlus style={{ marginRight: '10px' }} />
+          <ListItemText primary="Registrarte" />
+        </ListItem>
+      </List>
+    </Box>
+  );
 
   return (
-    <nav style={navbarStyles}>
-      <ul style={navbarListStyles}>
-
-        <li>
-          <Link
+    <>
+      <AppBar position="static" sx={{ backgroundColor: isDarkTheme ? '#333' : '#f0f0f0' }}>
+        <Toolbar>
+          {/* Logo y nombre de la empresa */}
+          <Typography
+            variant="h6"
+            component={Link}
             to="/"
-            style={navbarLinkStyles}
-            onMouseOver={handleMouseOver}
-            onMouseOut={handleMouseOut}
+            sx={{
+              color: isDarkTheme ? 'white' : '#333',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              flexGrow: 1,
+            }}
           >
-            <FaTooth style={iconStyles} /> Odontología Carol
-          </Link>
-        </li>
-      </ul>
-      <ul style={navbarListStyles}>
-        <li>
-          <Link
-            to="/login"
-            style={navbarLinkStyles}
-            onMouseOver={handleMouseOver}
-            onMouseOut={handleMouseOut}
+            <FaTooth style={{ fontSize: '1.5rem', marginRight: '8px' }} />
+            Odontología Carol
+          </Typography>
+
+          {/* Links de Login y Registro, con responsividad */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+            <IconButton
+              component={Link}
+              to="/login"
+              sx={{
+                color: isDarkTheme ? 'white' : '#333',
+                '&:hover': { color: '#0066cc' },
+              }}
+            >
+              <FaSignInAlt />
+              <Typography sx={{ marginLeft: '8px' }}>Iniciar sesión</Typography>
+            </IconButton>
+            <IconButton
+              component={Link}
+              to="/register"
+              sx={{
+                color: isDarkTheme ? 'white' : '#333',
+                '&:hover': { color: '#0066cc' },
+              }}
+            >
+              <FaUserPlus />
+              <Typography sx={{ marginLeft: '8px' }}>Registrarte</Typography>
+            </IconButton>
+          </Box>
+
+          {/* Menú en pantallas pequeñas */}
+          <IconButton
+            edge="end"
+            sx={{ display: { xs: 'block', md: 'none' }, color: isDarkTheme ? 'white' : '#333' }}
+            onClick={toggleDrawer(true)}
           >
-            <FaSignInAlt style={iconStyles} /> Iniciar sesión
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/register"
-            style={navbarLinkStyles}
-            onMouseOver={handleMouseOver}
-            onMouseOut={handleMouseOut}
-          >
-            <FaUserPlus style={iconStyles} /> Registrarte
-          </Link>
-        </li>
-      </ul>
-    </nav>
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      {/* Drawer para el menú en pantallas pequeñas */}
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+        {drawerList}
+      </Drawer>
+    </>
   );
 };
 
