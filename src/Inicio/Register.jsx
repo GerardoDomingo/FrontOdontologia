@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText } from '@mui/material';
-import { FaUser, FaPhone, FaEnvelope, FaLock, FaHome } from 'react-icons/fa';
+import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, Grid, InputAdornment } from '@mui/material';
+import { FaUser, FaPhone, FaEnvelope, FaLock, FaHome, FaInfoCircle } from 'react-icons/fa';
 import zxcvbn from 'zxcvbn';
 
 const Register = () => {
@@ -11,7 +11,6 @@ const Register = () => {
     aMaterno: '',
     edad: '',
     genero: '',
-    estadoCivil: '',
     lugar: '',
     otroLugar: '',
     telefono: '',
@@ -34,7 +33,6 @@ const Register = () => {
       [name]: value,
     }));
 
-    // Si cambia la contraseña, calcular la fortaleza
     if (name === 'password') {
       const strength = zxcvbn(value).score;
       setPasswordStrength(strength);
@@ -54,15 +52,12 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateStep()) {
-      // Aquí iría el envío de datos al backend
       console.log(formData);
     }
   };
 
-  // Validar los campos del paso actual
   const validateStep = () => {
     const stepErrors = {};
-    
     if (activeStep === 0) {
       if (!formData.nombre) stepErrors.nombre = 'El nombre es requerido';
       if (!formData.aPaterno) stepErrors.aPaterno = 'El apellido paterno es requerido';
@@ -87,6 +82,14 @@ const Register = () => {
     return Object.keys(stepErrors).length === 0;
   };
 
+  const alergiasInfo = {
+    Penicilina: 'Antibiótico común.',
+    Látex: 'Material en guantes y equipo dental.',
+    'Anestésicos Locales': 'Utilizado en procedimientos odontológicos.',
+    Metales: 'Usado en coronas y aparatos.',
+    Acrílico: 'Presente en prótesis dentales.',
+  };
+
   const getStepContent = (step) => {
     switch (step) {
       case 0:
@@ -102,6 +105,13 @@ const Register = () => {
               required
               error={!!errors.nombre}
               helperText={errors.nombre}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaUser />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               fullWidth
@@ -113,6 +123,13 @@ const Register = () => {
               required
               error={!!errors.aPaterno}
               helperText={errors.aPaterno}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaUser />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               fullWidth
@@ -124,6 +141,13 @@ const Register = () => {
               required
               error={!!errors.aMaterno}
               helperText={errors.aMaterno}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaUser />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               fullWidth
@@ -170,7 +194,7 @@ const Register = () => {
               </Select>
               {errors.lugar && <FormHelperText>{errors.lugar}</FormHelperText>}
             </FormControl>
-            
+
             {formData.lugar === 'Otro' && (
               <TextField
                 fullWidth
@@ -199,6 +223,13 @@ const Register = () => {
               required
               error={!!errors.telefono}
               helperText={errors.telefono}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaPhone />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               fullWidth
@@ -210,6 +241,13 @@ const Register = () => {
               required
               error={!!errors.email}
               helperText={errors.email}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaEnvelope />
+                  </InputAdornment>
+                ),
+              }}
             />
             <FormControl fullWidth margin="normal" error={!!errors.alergias}>
               <InputLabel>Alergias Comunes</InputLabel>
@@ -220,15 +258,21 @@ const Register = () => {
                 name="alergias"
               >
                 <MenuItem value="Ninguna">Ninguna</MenuItem>
-                <MenuItem value="Penicilina">Penicilina</MenuItem>
-                <MenuItem value="Látex">Látex</MenuItem>
-                <MenuItem value="Anestésicos Locales">Anestésicos Locales</MenuItem>
-                <MenuItem value="Metales">Metales</MenuItem>
-                <MenuItem value="Acrílico">Acrílico</MenuItem>
+                {Object.keys(alergiasInfo).map((alergia) => (
+                  <MenuItem key={alergia} value={alergia}>
+                    {alergia}
+                  </MenuItem>
+                ))}
                 <MenuItem value="Otro">Otro</MenuItem>
               </Select>
               {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
             </FormControl>
+
+            {formData.alergias && alergiasInfo[formData.alergias] && (
+              <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
+                <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias]}
+              </Typography>
+            )}
 
             {formData.alergias === 'Otro' && (
               <TextField
@@ -258,6 +302,13 @@ const Register = () => {
               required
               error={!!errors.password}
               helperText={errors.password}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaLock />
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               fullWidth
@@ -270,6 +321,13 @@ const Register = () => {
               required
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaLock />
+                  </InputAdornment>
+                ),
+              }}
             />
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2">Fortaleza de la contraseña</Typography>
