@@ -1,47 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import 'bulma/css/bulma.css';
-import { FaCheckCircle, FaUser, FaPhone, FaEnvelope, FaLock } from 'react-icons/fa'; // Iconos
+import React, { useState } from 'react';
+import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText } from '@mui/material';
+import { FaUser, FaPhone, FaEnvelope, FaLock, FaHome } from 'react-icons/fa';
 import zxcvbn from 'zxcvbn';
-import CryptoJS from 'crypto-js';
 
 const Register = () => {
+  const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     nombre: '',
     aPaterno: '',
     aMaterno: '',
+    edad: '',
+    genero: '',
+    estadoCivil: '',
+    lugar: '',
+    otroLugar: '',
     telefono: '',
     email: '',
+    alergias: '',
+    otraAlergia: '',
     password: '',
     confirmPassword: '',
   });
 
+  const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [passwordError, setPasswordError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [isPasswordSafe, setIsPasswordSafe] = useState(false);
-  const [isPasswordFiltered, setIsPasswordFiltered] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
-  // Detectar el tema del sistema
-  useEffect(() => {
-    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkTheme(matchDarkTheme.matches);
-
-    const handleThemeChange = (e) => {
-      setIsDarkTheme(e.matches);
-    };
-
-    matchDarkTheme.addEventListener('change', handleThemeChange);
-
-    return () => {
-      matchDarkTheme.removeEventListener('change', handleThemeChange);
-    };
-  }, []);
+  const steps = ['Datos personales', 'Información de contacto', 'Datos de acceso'];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,388 +34,323 @@ const Register = () => {
       [name]: value,
     }));
 
+    // Si cambia la contraseña, calcular la fortaleza
     if (name === 'password') {
-      setPasswordError('');
-      setIsPasswordSafe(false);
-      setIsPasswordFiltered(false);
-
       const strength = zxcvbn(value).score;
       setPasswordStrength(strength);
-
-      if (strength < 3) {
-        setPasswordError('La contraseña debe ser fuerte o muy fuerte');
-      } else {
-        setPasswordError('');
-      }
-
-      checkPasswordSafety(value);
     }
   };
 
-  const checkPasswordSafety = async (password) => {
-    setIsLoading(true);
-    try {
-      const hashedPassword = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
-      const prefix = hashedPassword.slice(0, 5);
-      const suffix = hashedPassword.slice(5);
-
-      const response = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
-      const hashes = response.data.split('\n').map((line) => line.split(':')[0]);
-
-      if (hashes.includes(suffix.toUpperCase())) {
-        setPasswordError('Contraseña insegura: ha sido filtrada en brechas de datos.');
-        setIsPasswordSafe(false);
-        setIsPasswordFiltered(true);
-      } else {
-        setIsPasswordSafe(true);
-        setIsPasswordFiltered(false);
-      }
-    } catch (error) {
-      console.error('Error al verificar la contraseña:', error);
-    } finally {
-      setIsLoading(false);
+  const handleNext = () => {
+    if (validateStep()) {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!isPasswordSafe || passwordStrength < 3) {
-      showModal('La contraseña no es segura o es muy débil', false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      showModal('Las contraseñas no coinciden', false);
-      return;
-    }
-
-    try {
-      const response = await axios.post('http://localhost:3001/api/users/register', formData);
-      showModal('Usuario registrado correctamente', true);
-      setFormData({
-        nombre: '',
-        aPaterno: '',
-        aMaterno: '',
-        telefono: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      });
-      setIsPasswordSafe(false);
-    } catch (error) {
-      showModal('Error al registrar el usuario, el correo ya existe', false);
-      console.error('Error en el registro:', error);
+    if (validateStep()) {
+      // Aquí iría el envío de datos al backend
+      console.log(formData);
     }
   };
 
-  const showModal = (message, success) => {
-    setModalMessage(message);
-    setIsSuccess(success);
-    setIsModalVisible(true);
+  // Validar los campos del paso actual
+  const validateStep = () => {
+    const stepErrors = {};
+    
+    if (activeStep === 0) {
+      if (!formData.nombre) stepErrors.nombre = 'El nombre es requerido';
+      if (!formData.aPaterno) stepErrors.aPaterno = 'El apellido paterno es requerido';
+      if (!formData.aMaterno) stepErrors.aMaterno = 'El apellido materno es requerido';
+      if (!formData.edad || formData.edad <= 0) stepErrors.edad = 'Ingresa una edad válida';
+      if (!formData.genero) stepErrors.genero = 'Selecciona un género';
+      if (formData.lugar === 'Otro' && !formData.otroLugar) stepErrors.otroLugar = 'Especifica el lugar';
+    }
+
+    if (activeStep === 1) {
+      if (!formData.telefono) stepErrors.telefono = 'El teléfono es requerido';
+      if (!formData.email) stepErrors.email = 'El correo electrónico es requerido';
+      if (formData.alergias === 'Otro' && !formData.otraAlergia) stepErrors.otraAlergia = 'Especifica la alergia';
+    }
+
+    if (activeStep === 2) {
+      if (!formData.password) stepErrors.password = 'La contraseña es requerida';
+      if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = 'Las contraseñas no coinciden';
+    }
+
+    setErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
   };
 
-  const closeModal = () => {
-    setIsModalVisible(false);
-  };
-
-  const getPasswordStrengthColor = () => {
-    switch (passwordStrength) {
+  const getStepContent = (step) => {
+    switch (step) {
       case 0:
-      case 1:
-        return 'red';
-      case 2:
-        return 'yellow';
-      case 3:
-      case 4:
-        return 'green';
-      default:
-        return '';
-    }
-  };
+        return (
+          <Box>
+            <TextField
+              fullWidth
+              label="Nombre"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.nombre}
+              helperText={errors.nombre}
+            />
+            <TextField
+              fullWidth
+              label="Apellido Paterno"
+              name="aPaterno"
+              value={formData.aPaterno}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.aPaterno}
+              helperText={errors.aPaterno}
+            />
+            <TextField
+              fullWidth
+              label="Apellido Materno"
+              name="aMaterno"
+              value={formData.aMaterno}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.aMaterno}
+              helperText={errors.aMaterno}
+            />
+            <TextField
+              fullWidth
+              label="Edad"
+              name="edad"
+              type="number"
+              value={formData.edad}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.edad}
+              helperText={errors.edad}
+            />
+            <FormControl fullWidth margin="normal" required error={!!errors.genero}>
+              <InputLabel>Género</InputLabel>
+              <Select
+                value={formData.genero}
+                onChange={handleChange}
+                label="Género"
+                name="genero"
+              >
+                <MenuItem value="Masculino">Masculino</MenuItem>
+                <MenuItem value="Femenino">Femenino</MenuItem>
+                <MenuItem value="Otro">Otro</MenuItem>
+              </Select>
+              {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
+            </FormControl>
 
-  const themeStyles = {
-    backgroundColor: isDarkTheme ? '#1a1a1a' : '#f5f5f5',
-    color: isDarkTheme ? '#fff' : '#333',
+            <FormControl fullWidth margin="normal" required error={!!errors.lugar}>
+              <InputLabel>Lugar de Proveniencia</InputLabel>
+              <Select
+                value={formData.lugar}
+                onChange={handleChange}
+                label="Lugar de Proveniencia"
+                name="lugar"
+              >
+                <MenuItem value="Ixcatlan">Ixcatlan</MenuItem>
+                <MenuItem value="Tepemaxac">Tepemaxac</MenuItem>
+                <MenuItem value="Pastora">Pastora</MenuItem>
+                <MenuItem value="Ahuacatitla">Ahuacatitla</MenuItem>
+                <MenuItem value="Tepeica">Tepeica</MenuItem>
+                <MenuItem value="Axcaco">Axcaco</MenuItem>
+                <MenuItem value="Otro">Otro</MenuItem>
+              </Select>
+              {errors.lugar && <FormHelperText>{errors.lugar}</FormHelperText>}
+            </FormControl>
+            
+            {formData.lugar === 'Otro' && (
+              <TextField
+                fullWidth
+                label="Especificar Lugar"
+                name="otroLugar"
+                value={formData.otroLugar}
+                onChange={handleChange}
+                margin="normal"
+                required
+                error={!!errors.otroLugar}
+                helperText={errors.otroLugar}
+              />
+            )}
+          </Box>
+        );
+      case 1:
+        return (
+          <Box>
+            <TextField
+              fullWidth
+              label="Teléfono"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.telefono}
+              helperText={errors.telefono}
+            />
+            <TextField
+              fullWidth
+              label="Correo electrónico"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.email}
+              helperText={errors.email}
+            />
+            <FormControl fullWidth margin="normal" error={!!errors.alergias}>
+              <InputLabel>Alergias Comunes</InputLabel>
+              <Select
+                value={formData.alergias}
+                onChange={handleChange}
+                label="Alergias"
+                name="alergias"
+              >
+                <MenuItem value="Ninguna">Ninguna</MenuItem>
+                <MenuItem value="Penicilina">Penicilina</MenuItem>
+                <MenuItem value="Látex">Látex</MenuItem>
+                <MenuItem value="Anestésicos Locales">Anestésicos Locales</MenuItem>
+                <MenuItem value="Metales">Metales</MenuItem>
+                <MenuItem value="Acrílico">Acrílico</MenuItem>
+                <MenuItem value="Otro">Otro</MenuItem>
+              </Select>
+              {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+            </FormControl>
+
+            {formData.alergias === 'Otro' && (
+              <TextField
+                fullWidth
+                label="Especificar Alergia"
+                name="otraAlergia"
+                value={formData.otraAlergia}
+                onChange={handleChange}
+                margin="normal"
+                error={!!errors.otraAlergia}
+                helperText={errors.otraAlergia}
+              />
+            )}
+          </Box>
+        );
+      case 2:
+        return (
+          <Box>
+            <TextField
+              fullWidth
+              label="Contraseña"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.password}
+              helperText={errors.password}
+            />
+            <TextField
+              fullWidth
+              label="Confirmar Contraseña"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.confirmPassword}
+              helperText={errors.confirmPassword}
+            />
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2">Fortaleza de la contraseña</Typography>
+              <Box
+                sx={{
+                  height: '10px',
+                  width: '100%',
+                  backgroundColor: '#e0e0e0',
+                  borderRadius: '5px',
+                  mt: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    height: '100%',
+                    width: `${(passwordStrength / 4) * 100}%`,
+                    backgroundColor: passwordStrength < 2 ? 'red' : passwordStrength === 2 ? 'yellow' : 'green',
+                    borderRadius: '5px',
+                  }}
+                />
+              </Box>
+              <Typography
+                variant="caption"
+                sx={{ color: passwordStrength < 2 ? 'red' : passwordStrength === 2 ? 'yellow' : 'green', mt: 1 }}
+              >
+                {passwordStrength === 0 && "Muy débil"}
+                {passwordStrength === 1 && "Débil"}
+                {passwordStrength === 2 && "Regular"}
+                {passwordStrength === 3 && "Fuerte"}
+                {passwordStrength === 4 && "Muy fuerte"}
+              </Typography>
+            </Box>
+          </Box>
+        );
+      default:
+        return 'Unknown step';
+    }
   };
 
   return (
-    <div
-      style={{
-        ...themeStyles,
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '20px',
-      }}
-    >
-      <div
-        className="card"
-        style={{
-          backgroundColor: isDarkTheme ? '#333' : '#fff',
-          maxWidth: '800px',
-          width: '100%',
-          borderRadius: '15px',
-          padding: '30px',
-          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.2)',
-        }}
-      >
-        <header
-          className="card-header"
-          style={{
-            backgroundColor: '#00bcd4',
-            color: '#ffffff',
-            borderTopLeftRadius: '15px',
-            borderTopRightRadius: '15px',
-            textAlign: 'center',
-            padding: '10px',
-          }}
-        >
-          <p className="card-header-title is-centered" style={{ fontSize: '24px' }}>
-            <FaUser style={{ marginRight: '10px' }} />
-            Registro de Paciente
-          </p>
-        </header>
-        <div className="card-content">
-          <form onSubmit={handleSubmit}>
-            {/* Dividimos el formulario en dos columnas */}
-            <div className="columns is-multiline">
-              <div className="column is-half">
-                <div className="field">
-                  <label className="label">Nombre:</label>
-                  <div className="control has-icons-left">
-                    <input
-                      className="input"
-                      type="text"
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleChange}
-                      required
-                      placeholder="Escribe tu nombre completo"
-                    />
-                    <span className="icon is-left">
-                      <FaUser />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="column is-half">
-                <div className="field">
-                  <label className="label">Apellido Paterno:</label>
-                  <div className="control has-icons-left">
-                    <input
-                      className="input"
-                      type="text"
-                      name="aPaterno"
-                      value={formData.aPaterno}
-                      onChange={handleChange}
-                      required
-                      placeholder="Apellido paterno"
-                    />
-                    <span className="icon is-left">
-                      <FaUser />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="column is-half">
-                <div className="field">
-                  <label className="label">Apellido Materno:</label>
-                  <div className="control has-icons-left">
-                    <input
-                      className="input"
-                      type="text"
-                      name="aMaterno"
-                      value={formData.aMaterno}
-                      onChange={handleChange}
-                      required
-                      placeholder="Apellido materno"
-                    />
-                    <span className="icon is-left">
-                      <FaUser />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="column is-half">
-                <div className="field">
-                  <label className="label">Teléfono:</label>
-                  <div className="control has-icons-left">
-                    <input
-                      className="input"
-                      type="text"
-                      name="telefono"
-                      value={formData.telefono}
-                      onChange={handleChange}
-                      required
-                      placeholder="Número de teléfono"
-                    />
-                    <span className="icon is-left">
-                      <FaPhone />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="column is-half">
-                <div className="field">
-                  <label className="label">Email:</label>
-                  <div className="control has-icons-left">
-                    <input
-                      className="input"
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="Correo electrónico"
-                    />
-                    <span className="icon is-left">
-                      <FaEnvelope />
-                    </span>
-                  </div>
-                  {emailError && <p className="help is-danger">{emailError}</p>}
-                </div>
-              </div>
-              <div className="column is-half">
-                <div className="field">
-                  <label className="label">Contraseña:</label>
-                  <div className="control has-icons-left">
-                    <input
-                      className="input"
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      placeholder="Contraseña segura"
-                    />
-                    <span className="icon is-left">
-                      <FaLock />
-                    </span>
-                  </div>
-                  {passwordError && <p className="help is-danger">{passwordError}</p>}
-                  {isPasswordFiltered && (
-                    <p className="help is-danger">Contraseña filtrada. Por favor, elige otra.</p>
-                  )}
-                  {isPasswordSafe && (
-                    <p className="help is-success">
-                      <FaCheckCircle style={{ color: 'green' }} /> Contraseña segura
-                    </p>
-                  )}
-                  <div
-                    style={{
-                      backgroundColor: '#e0e0e0',
-                      borderRadius: '5px',
-                      overflow: 'hidden',
-                      height: '10px',
-                      marginTop: '10px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${(passwordStrength / 4) * 100}%`,
-                        backgroundColor: getPasswordStrengthColor(),
-                        height: '100%',
-                      }}
-                    />
-                  </div>
-                  <p
-                    style={{
-                      color: getPasswordStrengthColor(),
-                      fontWeight: 'bold',
-                      marginTop: '10px',
-                    }}
-                  >
-                    {isLoading ? 'Verificando contraseña...' : `Fortaleza: ${['Muy débil', 'Débil', 'Regular', 'Fuerte', 'Muy fuerte'][passwordStrength]}`}
-                  </p>
-                </div>
-              </div>
-              <div className="column is-half">
-                <div className="field">
-                  <label className="label">Confirmar Contraseña:</label>
-                  <div className="control has-icons-left">
-                    <input
-                      className="input"
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                      placeholder="Confirma tu contraseña"
-                    />
-                    <span className="icon is-left">
-                      <FaLock />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="control" style={{ textAlign: 'center', marginTop: '20px' }}>
-              <button
-                className="button is-primary"
-                type="submit"
-                style={{
-                  width: '100%',
-                  backgroundColor: '#00bcd4',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '15px',
-                  fontSize: '18px',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                }}
-              >
-                <FaCheckCircle style={{ marginRight: '10px' }} />
-                Registrarse
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Modal para mostrar mensajes */}
-      {isModalVisible && (
-        <div className="modal is-active">
-          <div className="modal-background" onClick={closeModal}></div>
-          <div
-            className="modal-content"
-            style={{
-              backgroundColor: isSuccess ? '#d4edda' : '#f8d7da',
-              borderRadius: '8px',
-              padding: '20px',
-              textAlign: 'center',
-              maxWidth: '400px',
-              margin: 'auto',
-            }}
+    <Container maxWidth="md" sx={{ mt: 5 }}>
+      <Card sx={{ p: 4, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', borderRadius: '16px' }}>
+        <CardContent>
+          <Typography
+            variant="h4"
+            sx={{ textAlign: 'center', mb: 4, color: '#1976d2', fontFamily: 'Roboto, sans-serif', fontWeight: 'bold' }}
           >
-            <p
-              style={{
-                color: isSuccess ? '#155724' : '#721c24',
-                fontWeight: 'bold',
-                marginBottom: '20px',
-              }}
-            >
-              {modalMessage}
-            </p>
-            <button
-              className="button is-info"
-              onClick={closeModal}
-              style={{
-                margin: '0 auto',
-                backgroundColor: '#007BFF',
-                color: '#fff',
-                padding: '10px 20px',
-                borderRadius: '5px',
-              }}
-            >
-              Cerrar
-            </button>
-          </div>
-          <button className="modal-close is-large" aria-label="close" onClick={closeModal}></button>
-        </div>
-      )}
-    </div>
+            Registro de Paciente
+          </Typography>
+
+          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
+          <form onSubmit={handleSubmit}>
+            {getStepContent(activeStep)}
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+              {activeStep !== 0 && (
+                <Button onClick={handleBack} sx={{ mr: 2 }}>
+                  Regresar
+                </Button>
+              )}
+              {activeStep === steps.length - 1 ? (
+                <Button variant="contained" color="primary" type="submit" sx={{ px: 4 }}>
+                  Registrar
+                </Button>
+              ) : (
+                <Button variant="contained" color="primary" onClick={handleNext} sx={{ px: 4 }}>
+                  Siguiente
+                </Button>
+              )}
+            </Box>
+          </form>
+        </CardContent>
+      </Card>
+    </Container>
   );
 };
 

@@ -1,29 +1,13 @@
-// Login.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaUser, FaLock, FaEnvelope, FaTooth } from 'react-icons/fa';
+import { Box, TextField, Button, Typography, Card, CardContent, IconButton } from '@mui/material';
+import { FaTooth } from 'react-icons/fa'; // Mantendremos el icono de FaTooth de React Icons
+import { Email, Lock } from '@mui/icons-material'; // Iconos de Material UI
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
   const navigate = useNavigate();
-
-  // Detectar el tema del sistema
-  useEffect(() => {
-    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkTheme(matchDarkTheme.matches);
-
-    const handleThemeChange = (e) => {
-      setIsDarkTheme(e.matches);
-    };
-
-    matchDarkTheme.addEventListener('change', handleThemeChange);
-
-    return () => {
-      matchDarkTheme.removeEventListener('change', handleThemeChange);
-    };
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,15 +24,10 @@ const Login = () => {
     }
   };
 
-  // Estilos dinámicos según el tema del sistema
-  const backgroundColor = isDarkTheme ? '#1a1a1a' : '#f5f5f5';
-  const cardBackgroundColor = isDarkTheme ? '#333' : '#fff';
-  const textColor = isDarkTheme ? '#fff' : '#333';
-
   return (
-    <div
-      style={{
-        backgroundColor: backgroundColor,
+    <Box
+      sx={{
+        backgroundColor: '#FFFFFF',
         minHeight: '100vh',
         display: 'flex',
         justifyContent: 'center',
@@ -56,111 +35,99 @@ const Login = () => {
         padding: '20px',
       }}
     >
-      <div
-        style={{
-          backgroundColor: cardBackgroundColor,
-          maxWidth: '400px',
-          width: '100%',
-          borderRadius: '15px',
-          padding: '30px',
-          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-          color: textColor,
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <FaTooth style={{ fontSize: '40px', color: '#00bcd4' }} />
-          <h2 style={{ color: textColor, marginBottom: '20px', fontSize: '24px' }}>Iniciar Sesión</h2>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="field" style={{ marginBottom: '20px' }}>
-            <label style={{ fontWeight: 'bold', color: textColor }}>Correo Electrónico:</label>
-            <div style={{ position: 'relative' }}>
-              <FaEnvelope style={{ position: 'absolute', left: '10px', top: '12px', color: '#ccc' }} />
-              <input
-                type="email"
+      <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3 }}>
+        <CardContent sx={{ textAlign: 'center', p: 4 }}>
+          <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
+            <FaTooth />
+          </IconButton>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
+            Iniciar Sesión
+          </Typography>
+
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
+                label="Correo Electrónico"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                placeholder="Introduce tu correo electrónico"
-                style={{
-                  padding: '12px 12px 12px 40px',
-                  width: '100%',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  boxSizing: 'border-box',
+                InputProps={{
+                  startAdornment: (
+                    <IconButton sx={{ mr: 1 }}>
+                      <Email />
+                    </IconButton>
+                  ),
                 }}
               />
-            </div>
-          </div>
-          <div className="field" style={{ marginBottom: '20px' }}>
-            <label style={{ fontWeight: 'bold', color: textColor }}>Contraseña:</label>
-            <div style={{ position: 'relative' }}>
-              <FaLock style={{ position: 'absolute', left: '10px', top: '12px', color: '#ccc' }} />
-              <input
+            </Box>
+
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
                 type="password"
+                label="Contraseña"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                placeholder="Introduce tu contraseña"
-                style={{
-                  padding: '12px 12px 12px 40px',
-                  width: '100%',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  boxSizing: 'border-box',
+                InputProps={{
+                  startAdornment: (
+                    <IconButton sx={{ mr: 1 }}>
+                      <Lock />
+                    </IconButton>
+                  ),
                 }}
               />
-            </div>
-          </div>
-          {errorMessage && (
-            <p
-              style={{
-                color: 'red',
-                textAlign: 'center',
-                marginBottom: '20px',
-                backgroundColor: '#ffe5e5',
-                padding: '10px',
-                borderRadius: '8px',
-              }}
-            >
-              {errorMessage}
-            </p>
-          )}
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <button
+            </Box>
+
+            {errorMessage && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'red',
+                  textAlign: 'center',
+                  mb: 3,
+                  backgroundColor: '#ffe5e5',
+                  p: 1,
+                  borderRadius: '15px',
+                }}
+              >
+                {errorMessage}
+              </Typography>
+            )}
+
+            <Button
+              fullWidth
               type="submit"
-              style={{
+              variant="contained"
+              sx={{
                 backgroundColor: '#00bcd4',
-                color: '#fff',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                width: '100%',
-                fontSize: '18px',
-                border: 'none',
-                transition: 'background-color 0.3s ease',
+                '&:hover': { backgroundColor: '#00a3ba' },
+                py: 1.5,
+                fontSize: '16px',
               }}
-              onMouseOver={(e) => (e.target.style.backgroundColor = '#00a3ba')}
-              onMouseOut={(e) => (e.target.style.backgroundColor = '#00bcd4')}
             >
               Iniciar Sesión
-            </button>
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <p>
-              <Link to="/register" style={{ color: '#00bcd4', textDecoration: 'none' }}>¿No tienes cuenta? Registrarte</Link>
-            </p>
-            <p>
-              <Link to="/forgot-password" style={{ color: '#00bcd4', textDecoration: 'none' }}>¿Olvidaste tu contraseña?</Link>
-            </p>
-          </div>
-        </form>
-      </div>
-    </div>
+            </Button>
+
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="body2">
+                <Link to="/register" style={{ color: '#00bcd4', textDecoration: 'none' }}>
+                  ¿No tienes cuenta? Registrarte
+                </Link>
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                <Link to="/forgot-password" style={{ color: '#00bcd4', textDecoration: 'none' }}>
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </Typography>
+            </Box>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 
