@@ -6,6 +6,10 @@ import Register from './Inicio/Register';
 import Login from './Inicio/Login'; 
 import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';  
 
+//Administrador
+import AvisoDePrivacidad from './Administrador/AvisoPriva';
+import DeslindeLegal from './Administrador/DeslindeLegal';
+
 function App() {
   return (
     <Router basename="/Odontologia"> {/* Se añade el basename */}
@@ -13,6 +17,10 @@ function App() {
         <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} /> 
         <Route path="/register" element={<LayoutConEncabezado><Register /></LayoutConEncabezado>} /> 
         <Route path="/login" element={<LayoutConEncabezado><Login /></LayoutConEncabezado>} /> 
+
+        <Route path="/AvisoPriva" element={<LayoutConEncabezado><AvisoDePrivacidad /></LayoutConEncabezado>} /> 
+        <Route path="/deslindeLegal" element={<LayoutConEncabezado><DeslindeLegal /></LayoutConEncabezado>} /> 
+ 
       </Routes>
     </Router>
   );

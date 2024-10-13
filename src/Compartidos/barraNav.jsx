@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText, Select, MenuItem } from '@mui/material';
 import { FaTooth, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const BarraNav = () => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const navigate = useNavigate(); // Hook de navegación
 
   // Detectar el tema del sistema
   useEffect(() => {
@@ -30,6 +31,14 @@ const BarraNav = () => {
       return;
     }
     setDrawerOpen(open);
+  };
+
+  // Función para manejar la selección del menú
+  const handleSelectChange = (event) => {
+    const value = event.target.value;
+    if (value) {
+      navigate(value); // Navegar a la ruta seleccionada
+    }
   };
 
   // Lista de enlaces en el Drawer
@@ -104,6 +113,36 @@ const BarraNav = () => {
             </IconButton>
           </Box>
 
+          {/* Select para términos y condiciones y deslinde legal */}
+          
+          <Select
+  defaultValue="Administrar"
+  onChange={handleSelectChange}
+  sx={{
+    marginLeft: 2,
+    color: isDarkTheme ? '#fff' : '#333',
+    bgcolor: isDarkTheme ? '#444' : '#f5f5f5',
+    border: '1px solid',
+    borderColor: isDarkTheme ? '#666' : '#ccc',
+    borderRadius: '8px',
+    '&:hover': {
+      borderColor: isDarkTheme ? '#888' : '#aaa',
+    },
+  }}
+  >
+   <MenuItem value="Administrar" disabled>
+    Administrar
+    </MenuItem>
+   <MenuItem value="/AvisoPriva">
+    Políticas de privacidad
+    </MenuItem>
+    <MenuItem value="/terminos">
+    Términos y condiciones
+    </MenuItem>
+    <MenuItem value="/deslindeLegal">
+    Deslinde Legal
+   </MenuItem>
+    </Select>
           {/* Menú en pantallas pequeñas */}
           <IconButton
             edge="end"
