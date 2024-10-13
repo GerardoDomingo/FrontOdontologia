@@ -256,13 +256,15 @@ const DeslindeLegal = () => {
         </ListItem>
         ))}
             </List>
-
-                {/* Paginación */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                    <Button variant="outlined" onClick={handlePreviousPage} disabled={currentPage === 1}>
+      {/* Controles de paginación */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
+                    <Button variant="contained" color="primary" onClick={handlePreviousPage} disabled={currentPage === 1}>
                         Anterior
                     </Button>
-                    <Button variant="outlined" onClick={handleNextPage} disabled={currentPage >= Math.ceil(deslindes.length / deslindesPerPage)}>
+                    <Typography variant="body1" style={{ margin: '0 20px' }}>
+                        Página {currentPage}
+                    </Typography>
+                    <Button variant="contained" color="primary" onClick={handleNextPage} disabled={currentPage >= Math.ceil(deslindes.length / deslindesPerPage)}>
                         Siguiente
                     </Button>
                 </div>

@@ -9,6 +9,7 @@ import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';
 //Administrador
 import AvisoDePrivacidad from './Administrador/AvisoPriva';
 import DeslindeLegal from './Administrador/DeslindeLegal';
+import TerminosCondiciones from './Administrador/TermiCondicion';
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
 
         <Route path="/AvisoPriva" element={<LayoutConEncabezado><AvisoDePrivacidad /></LayoutConEncabezado>} /> 
         <Route path="/deslindeLegal" element={<LayoutConEncabezado><DeslindeLegal /></LayoutConEncabezado>} /> 
- 
+        <Route path="/terminos" element={<LayoutConEncabezado><TerminosCondiciones /></LayoutConEncabezado>} /> 
       </Routes>
     </Router>
   );
