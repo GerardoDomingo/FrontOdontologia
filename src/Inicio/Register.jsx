@@ -173,12 +173,12 @@ const Register = () => {
     }
     setIsVerifyingEmail(true); // Cambia el botón a "Verificando..."
     setEmailVerificationError(''); // Limpia cualquier error previoo
-  
+
     try {
       const response = await axios.post('http://localhost:3001/api/send-verification-email', {
         email: formData.email,
       });
-  
+
       if (response.status === 200) {
         setIsEmailSent(true); // Indica que el correo fue enviado
         setNotificationMessage('Correo de verificación enviado.');
@@ -203,7 +203,7 @@ const Register = () => {
       setIsVerifyingEmail(false); // Finaliza la verificación
     }
   };
-  
+
 
 
   // Verificar el token de verificación
@@ -647,7 +647,7 @@ const Register = () => {
         type={notificationType}
         handleClose={handleCloseNotification}
       />
-      <Card sx={{ p: 4, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', borderRadius: '16px', marginBottom:'20px'}}>
+      <Card sx={{ p: 4, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', borderRadius: '16px', marginBottom: '20px' }}>
         <CardContent>
           <Typography
             variant="h4"
@@ -655,18 +655,32 @@ const Register = () => {
           >
             Registro de Paciente
           </Typography>
-  
+
           <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-  
+  {steps.map((label) => (
+    <Step key={label}>
+      <StepLabel
+        StepIconProps={{
+          sx: { display: 'flex' }, // Asegura que los íconos se sigan mostrando
+        }}
+        sx={{
+          // Oculta solo el texto en pantallas pequeñas (xs), pero deja los íconos
+          '& .MuiStepLabel-label': {
+            display: { xs: 'none', sm: 'block' } // Oculta solo el texto en xs
+          }
+        }}
+      >
+        {label}
+      </StepLabel>
+    </Step>
+  ))}
+</Stepper>
+
+
+
           <form onSubmit={handleSubmit}>
             {getStepContent(activeStep)}
-  
+
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
               {activeStep !== 0 && (
                 <Button onClick={handleBack} sx={{ mr: 2 }}>
@@ -688,7 +702,7 @@ const Register = () => {
       </Card>
     </Container>
   );
-  
+
 };
 
 export default Register;
