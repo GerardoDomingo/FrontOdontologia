@@ -22,7 +22,7 @@ const Home = () => {
               fontFamily: 'Roboto, sans-serif',
             }}
           >
-            Bienvenido a Odontología Carol
+          Odontología Carol
           </Typography>
           <Typography
             variant="subtitle1"

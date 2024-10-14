@@ -1,11 +1,14 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+//Inicio
 import Home from './Inicio/Home';
 import Register from './Inicio/Register';
 import Login from './Inicio/Login';
 import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';
+
+//Paciente
 import Principal from './Paciente/Principal.jsx';
+import LayoutPaciente from './Paciente/LayoutPaciente'; // Nuevo layout específico para pacientes
 
 //Administrador
 import AvisoDePrivacidad from './Administrador/AvisoPriva';
@@ -14,19 +17,18 @@ import TerminosCondiciones from './Administrador/TermiCondicion';
 
 function App() {
   return (
-    <Router basename="/Odontologia"> {/* Se añade el basename */}
+    <Router basename="/Odontologia">
       <Routes>
-        {/* Publico */}
+        {/* Rutas públicas */}
         <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} />
         <Route path="/register" element={<LayoutConEncabezado><Register /></LayoutConEncabezado>} />
-        <Route path="/login" element={<LayoutConEncabezado><Login /></LayoutConEncabezado>} />
+        <Route path="/login" element={<Login />} />
 
-        {/*Paciente */}
-        <Route path="/Paciente/principal" element={<LayoutConEncabezado><Principal /></LayoutConEncabezado>} />
+        {/* Rutas del paciente */}
+        <Route path="/Paciente/principal" element={<LayoutPaciente><Principal /></LayoutPaciente>} />
 
 
-
-        {/*Administrativo */}
+        {/* Rutas administrativas */}
         <Route path="/AvisoPriva" element={<LayoutConEncabezado><AvisoDePrivacidad /></LayoutConEncabezado>} />
         <Route path="/deslindeLegal" element={<LayoutConEncabezado><DeslindeLegal /></LayoutConEncabezado>} />
         <Route path="/terminos" element={<LayoutConEncabezado><TerminosCondiciones /></LayoutConEncabezado>} />

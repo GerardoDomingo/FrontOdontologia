@@ -639,7 +639,7 @@ const Register = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 5 }}>
+    <Container maxWidth="md" sx={{ mt: 6, mb: 14 }}> {/* Aquí agregamos marginTop y marginBottom */}
       {/* Aquí va la notificación */}
       <Notificaciones
         open={openNotification}
@@ -647,7 +647,7 @@ const Register = () => {
         type={notificationType}
         handleClose={handleCloseNotification}
       />
-      <Card sx={{ p: 4, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', borderRadius: '16px' }}>
+      <Card sx={{ p: 4, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', borderRadius: '16px', marginBottom:'20px'}}>
         <CardContent>
           <Typography
             variant="h4"
@@ -655,7 +655,7 @@ const Register = () => {
           >
             Registro de Paciente
           </Typography>
-
+  
           <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
             {steps.map((label) => (
               <Step key={label}>
@@ -663,10 +663,10 @@ const Register = () => {
               </Step>
             ))}
           </Stepper>
-
+  
           <form onSubmit={handleSubmit}>
             {getStepContent(activeStep)}
-
+  
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
               {activeStep !== 0 && (
                 <Button onClick={handleBack} sx={{ mr: 2 }}>
@@ -688,6 +688,7 @@ const Register = () => {
       </Card>
     </Container>
   );
+  
 };
 
 export default Register;

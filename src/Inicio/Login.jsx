@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Box, TextField, Button, Typography, Card, CardContent, IconButton } from '@mui/material';
 import { FaTooth } from 'react-icons/fa';
-import { Email, Lock } from '@mui/icons-material';
+import { Email, Lock, ArrowBack } from '@mui/icons-material';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useNavigate, Link } from 'react-router-dom'; // Asegúrate de importar estos desde react-router-dom
 
@@ -60,9 +60,27 @@ const Login = () => {
         justifyContent: 'center',
         alignItems: 'center',
         padding: '20px',
+        position: 'relative'  // Aseguramos que los elementos dentro del Box puedan ser posicionados con 'absolute'
       }}
     >
-      <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3 }}>
+      <IconButton
+        sx={{ position: 'absolute', top: 16, left: 16, color: '#00bcd4' }}
+        component={Link}
+        to="/"  // Ruta a la que redirige el botón
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <ArrowBack />
+          <Typography
+            variant="body2"
+            sx={{ color: '#707070', opacity: 0.7, ml: 1 }} // El texto con un color suave y margen a la izquierda
+          >
+            Atrás
+          </Typography>
+        </Box>
+      </IconButton>
+      <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3, position: 'relative' }}>
+
+
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
             <FaTooth />
