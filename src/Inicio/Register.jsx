@@ -172,7 +172,7 @@ const Register = () => {
       return;
     }
     setIsVerifyingEmail(true); // Cambia el botón a "Verificando..."
-    setEmailVerificationError(''); // Limpia cualquier error previo
+    setEmailVerificationError(''); // Limpia cualquier error previoo
   
     try {
       const response = await axios.post('http://localhost:3001/api/send-verification-email', {
