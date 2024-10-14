@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, Grid, InputAdornment } from '@mui/material';
 import { FaUser, FaPhone, FaEnvelope, FaLock, FaHome, FaInfoCircle } from 'react-icons/fa';
 import zxcvbn from 'zxcvbn';
+import axios from 'axios';
+import Notificaciones from '../Compartidos/Notificaciones'
 
 const Register = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -23,9 +25,35 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [openNotification, setOpenNotification] = useState(false); // Estado para manejar la notificación
+  const [notificationMessage, setNotificationMessage] = useState(''); // Mensaje de la notificación
+  const [notificationType, setNotificationType] = useState('success'); // Tipo de notificación (success, error, etc.)
+
+  const handleCloseNotification = () => {
+    setOpenNotification(false); // Función para cerrar la notificación
+  };
 
   const steps = ['Datos personales', 'Información de contacto', 'Datos de acceso'];
 
+  // Función para verificar si la contraseña cumple con las reglas personalizadas
+  const checkPasswordRules = (password) => {
+    const errors = [];
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const hasMinLength = password.length >= 8;
+    const noRepeatingChars = !/(.)\1{2}/.test(password); // No repetir más de 3 letras seguidas
+
+    if (!hasUpperCase) errors.push('Debe tener al menos una letra mayúscula.');
+    if (!hasNumber) errors.push('Debe tener al menos un número.');
+    if (!hasSpecialChar) errors.push('Debe tener al menos un símbolo especial.');
+    if (!hasMinLength) errors.push('Debe tener más de 8 caracteres.');
+    if (!noRepeatingChars) errors.push('No puede tener más de 3 letras seguidas iguales.');
+
+    return errors;
+  };
+
+  // Función para manejar el cambio en los campos
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -36,8 +64,15 @@ const Register = () => {
     if (name === 'password') {
       const strength = zxcvbn(value).score;
       setPasswordStrength(strength);
+
+      const customErrors = checkPasswordRules(value);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: customErrors.length > 0 ? customErrors.join(' ') : '',
+      }));
     }
   };
+
 
   const handleNext = () => {
     if (validateStep()) {
@@ -49,10 +84,39 @@ const Register = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep()) {
-      console.log(formData);
+      try {
+        // Imprime los datos que se van a enviar
+        console.log('Datos que se enviarán:', formData);
+
+        const response = await axios.post('http://localhost:3001/api/register', formData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 200) {
+          setNotificationMessage('Usuario registrado exitosamente');
+          setNotificationType('success');
+          setOpenNotification(true);
+        } else {
+          setNotificationMessage('Error al registrar el usuario');
+          setNotificationType('error');
+          setOpenNotification(true);
+        }
+      } catch (error) {
+        if (error.response && error.response.data.message) {
+          // Aquí es donde capturas el mensaje del servidor (como 'El correo electrónico ya está registrado')
+          setNotificationMessage(error.response.data.message);  // Muestra el mensaje exacto del servidor
+          setNotificationType('error');
+        } else {
+          setNotificationMessage('Error en la solicitud');
+          setNotificationType('error');
+        }
+        setOpenNotification(true);
+      }
     }
   };
 
@@ -250,7 +314,7 @@ const Register = () => {
               }}
             />
             <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-              <InputLabel>Alergias Comunes</InputLabel>
+              <InputLabel>Alergias </InputLabel>
               <Select
                 value={formData.alergias}
                 onChange={handleChange}
@@ -329,6 +393,7 @@ const Register = () => {
                 ),
               }}
             />
+
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2">Fortaleza de la contraseña</Typography>
               <Box
@@ -338,30 +403,43 @@ const Register = () => {
                   backgroundColor: '#e0e0e0',
                   borderRadius: '5px',
                   mt: 1,
+                  position: 'relative',
                 }}
               >
                 <Box
                   sx={{
                     height: '100%',
                     width: `${(passwordStrength / 4) * 100}%`,
-                    backgroundColor: passwordStrength < 2 ? 'red' : passwordStrength === 2 ? 'yellow' : 'green',
+                    backgroundColor:
+                      passwordStrength < 2
+                        ? 'red'
+                        : passwordStrength === 2
+                          ? 'yellow'
+                          : 'green',
                     borderRadius: '5px',
+                    transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out', // Agregamos transición también al color
                   }}
                 />
               </Box>
               <Typography
                 variant="caption"
-                sx={{ color: passwordStrength < 2 ? 'red' : passwordStrength === 2 ? 'yellow' : 'green', mt: 1 }}
+                sx={{
+                  color:
+                    passwordStrength < 2 ? 'red' : passwordStrength === 2 ? 'yellow' : 'green',
+                  mt: 1,
+                }}
               >
-                {passwordStrength === 0 && "Muy débil"}
-                {passwordStrength === 1 && "Débil"}
-                {passwordStrength === 2 && "Regular"}
-                {passwordStrength === 3 && "Fuerte"}
-                {passwordStrength === 4 && "Muy fuerte"}
+                {passwordStrength === 0 && 'Muy débil'}
+                {passwordStrength === 1 && 'Débil'}
+                {passwordStrength === 2 && 'Regular'}
+                {passwordStrength === 3 && 'Fuerte'}
+                {passwordStrength === 4 && 'Muy fuerte'}
               </Typography>
             </Box>
+
           </Box>
         );
+
       default:
         return 'Unknown step';
     }
@@ -369,6 +447,13 @@ const Register = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
+      {/* Aquí va la notificación */}
+      <Notificaciones
+        open={openNotification}
+        message={notificationMessage}
+        type={notificationType}
+        handleClose={handleCloseNotification}
+      />
       <Card sx={{ p: 4, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', borderRadius: '16px' }}>
         <CardContent>
           <Typography

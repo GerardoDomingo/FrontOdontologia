@@ -113,36 +113,6 @@ const BarraNav = () => {
             </IconButton>
           </Box>
 
-          {/* Select para términos y condiciones y deslinde legal */}
-          
-          <Select
-  defaultValue="Administrar"
-  onChange={handleSelectChange}
-  sx={{
-    marginLeft: 2,
-    color: isDarkTheme ? '#fff' : '#333',
-    bgcolor: isDarkTheme ? '#444' : '#f5f5f5',
-    border: '1px solid',
-    borderColor: isDarkTheme ? '#666' : '#ccc',
-    borderRadius: '8px',
-    '&:hover': {
-      borderColor: isDarkTheme ? '#888' : '#aaa',
-    },
-  }}
-  >
-   <MenuItem value="Administrar" disabled>
-    Administrar
-    </MenuItem>
-   <MenuItem value="/AvisoPriva">
-    Políticas de privacidad
-    </MenuItem>
-    <MenuItem value="/terminos">
-    Términos y condiciones
-    </MenuItem>
-    <MenuItem value="/deslindeLegal">
-    Deslinde Legal
-   </MenuItem>
-    </Select>
           {/* Menú en pantallas pequeñas */}
           <IconButton
             edge="end"
