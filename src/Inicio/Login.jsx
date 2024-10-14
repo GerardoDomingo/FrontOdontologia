@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
 import { Box, TextField, Button, Typography, Card, CardContent, IconButton } from '@mui/material';
 import { FaTooth } from 'react-icons/fa';
 import { Email, Lock } from '@mui/icons-material';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useNavigate, Link } from 'react-router-dom'; // Asegúrate de importar estos desde react-router-dom
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
   const [captchaValue, setCaptchaValue] = useState(null);
-  const navigate = useNavigate();
+  const recaptchaRef = useRef(null);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const navigate = useNavigate(); // Aquí definimos navigate usando el hook useNavigate
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,7 +19,7 @@ const Login = () => {
   };
 
   const handleCaptchaChange = (value) => {
-    setCaptchaValue(value); 
+    setCaptchaValue(value);
   };
 
   const handleSubmit = async (e) => {
@@ -27,8 +29,6 @@ const Login = () => {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-
-    console.log('Captcha Value (Frontend):', captchaValue); 
 
     try {
       const response = await fetch('http://localhost:3001/api/users/login', {
@@ -110,10 +110,14 @@ const Login = () => {
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+              {/* Mostrar el captcha solo cuando el usuario haga clic */}
+
               <ReCAPTCHA
+                ref={recaptchaRef}
                 sitekey="6Lc74mAqAAAAAL5MmFjf4x0PWP9MtBNEy9ypux_h"
                 onChange={handleCaptchaChange}
               />
+
             </Box>
 
             {errorMessage && (
@@ -142,7 +146,7 @@ const Login = () => {
                 py: 1.5,
                 fontSize: '16px',
               }}
-              disabled={!captchaValue} 
+              disabled={!captchaValue}
             >
               Iniciar Sesión
             </Button>
