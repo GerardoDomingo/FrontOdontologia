@@ -155,7 +155,7 @@ const BarraPaciente = () => {
 
                     <MenuItem
                         component={Link}
-                        to="/login"
+                        to="/"
                         onClick={handleMenuClose}
                         sx={{
                             '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto

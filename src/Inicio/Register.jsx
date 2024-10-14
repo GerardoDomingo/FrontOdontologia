@@ -657,24 +657,24 @@ const Register = () => {
           </Typography>
 
           <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-  {steps.map((label) => (
-    <Step key={label}>
-      <StepLabel
-        StepIconProps={{
-          sx: { display: 'flex' }, // Asegura que los íconos se sigan mostrando
-        }}
-        sx={{
-          // Oculta solo el texto en pantallas pequeñas (xs), pero deja los íconos
-          '& .MuiStepLabel-label': {
-            display: { xs: 'none', sm: 'block' } // Oculta solo el texto en xs
-          }
-        }}
-      >
-        {label}
-      </StepLabel>
-    </Step>
-  ))}
-</Stepper>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel
+                  StepIconProps={{
+                    sx: { display: 'flex' }, // Asegura que los íconos se sigan mostrando
+                  }}
+                  sx={{
+                    // Oculta solo el texto en pantallas pequeñas (xs), pero deja los íconos
+                    '& .MuiStepLabel-label': {
+                      display: { xs: 'none', sm: 'block' } // Oculta solo el texto en xs
+                    }
+                  }}
+                >
+                  {label}
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
 
 
 
