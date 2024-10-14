@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, Grid, InputAdornment } from '@mui/material';
-import { FaUser, FaPhone, FaEnvelope, FaLock, FaHome, FaInfoCircle } from 'react-icons/fa';
+import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment } from '@mui/material'; // Aquí ya no importamos Grid
+import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle } from 'react-icons/fa'; // Agrega FaInfoCircle aquí
 import zxcvbn from 'zxcvbn';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
+import { useNavigate } from 'react-router-dom';
 import Notificaciones from '../Compartidos/Notificaciones'
 
 const Register = () => {
@@ -24,10 +26,20 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [passwordStrength, setPasswordStrength] = useState(0);
-  const [openNotification, setOpenNotification] = useState(false); // Estado para manejar la notificación
-  const [notificationMessage, setNotificationMessage] = useState(''); // Mensaje de la notificación
-  const [notificationType, setNotificationType] = useState('success'); // Tipo de notificación (success, error, etc.)
+  const [isEmailSent, setIsEmailSent] = useState(false); // Para saber si se ha enviado el correo
+  const [isEmailVerified, setIsEmailVerified] = useState(false); // Para saber si el correo ya está verificado
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false); // Saber si se está verificando el correo
+  const [isVerifiedComplete, setIsVerifiedComplete] = useState(false); // Saber si ya está verificado el código
+  const [emailVerificationError, setEmailVerificationError] = useState(''); // Errores de verificación de correo
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState('success');
+  const [openNotification, setOpenNotification] = useState(false); const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordError, setPasswordError] = useState('');
+  const [isPasswordSafe, setIsPasswordSafe] = useState(false);
+  const [isPasswordFiltered, setIsPasswordFiltered] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [verificationToken, setVerificationToken] = useState(''); // Guardar el token ingresado
+  const navigate = useNavigate();
 
   const handleCloseNotification = () => {
     setOpenNotification(false); // Función para cerrar la notificación
@@ -64,6 +76,8 @@ const Register = () => {
     if (name === 'password') {
       const strength = zxcvbn(value).score;
       setPasswordStrength(strength);
+      // Verificar la seguridad de la contraseña
+      checkPasswordSafety(value);
 
       const customErrors = checkPasswordRules(value);
       setErrors((prevErrors) => ({
@@ -73,6 +87,33 @@ const Register = () => {
     }
   };
 
+  // Función para verificar si la contraseña ha sido filtrada en brechas de seguridad
+  const checkPasswordSafety = async (password) => {
+    setIsLoading(true); // Iniciar la carga
+    try {
+      const hashedPassword = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
+      const prefix = hashedPassword.slice(0, 5);
+      const suffix = hashedPassword.slice(5);
+
+      const response = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
+      const hashes = response.data.split('\n').map(line => line.split(':')[0]);
+
+      if (hashes.includes(suffix.toUpperCase())) {
+        setPasswordError('Contraseña insegura: ha sido filtrada en brechas de datos.');
+        setIsPasswordSafe(false);
+        setIsPasswordFiltered(true); // Actualizar el estado de filtrado
+      } else {
+        setPasswordError('');
+        setIsPasswordSafe(true);
+        setIsPasswordFiltered(false); // Contraseña no filtrada
+      }
+    } catch (error) {
+      console.error('Error al verificar la contraseña:', error);
+      setPasswordError('Error al verificar la contraseña.');
+    } finally {
+      setIsLoading(false); // Detener la carga
+    }
+  };
 
   const handleNext = () => {
     if (validateStep()) {
@@ -97,10 +138,15 @@ const Register = () => {
           },
         });
 
-        if (response.status === 200) {
+        if (response.status === 200 || response.status === 201) {
           setNotificationMessage('Usuario registrado exitosamente');
           setNotificationType('success');
           setOpenNotification(true);
+
+          // Redirige al login después de un pequeño delay (opcional)
+          setTimeout(() => {
+            navigate('/login'); // Redirige al login
+          }, 2000); // Delay de 2 segundos para mostrar la notificación
         } else {
           setNotificationMessage('Error al registrar el usuario');
           setNotificationType('error');
@@ -117,6 +163,74 @@ const Register = () => {
         }
         setOpenNotification(true);
       }
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!formData.email) {
+      setEmailVerificationError('Por favor, ingresa un correo electrónico.');
+      return;
+    }
+    setIsVerifyingEmail(true); // Cambia el botón a "Verificando..."
+    setEmailVerificationError(''); // Limpia cualquier error previo
+  
+    try {
+      const response = await axios.post('http://localhost:3001/api/send-verification-email', {
+        email: formData.email,
+      });
+  
+      if (response.status === 200) {
+        setIsEmailSent(true); // Indica que el correo fue enviado
+        setNotificationMessage('Correo de verificación enviado.');
+        setNotificationType('success');
+        setOpenNotification(true);
+      }
+    } catch (error) {
+      // Verifica si el servidor responde con un mensaje indicando que el correo ya está registrado
+      if (error.response && error.response.status === 400 && error.response.data.message) {
+        if (error.response.data.message === 'El correo electrónico ya está registrado.') {
+          setEmailVerificationError('El correo electrónico ya está registrado. Por favor, intenta con otro correo.');
+          setNotificationMessage('El correo electrónico ya está registrado.'); // Agregamos el mensaje a la notificación
+          setNotificationType('error'); // Establece el tipo de notificación
+          setOpenNotification(true); // Abre la notificación
+        } else {
+          setEmailVerificationError(error.response.data.message); // Captura otros mensajes de error del servidor
+        }
+      } else {
+        setEmailVerificationError('Error al enviar el correo de verificación.');
+      }
+    } finally {
+      setIsVerifyingEmail(false); // Finaliza la verificación
+    }
+  };
+  
+
+
+  // Verificar el token de verificación
+  const handleVerifyToken = async () => {
+    if (!formData.verificationToken) {
+      setEmailVerificationError('Por favor, ingresa el token de verificación.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3001/api/verify-token', {
+        email: formData.email,
+        token: formData.verificationToken,
+      });
+
+      if (response.status === 200) {
+        setIsEmailVerified(true); // Verificación completada
+        setIsVerifiedComplete(true); // Marca como verificado
+        setEmailVerificationError('');
+        setNotificationMessage('Correo verificado correctamente.');
+        setNotificationType('success');
+        setOpenNotification(true);
+      } else {
+        setEmailVerificationError('Token de verificación inválido o expirado.');
+      }
+    } catch (error) {
+      setEmailVerificationError('Error al verificar el token.');
     }
   };
 
@@ -145,6 +259,7 @@ const Register = () => {
     setErrors(stepErrors);
     return Object.keys(stepErrors).length === 0;
   };
+
 
   const alergiasInfo = {
     Penicilina: 'Antibiótico común.',
@@ -277,30 +392,13 @@ const Register = () => {
       case 1:
         return (
           <Box>
-            <TextField
-              fullWidth
-              label="Teléfono"
-              name="telefono"
-              value={formData.telefono}
-              onChange={handleChange}
-              margin="normal"
-              required
-              error={!!errors.telefono}
-              helperText={errors.telefono}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaPhone />
-                  </InputAdornment>
-                ),
-              }}
-            />
+            {/* Campo de correo electrónico */}
             <TextField
               fullWidth
               label="Correo electrónico"
               name="email"
               value={formData.email}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               margin="normal"
               required
               error={!!errors.email}
@@ -312,43 +410,128 @@ const Register = () => {
                   </InputAdornment>
                 ),
               }}
+              disabled={isEmailVerified || isVerifiedComplete} // Deshabilitar si ya está verificado
             />
-            <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-              <InputLabel>Alergias </InputLabel>
-              <Select
-                value={formData.alergias}
-                onChange={handleChange}
-                label="Alergias"
-                name="alergias"
-              >
-                <MenuItem value="Ninguna">Ninguna</MenuItem>
-                {Object.keys(alergiasInfo).map((alergia) => (
-                  <MenuItem key={alergia} value={alergia}>
-                    {alergia}
-                  </MenuItem>
-                ))}
-                <MenuItem value="Otro">Otro</MenuItem>
-              </Select>
-              {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
-            </FormControl>
 
-            {formData.alergias && alergiasInfo[formData.alergias] && (
-              <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
-                <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias]}
+            {!isEmailVerified && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleVerifyEmail} // Función para verificar el correo
+                sx={{ mt: 2 }}
+                disabled={isVerifyingEmail || isVerifiedComplete || isEmailSent} // Deshabilitar si ya se verificó o se está verificando
+              >
+                {isVerifiedComplete ? 'Verificado' : isVerifyingEmail ? 'Verificando...' : isEmailSent ? 'Correo Enviado' : 'Verificar Correo'}
+              </Button>
+
+            )}
+
+            {/* Mostrar mensaje de verificación exitosa o error */}
+            {isEmailVerified && (
+              <Typography sx={{ color: 'green', mt: 2 }}>
+                Correo verificado correctamente.
               </Typography>
             )}
 
-            {formData.alergias === 'Otro' && (
+            {emailVerificationError && (
+              <Typography sx={{ color: 'red', mt: 2 }}>
+                {emailVerificationError}
+              </Typography>
+            )}
+
+            {/* Si el correo está verificado, permitir la entrada del código de verificación */}
+            {isEmailSent && !isEmailVerified && (
               <TextField
                 fullWidth
-                label="Especificar Alergia"
-                name="otraAlergia"
-                value={formData.otraAlergia}
-                onChange={handleChange}
+                label="Código de verificación"
+                name="verificationToken"
+                value={formData.verificationToken}
+                onChange={(e) => setFormData({ ...formData, verificationToken: e.target.value })}
                 margin="normal"
-                error={!!errors.otraAlergia}
-                helperText={errors.otraAlergia}
+                required
+                error={!!errors.verificationToken}
+                helperText={errors.verificationToken}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FaLock />
+                    </InputAdornment>
+                  ),
+                }}
               />
+            )}
+
+            {/* Botón para validar el código de verificación */}
+            {isEmailSent && !isEmailVerified && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleVerifyToken} // Función para validar el token
+                sx={{ mt: 2 }}
+              >
+                Validar Código
+              </Button>
+            )}
+
+            {/* Mostrar el resto de los campos sólo si el correo ha sido verificado */}
+            {isEmailVerified && (
+              <>
+                <TextField
+                  fullWidth
+                  label="Teléfono"
+                  name="telefono"
+                  value={formData.telefono}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  error={!!errors.telefono}
+                  helperText={errors.telefono}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FaPhone />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <FormControl fullWidth margin="normal" error={!!errors.alergias}>
+                  <InputLabel>Alergias </InputLabel>
+                  <Select
+                    value={formData.alergias}
+                    onChange={handleChange}
+                    label="Alergias"
+                    name="alergias"
+                  >
+                    <MenuItem value="Ninguna">Ninguna</MenuItem>
+                    {Object.keys(alergiasInfo).map((alergia) => (
+                      <MenuItem key={alergia} value={alergia}>
+                        {alergia}
+                      </MenuItem>
+                    ))}
+                    <MenuItem value="Otro">Otro</MenuItem>
+                  </Select>
+                  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+                </FormControl>
+
+                {formData.alergias && alergiasInfo[formData.alergias] && (
+                  <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
+                    <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias]}
+                  </Typography>
+                )}
+
+                {formData.alergias === 'Otro' && (
+                  <TextField
+                    fullWidth
+                    label="Especificar Alergia"
+                    name="otraAlergia"
+                    value={formData.otraAlergia}
+                    onChange={handleChange}
+                    margin="normal"
+                    error={!!errors.otraAlergia}
+                    helperText={errors.otraAlergia}
+                  />
+                )}
+              </>
             )}
           </Box>
         );
@@ -393,6 +576,16 @@ const Register = () => {
                 ),
               }}
             />
+
+            {/* Indicadores de seguridad de la contraseña */}
+            {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
+            {isPasswordFiltered && <p style={{ color: 'red' }}>Contraseña filtrada. Por favor, elige otra.</p>}
+            {isPasswordSafe && !isPasswordFiltered && (
+              <p>
+                <FaCheckCircle style={{ color: 'green' }} /> Contraseña segura
+              </p>
+            )}
+            {/* Barra de fortaleza de la contraseña */}
 
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2">Fortaleza de la contraseña</Typography>
