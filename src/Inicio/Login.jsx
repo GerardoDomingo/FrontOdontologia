@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, TextField, Button, Typography, Card, CardContent, IconButton } from '@mui/material';
-import { FaTooth } from 'react-icons/fa'; // Mantendremos el icono de FaTooth de React Icons
-import { Email, Lock } from '@mui/icons-material'; // Iconos de Material UI
+import { FaTooth } from 'react-icons/fa';
+import { Email, Lock } from '@mui/icons-material';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
+  const [captchaValue, setCaptchaValue] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -14,13 +16,38 @@ const Login = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleCaptchaChange = (value) => {
+    setCaptchaValue(value); 
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Lógica de autenticación
-    if (formData.email === 'usuario@ejemplo.com' && formData.password === '123456') {
-      navigate('/');
-    } else {
-      setErrorMessage('Credenciales incorrectas. Inténtalo de nuevo.');
+
+    if (!captchaValue) {
+      setErrorMessage('Por favor, completa el captcha.');
+      return;
+    }
+
+    console.log('Captcha Value (Frontend):', captchaValue); 
+
+    try {
+      const response = await fetch('http://localhost:3001/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...formData, captchaValue }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        navigate('/Paciente/principal');
+      } else {
+        setErrorMessage(data.message || 'Error al iniciar sesión');
+      }
+    } catch (error) {
+      setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     }
   };
 
@@ -82,6 +109,13 @@ const Login = () => {
               />
             </Box>
 
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+              <ReCAPTCHA
+                sitekey="6Lc74mAqAAAAAL5MmFjf4x0PWP9MtBNEy9ypux_h"
+                onChange={handleCaptchaChange}
+              />
+            </Box>
+
             {errorMessage && (
               <Typography
                 variant="body2"
@@ -108,6 +142,7 @@ const Login = () => {
                 py: 1.5,
                 fontSize: '16px',
               }}
+              disabled={!captchaValue} 
             >
               Iniciar Sesión
             </Button>
