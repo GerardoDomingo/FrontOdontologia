@@ -12,7 +12,8 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    Grid
+    Grid,
+    Box
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -141,8 +142,8 @@ const PoliticasPrivacidad = () => {
     };
 
     return (
-        <div style={{ padding: '60px' }}>
-            <Paper style={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.5)' }}>
+        <Box sx={{ padding: '60px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
+            <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" component="h2" align="center" gutterBottom>
                     Políticas de Privacidad
                 </Typography>
@@ -153,7 +154,7 @@ const PoliticasPrivacidad = () => {
                         value={numeroPolitica}
                         onChange={(e) => setNumeroPolitica(e.target.value)}
                         fullWidth
-                        style={{ marginBottom: '10px' }}
+                        sx={{ mb: 2 }}
                         error={!!errors.numeroPolitica}
                         helperText={errors.numeroPolitica}
                     />
@@ -162,7 +163,7 @@ const PoliticasPrivacidad = () => {
                         value={titulo}
                         onChange={(e) => setTitulo(e.target.value)}
                         fullWidth
-                        style={{ marginBottom: '10px' }}
+                        sx={{ mb: 2 }}
                         error={!!errors.titulo}
                         helperText={errors.titulo}
                     />
@@ -173,7 +174,7 @@ const PoliticasPrivacidad = () => {
                         fullWidth
                         multiline
                         rows={4}
-                        style={{ marginBottom: '20px' }}
+                        sx={{ mb: 3 }}
                         error={!!errors.contenido}
                         helperText={errors.contenido}
                     />
@@ -182,122 +183,88 @@ const PoliticasPrivacidad = () => {
                     </Button>
                 </form>
                 {mensaje && (
-                    <Typography variant="body1" style={{ marginTop: '10px', color: mensaje.includes('Error') ? 'red' : 'green' }}>
+                    <Typography variant="body1" sx={{ mt: 2, color: mensaje.includes('Error') ? 'red' : 'green' }}>
                         {mensaje}
                     </Typography>
                 )}
             </Paper>
 
             {/* Tarjeta que encierra las políticas y paginación */}
-            <Paper style={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.5)' }}>
-                <List style={{ marginTop: '20px' }}>
-                    {currentPolicies.map((politica, index) => (
-                        <ListItem key={politica.id} style={{ marginBottom: '20px' }}>
-                            <Paper style={{ padding: '10px', width: '100%', boxShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}>
-                                {/* Contenedor para Título y Política con diseño de cuadrícula */}
-                                <Grid container spacing={2}>
-                                    <Grid item xs={8}>
-                                        <Paper style={{ padding: '10px' }}>
+            {politicas.length > 0 ? (
+                <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.5)' }}>
+                    <List sx={{ mt: 3 }}>
+                        {currentPolicies.map((politica, index) => (
+                            <ListItem key={politica.id} sx={{ mb: 2 }}>
+                                <Paper sx={{ padding: '10px', width: '100%', boxShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={8}>
                                             <ListItemText
-                                                primary={
-                                                    <>
-                                                        <Typography
-                                                            variant="body1"
-                                                            style={{
-                                                                overflowWrap: 'break-word',
-                                                                wordBreak: 'break-word',
-                                                                whiteSpace: 'pre-line',
-                                                                marginTop: '5px',
-                                                                maxWidth: '350px',
-                                                                fontWeight: 'bold',
-                                                            }}
-                                                        >
-                                                            {`Política ${politica.numero_politica}:`}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body1"
-                                                            style={{
-                                                                overflowWrap: 'break-word',
-                                                                wordBreak: 'break-word',
-                                                                whiteSpace: 'pre-line',
-                                                                marginTop: '5px',
-                                                                maxWidth: '360px',
-                                                            }}
-                                                        >
-                                                            {`Título: ${politica.titulo}`}
-                                                        </Typography>
-                                                    </>
-                                                }
-                                            secondary={
-                                                <Typography variant="body2" color="textSecondary">
-                                                    {`Última actualización: ${new Date(politica.fecha_actualizacion).toLocaleDateString()}`}
+                                                primary={`Política ${politica.numero_politica}:`}
+                                                secondary={`Título: ${politica.titulo}`}
+                                                sx={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}
+                                            />
+                                            <Typography variant="body2" color="textSecondary">
+                                                {`Última actualización: ${new Date(politica.fecha_actualizacion).toLocaleDateString()}`}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                    Acciones
                                                 </Typography>
-                                            }
-                                        />
-                                            
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={4}>
-                                        <Paper style={{ height: '100%' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Typography variant="subtitle2" style={{ marginBottom: '5px', fontWeight: 'bold' }}>Acciones</Typography>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%' }}>
                                                     <IconButton title="Ver contenido" aria-label="view" onClick={() => handleDialogOpen(politica.contenido)}>
-                                                        <VisibilityIcon />
+                                                        <VisibilityIcon sx={{ color: 'blue' }} />
                                                     </IconButton>
                                                     <IconButton title="Editar" aria-label="edit" onClick={() => handleEdit(index)}>
-                                                        <EditIcon />
+                                                        <EditIcon sx={{ color: '#1976d2' }} />
                                                     </IconButton>
                                                     <IconButton title="Eliminar" aria-label="delete" onClick={() => handleDelete(politica.id)}>
-                                                        <DeleteIcon />
+                                                        <DeleteIcon sx={{ color: 'red' }} />
                                                     </IconButton>
-                                                </div>
-                                            </div>
-                                        </Paper>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </Paper>
-                        </ListItem>
-                    ))}
-                </List>
-                     {/* Controles de paginación */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
-    <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={handlePreviousPage} 
-        disabled={currentPage === 1}
-    >
-        Anterior
-    </Button>
-    <Typography variant="body1" style={{ margin: '0 20px' }}>
-        Página {currentPage} de {Math.ceil(politicas.length / policiesPerPage)}
-    </Typography>
-    <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={handleNextPage} 
-        disabled={currentPage >= Math.ceil(politicas.length / policiesPerPage)}>
-            Siguiente</Button>
-        </div>
-            </Paper>
+                                </Paper>
+                            </ListItem>
+                        ))}
+                    </List>
+
+                    {/* Controles de paginación */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                        <Button variant="contained" color="primary" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            Anterior
+                        </Button>
+                        <Typography variant="body1" sx={{ mx: 2 }}>
+                            Página {currentPage} de {Math.ceil(politicas.length / policiesPerPage)}
+                        </Typography>
+                        <Button variant="contained" color="primary" onClick={handleNextPage} disabled={currentPage >= Math.ceil(politicas.length / policiesPerPage)}>
+                            Siguiente
+                        </Button>
+                    </Box>
+                </Paper>
+            ) : (
+                <Typography variant="body1" align="center" sx={{ mt: 4 }}>
+                    No hay políticas disponibles.
+                </Typography>
+            )}
 
             {/* Diálogo para visualizar el contenido de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                    <DialogTitle>Contenido de la Política</DialogTitle>
-                    <DialogContent>
-                        <Typography variant="body1" style={{ overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
-                            {dialogContent}
-                        </Typography>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleDialogClose} color="primary" startIcon={<CloseIcon />}>
-                            Cerrar
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-        </div>
+                <DialogTitle>Contenido de la Política</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
+                        {dialogContent}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary" startIcon={<CloseIcon />}>
+                        Cerrar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Box>
     );
 };
 

@@ -11,8 +11,9 @@ import Principal from './Paciente/Principal.jsx';
 import LayoutPaciente from './Paciente/LayoutPaciente'; // Nuevo layout específico para pacientes
 
 //Administrador
+import LayoutAdmin from './Administrador/LayoutAdmin.jsx'; 
 import PrincipalAdmin from './Administrador/Principal.jsx';
-import LayoutAdmin from './Administrador/LayoutAdmin.jsx'; // Nuevo layout específico para pacientes
+import Configuracion from './Administrador/Configuracion.jsx';
 import AvisoDePrivacidad from './Administrador/AvisoPriva';
 import DeslindeLegal from './Administrador/DeslindeLegal';
 import TerminosCondiciones from './Administrador/TermiCondicion';
@@ -32,9 +33,10 @@ function App() {
 
         {/* Rutas administrativas */}
         <Route path="/Administrador/principal" element={<LayoutAdmin><PrincipalAdmin /></LayoutAdmin>} />
-        <Route path="/AvisoPriva" element={<LayoutAdmin><AvisoDePrivacidad /></LayoutAdmin>} />
-        <Route path="/deslindeLegal" element={<LayoutAdmin><DeslindeLegal /></LayoutAdmin>} />
-        <Route path="/terminos" element={<LayoutAdmin><TerminosCondiciones /></LayoutAdmin>} />
+        <Route path="/Administrador/configuracion" element={<LayoutAdmin><Configuracion/></LayoutAdmin>} />
+        <Route path="/Administrador/AvisoPriva" element={<LayoutAdmin><AvisoDePrivacidad /></LayoutAdmin>} />
+        <Route path="/Administrador/deslindeLegal" element={<LayoutAdmin><DeslindeLegal /></LayoutAdmin>} />
+        <Route path="/Administrador/terminos" element={<LayoutAdmin><TerminosCondiciones /></LayoutAdmin>} />
       </Routes>
     </Router>
   );

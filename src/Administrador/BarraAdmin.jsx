@@ -164,7 +164,7 @@ const BarraPaciente = () => {
 
                     <MenuItem
                         component={Link}
-                        to="/Administrador/configuracion"
+                        to="/Administrador/configuracion" // Asegúrate de que la ruta coincide con la definida en App.js
                         onClick={handleMenuClose}
                         sx={{
                             '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
