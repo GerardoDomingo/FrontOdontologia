@@ -16,7 +16,7 @@ import LayoutAdmin from './Administrador/LayoutAdmin.jsx'; // Nuevo layout espec
 import AvisoDePrivacidad from './Administrador/AvisoPriva';
 import DeslindeLegal from './Administrador/DeslindeLegal';
 import TerminosCondiciones from './Administrador/TermiCondicion';
-
+import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
 function App() {
   return (
     <Router basename="/Odontologia">
@@ -35,6 +35,8 @@ function App() {
         <Route path="/AvisoPriva" element={<LayoutAdmin><AvisoDePrivacidad /></LayoutAdmin>} />
         <Route path="/deslindeLegal" element={<LayoutAdmin><DeslindeLegal /></LayoutAdmin>} />
         <Route path="/terminos" element={<LayoutAdmin><TerminosCondiciones /></LayoutAdmin>} />
+        <Route path="/perfilEmpresa" element={<LayoutAdmin><PerfilEmpresa /></LayoutAdmin>} />
+        
       </Routes>
     </Router>
   );
