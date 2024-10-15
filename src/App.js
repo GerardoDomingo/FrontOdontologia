@@ -17,7 +17,7 @@ import Configuracion from './Administrador/Configuracion.jsx';
 import AvisoDePrivacidad from './Administrador/AvisoPriva';
 import DeslindeLegal from './Administrador/DeslindeLegal';
 import TerminosCondiciones from './Administrador/TermiCondicion';
-
+import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
 function App() {
   return (
     <Router basename="/Odontologia">
