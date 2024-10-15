@@ -91,7 +91,7 @@ const BarraPaciente = () => {
                     {/* Nueva opción Inicio */}
                     <MenuItem
                         component={Link}
-                        to="/Admin/principal"
+                        to="/Administrador/principal"
                         onClick={handleMenuClose}
                         sx={{
                             '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto

@@ -7,29 +7,32 @@ import {
     Typography,
     Box,
     Avatar,
+    IconButton,
 } from '@mui/material';
+import { UploadFile as UploadFileIcon, Save as SaveIcon, Edit as EditIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
+import { ArrowBack as ArrowBackIcon, Close as CloseIcon } from '@mui/icons-material';
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones'; // Importar Notificaciones
+import { Link } from 'react-router-dom';
 
 const PerfilEmpresa = () => {
     const [formData, setFormData] = useState({
-        id_empresa: '', 
+        id_empresa: '',
         nombre_empresa: '',
         direccion: '',
         telefono: '',
         correo_electronico: '',
         descripcion: '',
-        logo: null, 
+        logo: null,
     });
     const [logoPreview, setLogoPreview] = useState('');
-    const [isEditing, setIsEditing] = useState(false); 
+    const [isEditing, setIsEditing] = useState(false);
     const [errorMessages, setErrorMessages] = useState({});
     const [dataFetched, setDataFetched] = useState(false); // Estado para verificar si hay datos
-    // Estado para las notificaciones
     const [notification, setNotification] = useState({
         open: false,
         message: '',
-        type: 'success', // 'success' o 'error'
+        type: 'success',
     });
 
     useEffect(() => {
@@ -37,8 +40,6 @@ const PerfilEmpresa = () => {
             try {
                 const response = await axios.get('http://localhost:3001/api/perfilEmpresa/get');
                 const { id_empresa, nombre_empresa, direccion, telefono, correo_electronico, descripcion, logo } = response.data;
-
-                console.log('Datos recibidos:', response.data);
 
                 if (id_empresa) {
                     setFormData({
@@ -49,7 +50,7 @@ const PerfilEmpresa = () => {
                         correo_electronico,
                         descripcion,
                     });
-                    setDataFetched(true); // Datos fueron obtenidos
+                    setDataFetched(true); // Datos obtenidos
                 } else {
                     setDataFetched(false); // No hay datos
                     mostrarNotificacion('No hay información para actualizar, suba su información', 'error');
@@ -96,7 +97,7 @@ const PerfilEmpresa = () => {
         if (!formData.descripcion) errors.descripcion = "La descripción es obligatoria.";
 
         setErrorMessages(errors);
-        return Object.keys(errors).length === 0; // Retorna verdadero si no hay errores
+        return Object.keys(errors).length === 0;
     };
 
     const mostrarNotificacion = (mensaje, tipo) => {
@@ -114,7 +115,7 @@ const PerfilEmpresa = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) return; 
+        if (!validateForm()) return;
 
         const formDataToSend = new FormData();
         formDataToSend.append('nombre_empresa', formData.nombre_empresa);
@@ -149,7 +150,7 @@ const PerfilEmpresa = () => {
             return;
         }
 
-        if (!validateForm()) return; 
+        if (!validateForm()) return;
 
         const formDataToSend = new FormData();
         formDataToSend.append('id_empresa', formData.id_empresa);
@@ -169,7 +170,7 @@ const PerfilEmpresa = () => {
 
             if (response.status === 200) {
                 mostrarNotificacion('Perfil de empresa actualizado con éxito', 'success');
-                setIsEditing(false); 
+                setIsEditing(false);
             } else {
                 mostrarNotificacion('Error al actualizar el perfil de empresa', 'error');
             }
@@ -180,27 +181,68 @@ const PerfilEmpresa = () => {
     };
 
     return (
-        <Box sx={{ padding: 15,marginTop: -10 }}>
-            <Container maxWidth="sm">
-                <Box sx={{ marginTop: 1, textAlign: 'center' }}>
-                    <Typography variant="h4" gutterBottom>
-                        Perfil de la Empresa
-                    </Typography>
-                    {logoPreview ? (
-                        <Avatar
-                            src={logoPreview}
-                            alt="Logo de la empresa"
-                            sx={{
-                                width: 150,
-                                height: 150,
-                                margin: '0 auto',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                            }}
-                        />
-                    ) : (
-                        <Typography>No se ha cargado ninguna imagen</Typography>
-                    )}
+        <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f9f9f9', position: 'relative' }}>
+            <Container maxWidth="md">
+
+                {/* Botón de regreso */}
+                <IconButton
+                    component={Link}
+                    to="/Administrador/principal"
+                    sx={{
+                        position: 'absolute',
+                        top: 24,
+                        left: 24,
+                        color: '#1976d2',
+                    }}
+                >
+                    <ArrowBackIcon fontSize="large" />
+                </IconButton>
+
+                {/* Botón "X" en la esquina superior derecha */}
+                <IconButton
+                    sx={{
+                        position: 'absolute',
+                        top: 24,
+                        right: 24,
+                        color: 'gray',
+                    }}
+                    onClick={() => setIsEditing(false)}
+                >
+                    <CloseIcon fontSize="large" />
+                </IconButton>
+
+                <Box
+                    sx={{
+                        mt: 6,
+                        backgroundColor: '#fff',
+                        padding: 4,
+                        borderRadius: '16px',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                    }}
+                >
+                    <Box sx={{ textAlign: 'center', mb: 4 }}>
+                        <Typography variant="h4" gutterBottom>
+                            Perfil de la Empresa
+                        </Typography>
+
+                        {logoPreview ? (
+                            <Avatar
+                                src={logoPreview}
+                                alt="Logo de la empresa"
+                                sx={{
+                                    width: 100,
+                                    height: 100,
+                                    margin: '0 auto',
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                    boxShadow: 2,
+                                }}
+                            />
+                        ) : (
+                            <Typography>No se ha cargado ninguna imagen</Typography>
+                        )}
+                    </Box>
+
                     <form onSubmit={isEditing ? handleUpdate : handleSubmit}>
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
@@ -211,10 +253,12 @@ const PerfilEmpresa = () => {
                                     value={formData.nombre_empresa}
                                     onChange={handleInputChange}
                                     disabled={!isEditing}
-                                    error={!!errorMessages.nombre_empresa} 
-                                    helperText={errorMessages.nombre_empresa} 
+                                    error={!!errorMessages.nombre_empresa}
+                                    helperText={errorMessages.nombre_empresa}
+                                    sx={{ borderRadius: '12px' }}
                                 />
                             </Grid>
+
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -225,8 +269,10 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditing}
                                     error={!!errorMessages.direccion}
                                     helperText={errorMessages.direccion}
+                                    sx={{ borderRadius: '12px' }}
                                 />
                             </Grid>
+
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -237,8 +283,10 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditing}
                                     error={!!errorMessages.telefono}
                                     helperText={errorMessages.telefono}
+                                    sx={{ borderRadius: '12px' }}
                                 />
                             </Grid>
+
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -251,8 +299,10 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditing}
                                     error={!!errorMessages.correo_electronico}
                                     helperText={errorMessages.correo_electronico}
+                                    sx={{ borderRadius: '12px' }}
                                 />
                             </Grid>
+
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -265,32 +315,73 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditing}
                                     error={!!errorMessages.descripcion}
                                     helperText={errorMessages.descripcion}
+                                    sx={{ borderRadius: '12px' }}
                                 />
                             </Grid>
                             {isEditing && (
-                                <Grid item xs={12}>
-                                    <Button variant="contained" component="label">
+                                <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+                                    <Button
+                                        variant="contained"
+                                        component="label"
+                                        startIcon={<UploadFileIcon />}
+                                        sx={{
+                                            backgroundColor: '#1976d2',
+                                            color: '#fff',
+                                            borderRadius: '24px',
+                                            textTransform: 'none',
+                                            padding: '10px 24px',
+                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                            '&:hover': {
+                                                backgroundColor: '#1565c0',
+                                            },
+                                        }}
+                                    >
                                         Subir Logo de la Empresa
-                                        <input
-                                            type="file"
-                                            hidden
-                                            name="logo"
-                                            onChange={handleFileChange}
-                                        />
+                                        <input type="file" hidden name="logo" onChange={handleFileChange} />
                                     </Button>
                                 </Grid>
                             )}
-                            <Grid item xs={12}>
-                                <Button variant="contained" color="primary" type="submit" disabled={false}>
-                                
+
+                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    type="submit"
+                                    startIcon={isEditing ? <CheckCircleIcon /> : <SaveIcon />}
+                                    sx={{
+                                        borderRadius: '24px',
+                                        padding: '12px 24px',
+                                        backgroundColor: '#1976D2',
+                                        color: '#fff',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                        textTransform: 'none',
+                                        '&:hover': {
+                                            backgroundColor: '#105da5',
+                                        },
+                                    }}
+                                >
                                     {isEditing ? 'Actualizar' : 'Subir cambios'}
                                 </Button>
-                       
+                            </Grid>
+
+                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                                 <Button
                                     variant="outlined"
-                                    color="secondary"
+                                    startIcon={isEditing ? <CheckCircleIcon /> : <EditIcon />}
+                                    fullWidth
                                     onClick={() => setIsEditing(!isEditing)}
-                                    style={{ marginLeft: '10px' }}
+                                    sx={{
+                                        borderRadius: '24px',
+                                        padding: '12px 24px',
+                                        textTransform: 'none',
+                                        borderColor: isEditing ? '#28a745' : '#1976d2',
+                                        color: isEditing ? '#28a745' : '#1976d2',
+                                        '&:hover': {
+                                            borderColor: isEditing ? '#218838' : '#1565c0',
+                                            backgroundColor: isEditing ? '#e9f9eb' : '#e8f0ff',
+                                        },
+                                    }}
                                 >
                                     {isEditing ? 'Aceptar cambios' : 'Editar'}
                                 </Button>
@@ -299,13 +390,13 @@ const PerfilEmpresa = () => {
                     </form>
                 </Box>
             </Container>
-            
+
             {/* Componente de Notificaciones */}
-            <Notificaciones 
-                open={notification.open} 
-                message={notification.message} 
-                type={notification.type} 
-                handleClose={handleClose} 
+            <Notificaciones
+                open={notification.open}
+                message={notification.message}
+                type={notification.type}
+                handleClose={handleClose}
             />
         </Box>
     );

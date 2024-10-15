@@ -12,7 +12,8 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    Grid
+    Grid,
+    Box
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -45,7 +46,7 @@ const TerminosCondiciones = () => {
 
     const fetchTerminos = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/termiCondicion/getTerminos');
+            const response = await axios.get('http://localhost:3001/api/termiCondicion/getterminos');
             setTerminos(response.data);
         } catch (error) {
             console.error('Error al obtener términos:', error);
@@ -154,8 +155,8 @@ const TerminosCondiciones = () => {
     };
 
     return (
-        <div style={{ padding: '60px' }}>
-            <Paper style={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.5)' }}>
+        <Box sx={{ padding: '60px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
+            <Paper sx={{ padding: '30px', maxWidth: '650px', margin: '20px auto', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" component="h2" align="center" gutterBottom>
                     Términos y Condiciones
                 </Typography>
@@ -166,7 +167,7 @@ const TerminosCondiciones = () => {
                         value={numeroTermino}
                         onChange={(e) => setNumeroTermino(e.target.value)}
                         fullWidth
-                        style={{ marginBottom: '10px' }}
+                        sx={{ mb: 2 }}
                         error={!!errors.numeroTermino}
                         helperText={errors.numeroTermino}
                     />
@@ -175,7 +176,7 @@ const TerminosCondiciones = () => {
                         value={titulo}
                         onChange={(e) => setTitulo(e.target.value)}
                         fullWidth
-                        style={{ marginBottom: '10px' }}
+                        sx={{ mb: 2 }}
                         error={!!errors.titulo}
                         helperText={errors.titulo}
                     />
@@ -186,7 +187,7 @@ const TerminosCondiciones = () => {
                         fullWidth
                         multiline
                         rows={4}
-                        style={{ marginBottom: '20px' }}
+                        sx={{ mb: 3 }}
                         error={!!errors.contenido}
                         helperText={errors.contenido}
                     />
@@ -195,90 +196,88 @@ const TerminosCondiciones = () => {
                     </Button>
                 </form>
                 {mensaje && (
-                    <Typography variant="body1" style={{ marginTop: '10px', color: mensaje.includes('Error') ? 'red' : 'green' }}>
+                    <Typography variant="body1" sx={{ mt: 2, color: mensaje.includes('Error') ? 'red' : 'green' }}>
                         {mensaje}
                     </Typography>
                 )}
             </Paper>
 
-            <Paper style={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.5)' }}>
-                <List style={{ marginTop: '20px' }}>
-                    {currentTerminos.map((termino, index) => (
-                        <ListItem key={termino.id} style={{ marginBottom: '20px' }}>
-                            <Paper style={{ padding: '10px', width: '100%', boxShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={8}>
-                                        <Paper style={{ padding: '10px' }}>
+            {/* Tarjeta que encierra las políticas y paginación */}
+            {terminos.length > 0 ? (
+                <Paper sx={{ padding: '20px', maxWidth: '650px', margin: '20px auto', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)' }}>
+                    <List sx={{ mt: 3 }}>
+                        {currentTerminos.map((termino, index) => (
+                            <ListItem key={termino.id} sx={{ mb: 2 }}>
+                                <Paper sx={{ padding: '10px', width: '100%', boxShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={8}>
                                             <ListItemText
-                                                primary={
-                                                    <>
-                                                        <Typography variant="body1" style={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', marginTop: '5px' }}>
-                                                            {`Término ${termino.numero_termino}: ${termino.titulo}`}
-                                                        </Typography>
-                                                    </>
-                                                }
+                                                primary={`Término ${termino.numero_termino}:`}
+                                                secondary={`Título: ${termino.titulo}`}
+                                                sx={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}
                                             />
-                                        </Paper>
-                                    </Grid>
-                                    <Grid item xs={4}>
-                                        <Paper style={{ height: '100%' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Typography variant="subtitle2" style={{ marginBottom: '5px', fontWeight: 'bold' }}>Acciones</Typography>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                {`Última actualización: ${new Date(termino.fecha_actualizacion).toLocaleDateString()}`}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                    Acciones
+                                                </Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%' }}>
                                                     <IconButton title="Ver contenido" aria-label="view" onClick={() => handleDialogOpen(termino.contenido)}>
-                                                        <VisibilityIcon style={{ color: 'blue', marginRight: '10px' }} />
+                                                        <VisibilityIcon sx={{ color: 'blue' }} />
                                                     </IconButton>
-                                                    <IconButton title="Actualizar" aria-label="edit" onClick={() => handleEdit(index)}>
-                                                        <EditIcon />
+                                                    <IconButton title="Editar" aria-label="edit" onClick={() => handleEdit(index)}>
+                                                        <EditIcon sx={{ color: '#1976d2' }} />
                                                     </IconButton>
                                                     <IconButton title="Eliminar" aria-label="delete" onClick={() => handleDelete(termino.id)}>
-                                                        <DeleteIcon />
+                                                        <DeleteIcon sx={{ color: 'red' }} />
                                                     </IconButton>
-                                                </div>
-                                            </div>
-                                        </Paper>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                                <Typography variant="body2" color="textSecondary" style={{ marginTop: '10px', fontStyle: 'italic', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
-                                       Última modificación: {new Date(termino.fecha_actualizacion).toLocaleString()}
-                                </Typography>
-                            </Paper>
-                        </ListItem>
-                    ))}
-                </List>
-          {/* Controles de paginación */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
-                    <Button variant="contained" color="primary" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                        Anterior
-                    </Button>
-                    <Typography variant="body1" style={{ margin: '0 20px' }}>
-                        Página {currentPage}
-                    </Typography>
-                    <Button  variant="contained" color="primary"  onClick={handleNextPage} disabled={currentPage === Math.ceil(terminos.length / terminosPerPage)}>
-                        Siguiente
-                    </Button>
-                </div>
-            </Paper>
+                                </Paper>
+                            </ListItem>
+                        ))}
+                    </List>
 
+                    {/* Controles de paginación */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                        <Button variant="contained" color="primary" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            Anterior
+                        </Button>
+                        <Typography variant="body1" sx={{ mx: 2 }}>
+                            Página {currentPage} de {Math.ceil(terminos.length / terminosPerPage)}
+                        </Typography>
+                        <Button variant="contained" color="primary" onClick={handleNextPage} disabled={currentPage >= Math.ceil(terminos.length / terminosPerPage)}>
+                            Siguiente
+                        </Button>
+                    </Box>
+                </Paper>
+            ) : (
+                <Typography variant="body1" align="center" sx={{ mt: 4 }}>
+                    No hay términos disponibles.
+                </Typography>
+            )}
+
+            {/* Diálogo para visualizar el contenido de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                <DialogTitle>
-                    Contenido del Término
-                    <IconButton aria-label="close" onClick={handleDialogClose} style={{ position: 'absolute', right: '10px', top: '10px' }}>
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
+                <DialogTitle>Contenido del Término</DialogTitle>
                 <DialogContent>
-                    <Typography variant="body1" style={{ overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
+                    <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
                         {dialogContent}
                     </Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDialogClose} color="primary">
+                    <Button onClick={handleDialogClose} color="primary" startIcon={<CloseIcon />}>
                         Cerrar
                     </Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </Box>
     );
 };
 

@@ -37,6 +37,8 @@ function App() {
         <Route path="/Administrador/AvisoPriva" element={<LayoutAdmin><AvisoDePrivacidad /></LayoutAdmin>} />
         <Route path="/Administrador/deslindeLegal" element={<LayoutAdmin><DeslindeLegal /></LayoutAdmin>} />
         <Route path="/Administrador/terminos" element={<LayoutAdmin><TerminosCondiciones /></LayoutAdmin>} />
+        <Route path="/Administrador/PerfilEmpresa" element={<LayoutAdmin><PerfilEmpresa /></LayoutAdmin>} />
+
       </Routes>
     </Router>
   );
