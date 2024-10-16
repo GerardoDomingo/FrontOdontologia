@@ -14,7 +14,7 @@ const CambiarContraseña = () => {
 
     const token = searchParams.get('token'); // Obtener el token de la URL
     console.log("Token obtenido de la URL:", token);
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');
@@ -31,21 +31,23 @@ const CambiarContraseña = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:3001/api/resetPassword', { token, newPassword });
-
+            const response = await axios.post('http://localhost:3001/api/resetPassword', { token, newPassword }, { timeout: 5000 }); // Timeout de 5 segundos
             if (response.status === 200) {
                 setSuccessMessage('Contraseña actualizada correctamente.');
                 setTimeout(() => {
-                    navigate('/login'); // Redirigir al login después de cambiar la contraseña
+                    navigate('/login');
                 }, 2000);
             }
         } catch (error) {
             if (error.response && error.response.status === 400) {
                 setErrorMessage('El token ha expirado o es inválido.');
+            } else if (error.code === 'ECONNABORTED') {
+                setErrorMessage('La solicitud ha expirado. Inténtalo de nuevo.');
             } else {
                 setErrorMessage('Error al cambiar la contraseña. Inténtalo de nuevo.');
             }
         }
+
     };
 
     return (
