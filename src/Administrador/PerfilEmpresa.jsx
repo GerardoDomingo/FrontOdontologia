@@ -79,12 +79,17 @@ const PerfilEmpresa = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setFormData({
-                ...formData,
-                logo: file,
-            });
-            const objectUrl = URL.createObjectURL(file);
-            setLogoPreview(objectUrl);
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+            if (allowedTypes.includes(file.type)) {
+                setFormData({
+                    ...formData,
+                    logo: file,
+                });
+                const objectUrl = URL.createObjectURL(file);
+                setLogoPreview(objectUrl);
+            } else {
+                mostrarNotificacion('Por favor, sube una imagen válida (PNG o JPEG)', 'error');
+            }
         }
     };
 
