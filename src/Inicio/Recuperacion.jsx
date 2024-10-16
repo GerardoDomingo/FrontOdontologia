@@ -65,7 +65,7 @@ const Recuperacion = () => {
   
       if (response.status === 200) {
         setSuccessMessage('Código verificado correctamente. Ahora puedes restablecer tu contraseña.');
-        // Redirigir con el token a la página de cambiar contraseña
+        // Redirigir con el token a la página de cambiar contraseñaa
         navigate(`/resetContra?token=${encodeURIComponent(token)}`);
     }
     } catch (error) {
