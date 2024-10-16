@@ -1,17 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { Box, TextField, Button, Typography, Card, CardContent, IconButton } from '@mui/material';
+import { Box, TextField, Button, Typography, Card, CardContent, IconButton, InputAdornment } from '@mui/material';
 import { FaTooth } from 'react-icons/fa';
-import { Email, Lock, ArrowBack } from '@mui/icons-material';
+import { Email, Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material';
 import ReCAPTCHA from 'react-google-recaptcha';
-import { useNavigate, Link } from 'react-router-dom'; // Asegúrate de importar estos desde react-router-dom
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
   const [captchaValue, setCaptchaValue] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const recaptchaRef = useRef(null);
-  const [showCaptcha, setShowCaptcha] = useState(false);
-  const navigate = useNavigate(); // Aquí definimos navigate usando el hook useNavigate
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,6 +20,10 @@ const Login = () => {
 
   const handleCaptchaChange = (value) => {
     setCaptchaValue(value);
+  };
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword); // Cambiar entre mostrar y ocultar la contraseña
   };
 
   const handleSubmit = async (e) => {
@@ -60,27 +64,25 @@ const Login = () => {
         justifyContent: 'center',
         alignItems: 'center',
         padding: '20px',
-        position: 'relative'  // Aseguramos que los elementos dentro del Box puedan ser posicionados con 'absolute'
+        position: 'relative'
       }}
     >
       <IconButton
         sx={{ position: 'absolute', top: 16, left: 16, color: '#00bcd4' }}
         component={Link}
-        to="/"  // Ruta a la que redirige el botón
+        to="/" 
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <ArrowBack />
           <Typography
             variant="body2"
-            sx={{ color: '#707070', opacity: 0.7, ml: 1 }} // El texto con un color suave y margen a la izquierda
+            sx={{ color: '#707070', opacity: 0.7, ml: 1 }}
           >
             Atrás
           </Typography>
         </Box>
       </IconButton>
       <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3, position: 'relative' }}>
-
-
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
             <FaTooth />
@@ -111,7 +113,7 @@ const Login = () => {
             <Box sx={{ mb: 3 }}>
               <TextField
                 fullWidth
-                type="password"
+                type={showPassword ? 'text' : 'password'} // Mostrar texto o contraseña según el estado
                 label="Contraseña"
                 name="password"
                 value={formData.password}
@@ -123,19 +125,23 @@ const Login = () => {
                       <Lock />
                     </IconButton>
                   ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleTogglePasswordVisibility}>
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
               />
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-              {/* Mostrar el captcha solo cuando el usuario haga clic */}
-
               <ReCAPTCHA
                 ref={recaptchaRef}
                 sitekey="6Lc74mAqAAAAAL5MmFjf4x0PWP9MtBNEy9ypux_h"
                 onChange={handleCaptchaChange}
               />
-
             </Box>
 
             {errorMessage && (
