@@ -3,14 +3,18 @@ import { Box, TextField, Button, Typography, Card, CardContent, IconButton } fro
 import { Email, ArrowBack, Lock } from '@mui/icons-material';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import Notificaciones from '../Compartidos/Notificaciones'; // Asegúrate de importar el componente de notificaciones
 
 const Recuperacion = () => {
   const [email, setEmail] = useState('');
   const [token, setToken] = useState(''); // Para almacenar el código ingresado
   const [emailSent, setEmailSent] = useState(false); // Estado para saber si el email fue enviado
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
   const navigate = useNavigate();
+
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
 
   const handleChange = (e) => {
     setEmail(e.target.value);
@@ -22,62 +26,72 @@ const Recuperacion = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    setErrorMessage('');
-    setSuccessMessage('');
-  
+
+    setNotification({ ...notification, open: false }); // Ocultar notificaciones previas
+
     if (!email) {
-      setErrorMessage('Por favor, introduce un correo electrónico válido.');
+      setNotification({
+        open: true,
+        message: 'Por favor, introduce un correo electrónico válido.',
+        type: 'error',
+      });
       return;
     }
-  
-    console.log("Correo enviado al backend:", email);
-  
+
     try {
       const response = await axios.post('http://localhost:3001/api/recuperacion', { email });
-  
+
       if (response.status === 200) {
-        setSuccessMessage('Se ha enviado un correo de recuperación. Por favor, revisa tu bandeja de entrada.');
+        setNotification({
+          open: true,
+          message: 'Se ha enviado un correo de recuperación. Por favor, revisa tu bandeja de entrada.',
+          type: 'success',
+        });
         setEmailSent(true); // Cambia el estado para mostrar el campo del código
-      } 
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setErrorMessage('Correo no encontrado. Por favor, verifica el correo ingresado.');
-      } else {
-        setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
       }
+    } catch (error) {
+      setNotification({
+        open: true,
+        message: error.response?.status === 404
+          ? 'Correo no encontrado. Por favor, verifica el correo ingresado.'
+          : 'Error de conexión. Inténtalo de nuevo más tarde.',
+        type: 'error',
+      });
     }
   };
 
   const handleVerifyToken = async (e) => {
     e.preventDefault();
-  
+
     if (!token) {
-      setErrorMessage('Por favor, introduce el código que te fue enviado.');
+      setNotification({
+        open: true,
+        message: 'Por favor, introduce el código que te fue enviado.',
+        type: 'error',
+      });
       return;
     }
-  
-    console.log("Verificando código:", token);
-  
+
     try {
       // Enviar token y email al backend
       const response = await axios.post('http://localhost:3001/api/verifyTokene', { token, email });
-  
+
       if (response.status === 200) {
-        setSuccessMessage('Código verificado correctamente. Ahora puedes restablecer tu contraseña.');
-        // Redirigir con el token a la página de cambiar contraseñaa
+        setNotification({
+          open: true,
+          message: 'Código verificado correctamente. Ahora puedes restablecer tu contraseña.',
+          type: 'success',
+        });
         navigate(`/resetContra?token=${encodeURIComponent(token)}`);
-    }
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        setErrorMessage('Código inválido o expirado. Inténtalo de nuevo.');
-      } else {
-        setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
       }
+    } catch (error) {
+      setNotification({
+        open: true,
+        message: 'Código inválido o expirado. Inténtalo de nuevo.',
+        type: 'error',
+      });
     }
   };
-
-  
 
   return (
     <Box
@@ -156,38 +170,6 @@ const Recuperacion = () => {
               </Box>
             )}
 
-            {errorMessage && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'red',
-                  textAlign: 'center',
-                  mb: 3,
-                  backgroundColor: '#ffe5e5',
-                  p: 1,
-                  borderRadius: '15px',
-                }}
-              >
-                {errorMessage}
-              </Typography>
-            )}
-
-            {successMessage && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'green',
-                  textAlign: 'center',
-                  mb: 3,
-                  backgroundColor: '#e5ffe5',
-                  p: 1,
-                  borderRadius: '15px',
-                }}
-              >
-                {successMessage}
-              </Typography>
-            )}
-
             <Button
               fullWidth
               type="submit"
@@ -204,6 +186,14 @@ const Recuperacion = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Notificaciones */}
+      <Notificaciones
+        open={notification.open}
+        message={notification.message}
+        type={notification.type}
+        handleClose={handleCloseNotification}
+      />
     </Box>
   );
 };

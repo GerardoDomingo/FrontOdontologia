@@ -4,7 +4,7 @@ import { Alert, Snackbar } from '@mui/material';
 
 const Notificaciones = ({ open, message, type, handleClose }) => {
   return (
-    <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+    <Snackbar open={open} autoHideDuration={7000} onClose={handleClose}>
       <Alert onClose={handleClose} severity={type} sx={{ width: '100%' }}>
         {message}
       </Alert>
