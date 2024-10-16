@@ -176,7 +176,7 @@ const Login = () => {
                 </Link>
               </Typography>
               <Typography variant="body2" sx={{ mt: 1 }}>
-                <Link to="/forgot-password" style={{ color: '#00bcd4', textDecoration: 'none' }}>
+                <Link to="/recuperacion" style={{ color: '#00bcd4', textDecoration: 'none' }}>
                   ¿Olvidaste tu contraseña?
                 </Link>
               </Typography>

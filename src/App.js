@@ -5,6 +5,8 @@ import Home from './Inicio/Home';
 import Register from './Inicio/Register';
 import Login from './Inicio/Login';
 import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';
+import Recuperacion from './Inicio/Recuperacion.jsx'
+import Reset from './Inicio/CambiarContrasena.jsx'
 
 //Paciente
 import Principal from './Paciente/Principal.jsx';
@@ -18,6 +20,7 @@ import AvisoDePrivacidad from './Administrador/AvisoPriva';
 import DeslindeLegal from './Administrador/DeslindeLegal';
 import TerminosCondiciones from './Administrador/TermiCondicion';
 import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
+
 function App() {
   return (
     <Router basename="/Odontologia">
@@ -25,6 +28,8 @@ function App() {
         {/* Rutas públicas */}
         <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} />
         <Route path="/register" element={<LayoutConEncabezado><Register /></LayoutConEncabezado>} />
+        <Route path="/recuperacion" element={<Recuperacion />} />
+        <Route path="/resetContra" element={<Reset />} />
         <Route path="/login" element={<Login />} />
 
         {/* Rutas del paciente */}
