@@ -1,31 +1,54 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Card, CardContent, IconButton, InputAdornment } from '@mui/material';
 import { FaTooth } from 'react-icons/fa';
 import { Email, Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useNavigate, Link } from 'react-router-dom';
+import Notificaciones from '../Compartidos/Notificaciones';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
   const [captchaValue, setCaptchaValue] = useState(null);
-  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [showPassword, setShowPassword] = useState(false);
+  const [openNotification, setOpenNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
+  // Eliminar mensaje de error después de 3 segundos
+  useEffect(() => {
+    let errorTimeout;
+    if (errorMessage) {
+      errorTimeout = setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
+    }
+    return () => clearTimeout(errorTimeout);
+  }, [errorMessage]);
+
+  // Manejar el cambio de los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Capturar el valor del captcha cuando se completa
   const handleCaptchaChange = (value) => {
     setCaptchaValue(value);
   };
 
+  // Alternar la visibilidad de la contraseña
   const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword); // Cambiar entre mostrar y ocultar la contraseña
+    setShowPassword(!showPassword);
   };
 
+  // Cerrar la notificación
+  const handleCloseNotification = () => {
+    setOpenNotification(false);
+  };
+
+  // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -48,6 +71,11 @@ const Login = () => {
       if (response.ok) {
         navigate('/Paciente/principal');
       } else {
+        // Mostrar notificación y resetear el captcha
+        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts || 0}`);
+        setOpenNotification(true);
+        recaptchaRef.current.reset(); // Resetear el captcha
+        setCaptchaValue(null); // Deshabilitar el botón de nuevo
         setErrorMessage(data.message || 'Error al iniciar sesión');
       }
     } catch (error) {
@@ -74,14 +102,12 @@ const Login = () => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <ArrowBack />
-          <Typography
-            variant="body2"
-            sx={{ color: '#707070', opacity: 0.7, ml: 1 }}
-          >
+          <Typography variant="body2" sx={{ color: '#707070', opacity: 0.7, ml: 1 }}>
             Atrás
           </Typography>
         </Box>
       </IconButton>
+      
       <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3, position: 'relative' }}>
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
@@ -113,7 +139,7 @@ const Login = () => {
             <Box sx={{ mb: 3 }}>
               <TextField
                 fullWidth
-                type={showPassword ? 'text' : 'password'} // Mostrar texto o contraseña según el estado
+                type={showPassword ? 'text' : 'password'}
                 label="Contraseña"
                 name="password"
                 value={formData.password}
@@ -170,7 +196,7 @@ const Login = () => {
                 py: 1.5,
                 fontSize: '16px',
               }}
-              disabled={!captchaValue}
+              disabled={!captchaValue}  // Deshabilitar el botón si no se ha resuelto el captcha
             >
               Iniciar Sesión
             </Button>
@@ -190,6 +216,13 @@ const Login = () => {
           </form>
         </CardContent>
       </Card>
+
+      <Notificaciones
+        open={openNotification}
+        message={notificationMessage}
+        type="warning"
+        handleClose={handleCloseNotification}
+      />
     </Box>
   );
 };
