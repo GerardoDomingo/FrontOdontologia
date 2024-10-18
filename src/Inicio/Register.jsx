@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment } from '@mui/material'; // Aquí ya no importamos Grid
-import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle } from 'react-icons/fa'; // Agrega FaInfoCircle aquí
+import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye } from 'react-icons/fa'; // Agrega FaInfoCircle aquí
 import zxcvbn from 'zxcvbn';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
@@ -39,7 +39,10 @@ const Register = () => {
   const [isPasswordFiltered, setIsPasswordFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [verificationToken, setVerificationToken] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const steps = ['Datos personales', 'Información de contacto', 'Datos de acceso'];
   const nameRegex = /^[A-Za-z\s]+$/;
   const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live)\.com$/;
   const phoneRegex = /^\d{10}$/;
@@ -48,16 +51,25 @@ const Register = () => {
     setOpenNotification(false); // Función para cerrar la notificación
   };
 
-  const steps = ['Datos personales', 'Información de contacto', 'Datos de acceso'];
+  // Función para alternar la visibilidad de la contraseña
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
-  // Función para verificar si la contraseña cumple con las reglas personalizadas
+  // Función para alternar la visibilidad de la confirmación de contraseña
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+
+  // Función para verificar las reglas personalizadas
   const checkPasswordRules = (password) => {
     const errors = [];
     const hasUpperCase = /[A-Z]/.test(password);
     const hasNumber = /\d/.test(password);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
     const hasMinLength = password.length >= 8;
-    const noRepeatingChars = !/(.)\1{2}/.test(password); // No repetir más de 3 letras seguidas
+    const noRepeatingChars = !/(.)\1{2}/.test(password);  // No repetir más de 3 letras seguidas
 
     if (!hasUpperCase) errors.push('Debe tener al menos una letra mayúscula.');
     if (!hasNumber) errors.push('Debe tener al menos un número.');
@@ -66,6 +78,50 @@ const Register = () => {
     if (!noRepeatingChars) errors.push('No puede tener más de 3 letras seguidas iguales.');
 
     return errors;
+  };
+
+  // Función para verificar tanto la seguridad como las reglas de la contraseña
+  const checkPasswordValidity = async (password) => {
+    // Verificamos primero si cumple con las reglas personalizadas
+    const customErrors = checkPasswordRules(password);
+
+    if (customErrors.length > 0) {
+      // Si no cumple con las reglas personalizadas, mostramos los errores
+      setPasswordError(customErrors.join(' '));
+      setIsPasswordSafe(false);  // Marcar como insegura
+      return false;
+    }
+
+    // Si cumple con las reglas personalizadas, verificamos si la contraseña ha sido filtrada
+    setIsLoading(true);
+    try {
+      const hashedPassword = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
+      const prefix = hashedPassword.slice(0, 5);
+      const suffix = hashedPassword.slice(5);
+
+      const response = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
+      const hashes = response.data.split('\n').map(line => line.split(':')[0]);
+
+      if (hashes.includes(suffix.toUpperCase())) {
+        // Si la contraseña ha sido filtrada
+        setPasswordError('Contraseña insegura: ha sido filtrada en brechas de datos.');
+        setIsPasswordSafe(false);
+        setIsPasswordFiltered(true);
+        return false;  // No permitir el registro
+      } else {
+        // Si la contraseña no ha sido filtrada
+        setPasswordError('');
+        setIsPasswordSafe(true);
+        setIsPasswordFiltered(false);
+        return true;  // Permitir el registro
+      }
+    } catch (error) {
+      console.error('Error al verificar la contraseña:', error);
+      setPasswordError('Error al verificar la contraseña.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Función para manejar el cambio en los campos
@@ -80,18 +136,25 @@ const Register = () => {
       [name]: value,
     }));
 
-    //Validacion de la contraseña
+    // Validación de la contraseña
     if (name === 'password') {
       const strength = zxcvbn(value).score;
       setPasswordStrength(strength);
-      checkPasswordSafety(value);
-
-      const customErrors = checkPasswordRules(value);
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        password: customErrors.length > 0 ? customErrors.join(' ') : '',
-      }));
+      checkPasswordValidity(value).then((isValid) => {
+        if (!isValid) {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            password: 'La contraseña no cumple con los requisitos o ha sido filtrada.',
+          }));
+        } else {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            password: '',
+          }));
+        }
+      });
     }
+
     // Validación de nombre y apellidos
     if (name === 'nombre') {
       if (!nameRegex.test(value)) {
@@ -192,33 +255,7 @@ const Register = () => {
     }
   };
 
-  // Función para verificar si la contraseña ha sido filtrada en brechas de seguridad
-  const checkPasswordSafety = async (password) => {
-    setIsLoading(true); // Iniciar la carga
-    try {
-      const hashedPassword = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
-      const prefix = hashedPassword.slice(0, 5);
-      const suffix = hashedPassword.slice(5);
 
-      const response = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
-      const hashes = response.data.split('\n').map(line => line.split(':')[0]);
-
-      if (hashes.includes(suffix.toUpperCase())) {
-        setPasswordError('Contraseña insegura: ha sido filtrada en brechas de datos.');
-        setIsPasswordSafe(false);
-        setIsPasswordFiltered(true); // Actualizar el estado de filtrado
-      } else {
-        setPasswordError('');
-        setIsPasswordSafe(true);
-        setIsPasswordFiltered(false); // Contraseña no filtrada
-      }
-    } catch (error) {
-      console.error('Error al verificar la contraseña:', error);
-      setPasswordError('Error al verificar la contraseña.');
-    } finally {
-      setIsLoading(false); // Detener la carga
-    }
-  };
 
   const handleNext = () => {
     if (validateStep()) {
@@ -230,44 +267,49 @@ const Register = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  // Manejar el registro del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateStep()) {
-      try {
-        // Imprime los datos que se van a enviar
-        console.log('Datos que se enviarán:', formData);
 
-        const response = await axios.post('http://localhost:3001/api/register', formData, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+    // Verificar la validez de la contraseña antes de permitir el registro
+    const isPasswordValid = await checkPasswordValidity(formData.password);
 
-        if (response.status === 200 || response.status === 201) {
-          setNotificationMessage('Usuario registrado exitosamente');
-          setNotificationType('success');
-          setOpenNotification(true);
+    if (!isPasswordValid) {
+      setNotificationMessage('La contraseña debe cumplir con los requisitos y no haber sido filtrada.');
+      setNotificationType('error');
+      setOpenNotification(true);
+      return;  // Evitar el registro si la contraseña no es válida
+    }
 
-          // Redirige al login después de un pequeño delay (opcional)
-          setTimeout(() => {
-            navigate('/login'); // Redirige al login
-          }, 2000); // Delay de 2 segundos para mostrar la notificación
-        } else {
-          setNotificationMessage('Error al registrar el usuario');
-          setNotificationType('error');
-          setOpenNotification(true);
-        }
-      } catch (error) {
-        if (error.response && error.response.data.message) {
-          // Aquí es donde capturas el mensaje del servidor (como 'El correo electrónico ya está registrado')
-          setNotificationMessage(error.response.data.message);  // Muestra el mensaje exacto del servidor
-          setNotificationType('error');
-        } else {
-          setNotificationMessage('Error en la solicitud');
-          setNotificationType('error');
-        }
+    // Si todo es válido, proceder con el registro
+    try {
+      const response = await axios.post('http://localhost:3001/api/register', formData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        setNotificationMessage('Usuario registrado exitosamente');
+        setNotificationType('success');
+        setOpenNotification(true);
+
+        setTimeout(() => {
+          navigate('/login');  // Redirigir al login
+        }, 2000);  // Retraso de 2 segundos
+      } else {
+        setNotificationMessage('Error al registrar el usuario');
+        setNotificationType('error');
         setOpenNotification(true);
       }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        setNotificationMessage(error.response.data.message);
+      } else {
+        setNotificationMessage('Error en la solicitud');
+      }
+      setNotificationType('error');
+      setOpenNotification(true);
     }
   };
 
@@ -682,7 +724,7 @@ const Register = () => {
               fullWidth
               label="Contraseña"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}  // Alterna entre 'text' y 'password'
               value={formData.password}
               onChange={handleChange}
               margin="normal"
@@ -695,13 +737,20 @@ const Register = () => {
                     <FaLock />
                   </InputAdornment>
                 ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button onClick={togglePasswordVisibility}>
+                      {showPassword ?  <FaEye /> : <FaEyeSlash />}  {/* Cambia el ícono */}
+                    </Button>
+                  </InputAdornment>
+                ),
               }}
             />
             <TextField
               fullWidth
               label="Confirmar Contraseña"
               name="confirmPassword"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}  // Alterna entre 'text' y 'password'
               value={formData.confirmPassword}
               onChange={handleChange}
               margin="normal"
@@ -712,6 +761,13 @@ const Register = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     <FaLock />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button onClick={toggleConfirmPasswordVisibility}>
+                      {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}  {/* Cambia el ícono */}
+                    </Button>
                   </InputAdornment>
                 ),
               }}
