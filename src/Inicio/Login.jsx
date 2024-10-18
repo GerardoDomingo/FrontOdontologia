@@ -27,7 +27,7 @@ const Login = () => {
     return () => clearTimeout(errorTimeout);
   }, [errorMessage]);
 
-  // Manejar el cambio de los campos del formulario
+  // Manejar el cambio de los campos del formulariooo
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));

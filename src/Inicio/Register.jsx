@@ -48,7 +48,7 @@ const Register = () => {
   const phoneRegex = /^\d{10}$/;
 
   const handleCloseNotification = () => {
-    setOpenNotification(false); // Función para cerrar la notificación
+    setOpenNotification(false); // Función para cerrar la notificacióooon
   };
 
   // Función para alternar la visibilidad de la contraseña
