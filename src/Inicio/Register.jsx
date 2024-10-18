@@ -44,7 +44,7 @@ const Register = () => {
   const navigate = useNavigate();
   const steps = ['Datos personales', 'Información de contacto', 'Datos de acceso'];
   const nameRegex = /^[A-Za-z\s]+$/;
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live)\.com$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
   const phoneRegex = /^\d{10}$/;
 
   const handleCloseNotification = () => {
@@ -82,7 +82,6 @@ const Register = () => {
 
   // Función para verificar tanto la seguridad como las reglas de la contraseña
   const checkPasswordValidity = async (password) => {
-    // Verificamos primero si cumple con las reglas personalizadas
     const customErrors = checkPasswordRules(password);
 
     if (customErrors.length > 0) {
@@ -270,17 +269,22 @@ const Register = () => {
   // Manejar el registro del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Verificar la validez de la contraseña antes de permitir el registro
+  
+    // Verificar la validez de la contraseña antes de permitir el registro (reglas y filtrado)
     const isPasswordValid = await checkPasswordValidity(formData.password);
-
-    if (!isPasswordValid) {
-      setNotificationMessage('La contraseña debe cumplir con los requisitos y no haber sido filtrada.');
+  
+    // Verificar que la fortaleza de la contraseña sea al menos "Fuerte"
+    if (!isPasswordValid || passwordStrength < 3) {
+      setNotificationMessage(
+        passwordStrength < 3 
+        ? 'La contraseña debe ser al menos "Fuerte" para continuar con el registro.' 
+        : 'La contraseña debe cumplir con los requisitos y no haber sido filtrada.'
+      );
       setNotificationType('error');
       setOpenNotification(true);
-      return;  // Evitar el registro si la contraseña no es válida
+      return;  // Evitar el registro si la contraseña no es válida o no es fuerte
     }
-
+  
     // Si todo es válido, proceder con el registro
     try {
       const response = await axios.post('http://localhost:3001/api/register', formData, {
@@ -288,12 +292,12 @@ const Register = () => {
           'Content-Type': 'application/json',
         },
       });
-
+  
       if (response.status === 200 || response.status === 201) {
         setNotificationMessage('Usuario registrado exitosamente');
         setNotificationType('success');
         setOpenNotification(true);
-
+  
         setTimeout(() => {
           navigate('/login');  // Redirigir al login
         }, 2000);  // Retraso de 2 segundos
@@ -312,6 +316,7 @@ const Register = () => {
       setOpenNotification(true);
     }
   };
+  
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
