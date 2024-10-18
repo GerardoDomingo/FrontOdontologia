@@ -26,24 +26,6 @@ const Principal = () => {
       <Typography variant="h4" sx={{ mb: 4 }}>
         Bienvenido a la página principal
       </Typography>
-      <Typography variant="body1" sx={{ mb: 2 }}>
-        Aquí puedes acceder a las distintas funcionalidades de la plataforma.
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => navigate('/')}
-        sx={{ mb: 2 }}
-      >
-        Volver a la Página de Inicio
-      </Button>
-      <Button
-        variant="outlined"
-        color="secondary"
-        onClick={handleLogout}
-      >
-        Cerrar Sesión
-      </Button>
     </Box>
   );
 };

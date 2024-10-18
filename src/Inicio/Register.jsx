@@ -38,8 +38,11 @@ const Register = () => {
   const [isPasswordSafe, setIsPasswordSafe] = useState(false);
   const [isPasswordFiltered, setIsPasswordFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationToken, setVerificationToken] = useState(''); // Guardar el token ingresado
+  const [verificationToken, setVerificationToken] = useState('');
   const navigate = useNavigate();
+  const nameRegex = /^[A-Za-z\s]+$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live)\.com$/;
+  const phoneRegex = /^\d{10}$/;
 
   const handleCloseNotification = () => {
     setOpenNotification(false); // Función para cerrar la notificación
@@ -68,21 +71,123 @@ const Register = () => {
   // Función para manejar el cambio en los campos
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Remover espacios en blanco al principio y al final del valor
+    const trimmedValue = value.trim();
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
 
+    //Validacion de la contraseña
     if (name === 'password') {
       const strength = zxcvbn(value).score;
       setPasswordStrength(strength);
-      // Verificar la seguridad de la contraseña
       checkPasswordSafety(value);
 
       const customErrors = checkPasswordRules(value);
       setErrors((prevErrors) => ({
         ...prevErrors,
         password: customErrors.length > 0 ? customErrors.join(' ') : '',
+      }));
+    }
+    // Validación de nombre y apellidos
+    if (name === 'nombre') {
+      if (!nameRegex.test(value)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          nombre: 'El nombre solo debe contener letras',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          nombre: '',
+        }));
+      }
+    }
+
+    if (name === 'aPaterno') {
+      if (!nameRegex.test(value)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          aPaterno: 'El apellido paterno solo debe contener letras',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          aPaterno: '',
+        }));
+      }
+    }
+
+    if (name === 'aMaterno') {
+      if (!nameRegex.test(value)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          aMaterno: 'El apellido materno solo debe contener letras',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          aMaterno: '',
+        }));
+      }
+    }
+
+    // Validación de edad (entre 1 y 100 años)
+    if (name === 'edad') {
+      if (value < 1 || value > 100) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          edad: 'Verifique que su edad sea la correcta',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          edad: '',
+        }));
+      }
+    }
+    if (name === 'email') {
+      if (value !== trimmedValue || !emailRegex.test(trimmedValue)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          email: 'Verifique que su correo sea valido',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          email: '',
+        }));
+      }
+    }
+
+    if (name === 'telefono') {
+      if (!phoneRegex.test(value)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          telefono: 'Verifique que su numero de telefono sea valido',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          telefono: '',
+        }));
+      }
+    }
+
+    // Validación de alergias adicionales cuando se selecciona "Otro"
+    if (name === 'alergias' && value === 'Otro') {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        otraAlergia: formData.otraAlergia ? '' : 'Especifica la alergia',
+      }));
+    }
+    if (name === 'otraAlergia' && formData.alergias === 'Otro') {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        otraAlergia: value ? '' : 'Especifica la alergia',
       }));
     }
   };
@@ -167,16 +272,30 @@ const Register = () => {
   };
 
   const handleVerifyEmail = async () => {
+    const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
+
     if (!formData.email) {
       setEmailVerificationError('Por favor, ingresa un correo electrónico.');
       return;
     }
+
+    if (!trimmedEmail) {
+      setEmailVerificationError('Por favor, ingresa un correo electrónico.');
+      return;
+    }
+
+    // Verificar si el correo tiene el formato y dominio correcto
+    if (!emailRegex.test(formData.email)) {
+      setEmailVerificationError('Verifique que su correo sea ingresado correctamente');
+      return;
+    }
+
     setIsVerifyingEmail(true); // Cambia el botón a "Verificando..."
-    setEmailVerificationError(''); // Limpia cualquier error previoo
+    setEmailVerificationError(''); // Limpia cualquier error previo
 
     try {
       const response = await axios.post('http://localhost:3001/api/send-verification-email', {
-        email: formData.email,
+        email: trimmedEmail,
       });
 
       if (response.status === 200) {
@@ -204,8 +323,6 @@ const Register = () => {
     }
   };
 
-
-
   // Verificar el token de verificación
   const handleVerifyToken = async () => {
     if (!formData.verificationToken) {
@@ -226,23 +343,46 @@ const Register = () => {
         setNotificationMessage('Correo verificado correctamente.');
         setNotificationType('success');
         setOpenNotification(true);
-      } else {
-        setEmailVerificationError('Token de verificación inválido o expirado.');
       }
     } catch (error) {
-      setEmailVerificationError('Error al verificar el token.');
+      // Mostrar el mensaje específico que el servidor envía
+      if (error.response && error.response.status === 400) {
+        setEmailVerificationError(error.response.data.message); // Mostrar mensaje específico de token inválido o expirado
+      } else {
+        setEmailVerificationError('Error en el servidor al verificar el token.');
+      }
     }
   };
+
 
   const validateStep = () => {
     const stepErrors = {};
     if (activeStep === 0) {
-      if (!formData.nombre) stepErrors.nombre = 'El nombre es requerido';
-      if (!formData.aPaterno) stepErrors.aPaterno = 'El apellido paterno es requerido';
-      if (!formData.aMaterno) stepErrors.aMaterno = 'El apellido materno es requerido';
-      if (!formData.edad || formData.edad <= 0) stepErrors.edad = 'Ingresa una edad válida';
-      if (!formData.genero) stepErrors.genero = 'Selecciona un género';
-      if (formData.lugar === 'Otro' && !formData.otroLugar) stepErrors.otroLugar = 'Especifica el lugar';
+      const nameRegex = /^[A-Za-z\s]+$/;
+
+      // Validación de nombre y apellidos (solo letras)
+      if (!formData.nombre || !nameRegex.test(formData.nombre)) {
+        stepErrors.nombre = 'El nombre solo debe contener letras';
+      }
+      if (!formData.aPaterno || !nameRegex.test(formData.aPaterno)) {
+        stepErrors.aPaterno = 'El apellido paterno solo debe contener letras';
+      }
+      if (!formData.aMaterno || !nameRegex.test(formData.aMaterno)) {
+        stepErrors.aMaterno = 'El apellido materno solo debe contener letras';
+      }
+
+      // Validación de la edad (entre 1 y 100 años)
+      if (!formData.edad || formData.edad < 1 || formData.edad > 100) {
+        stepErrors.edad = 'Verifique que su edad sea la correcta';
+      }
+
+      // Validación de género y lugar de procedencia (ya existente)
+      if (!formData.genero) {
+        stepErrors.genero = 'Selecciona un género';
+      }
+      if (formData.lugar === 'Otro' && !formData.otroLugar) {
+        stepErrors.otroLugar = 'Especifica el lugar';
+      }
     }
 
     if (activeStep === 1) {
