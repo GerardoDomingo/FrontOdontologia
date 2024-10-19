@@ -287,7 +287,7 @@ const Register = () => {
   
     // Si todo es válido, proceder con el registro
     try {
-      const response = await axios.post('http://localhost:3001/api/register', formData, {
+      const response = await axios.post('https://backendodontologia.onrender.com/api/register', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -341,7 +341,7 @@ const Register = () => {
     setEmailVerificationError(''); // Limpia cualquier error previo
 
     try {
-      const response = await axios.post('http://localhost:3001/api/send-verification-email', {
+      const response = await axios.post('https://backendodontologia.onrender.com/api/send-verification-email', {
         email: trimmedEmail,
       });
 
@@ -378,7 +378,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/api/verify-token', {
+      const response = await axios.post('https://backendodontologia.onrender.com/api/verify-token', {
         email: formData.email,
         token: formData.verificationToken,
       });

@@ -13,7 +13,7 @@ import Principal from './Paciente/Principal.jsx';
 import LayoutPaciente from './Paciente/LayoutPaciente'; // Nuevo layout específico para pacientes
 
 //Administrador
-import LayoutAdmin from './Administrador/LayoutAdmin.jsx'; 
+import LayoutAdmin from './Administrador/LayoutAdmin.jsx';
 import PrincipalAdmin from './Administrador/Principal.jsx';
 import Configuracion from './Administrador/Configuracion.jsx';
 import AvisoDePrivacidad from './Administrador/AvisoPriva';
@@ -23,7 +23,7 @@ import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
 
 function App() {
   return (
-    <Router basename="/Odontologia">
+    <Router>
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} />
@@ -38,7 +38,7 @@ function App() {
 
         {/* Rutas administrativas */}
         <Route path="/Administrador/principal" element={<LayoutAdmin><PrincipalAdmin /></LayoutAdmin>} />
-        <Route path="/Administrador/configuracion" element={<LayoutAdmin><Configuracion/></LayoutAdmin>} />
+        <Route path="/Administrador/configuracion" element={<LayoutAdmin><Configuracion /></LayoutAdmin>} />
         <Route path="/Administrador/AvisoPriva" element={<LayoutAdmin><AvisoDePrivacidad /></LayoutAdmin>} />
         <Route path="/Administrador/deslindeLegal" element={<LayoutAdmin><DeslindeLegal /></LayoutAdmin>} />
         <Route path="/Administrador/terminos" element={<LayoutAdmin><TerminosCondiciones /></LayoutAdmin>} />

@@ -49,7 +49,7 @@ const DeslindeLegal = () => {
 
     const fetchDeslindes = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/deslinde/getdeslinde');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getdeslinde');
             setDeslindes(response.data);
         } catch (error) {
             console.error('Error al obtener deslindes:', error);
@@ -93,11 +93,11 @@ const DeslindeLegal = () => {
         try {
             if (editingIndex !== null) {
                 // Actualizar deslinde
-                await axios.put(`http://localhost:3001/api/deslinde/update/${deslindes[editingIndex].id}`, deslindeData);
+                await axios.put(`https://backendodontologia.onrender.com/api/deslinde/update/${deslindes[editingIndex].id}`, deslindeData);
                 setMensaje('Deslinde actualizado con éxito');
             } else {
                 // Insertar nuevo deslinde 
-                await axios.post('http://localhost:3001/api/deslinde/insert', deslindeData);
+                await axios.post('https://backendodontologia.onrender.com/api/deslinde/insert', deslindeData);
                 setMensaje('Deslinde insertado con éxito');
             }
             fetchDeslindes(); // Refrescar la lista de deslindes
@@ -125,7 +125,7 @@ const DeslindeLegal = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:3001/api/deslinde/delete/${id}`);
+            await axios.delete(`https://backendodontologia.onrender.com/api/deslinde/delete/${id}`);
             setMensaje('Deslinde eliminado con éxito');
             fetchDeslindes(); // Refrescar la lista de deslindes
         } catch (error) {

@@ -96,7 +96,7 @@ const Register = () => {
 
     // Intentar registrar al usuario
     try {
-      const response = await axios.post('http://localhost:3001/api/users/register', formData);
+      const response = await axios.post('https://backendodontologia.onrender.com/api/users/register', formData);
       showModal(response.data.message, true);
       showModal('Usuario registrado correctamente');
       // Limpiar el formulario

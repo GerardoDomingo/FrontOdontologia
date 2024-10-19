@@ -115,7 +115,7 @@ const CambiarContraseña = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:3001/api/resetPassword', { token, newPassword }, { timeout: 5000 });
+            const response = await axios.post('https://backendodontologia.onrender.com/api/resetPassword', { token, newPassword }, { timeout: 5000 });
             if (response.status === 200) {
                 setSuccessMessage('Contraseña actualizada.');
                 setTimeout(() => {

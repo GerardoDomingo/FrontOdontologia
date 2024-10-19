@@ -44,7 +44,7 @@ const PoliticasPrivacidad = () => {
 
     const fetchPoliticas = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/politicas/getpolitica');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
             setPoliticas(response.data);
         } catch (error) {
             console.error('Error al obtener políticas:', error);
@@ -74,11 +74,11 @@ const PoliticasPrivacidad = () => {
         try {
             if (editingIndex !== null) {
                 // Actualizar política
-                await axios.put(`http://localhost:3001/api/politicas/update/${politicas[editingIndex].id}`, politicaData);
+                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${politicas[editingIndex].id}`, politicaData);
                 setMensaje('Política actualizada con éxito');
             } else {
                 // Insertar nueva política
-                await axios.post('http://localhost:3001/api/politicas/insert', politicaData);
+                await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
                 setMensaje('Política insertada con éxito');
             }
             fetchPoliticas(); // Refrescar la lista de políticas
@@ -106,7 +106,7 @@ const PoliticasPrivacidad = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:3001/api/politicas/delete/${id}`);
+            await axios.delete(`https://backendodontologia.onrender.com/api/politicas/delete/${id}`);
             setMensaje('Política eliminada con éxito');
             fetchPoliticas(); // Refrescar la lista de políticas
         } catch (error) {
