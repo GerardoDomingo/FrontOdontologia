@@ -51,12 +51,12 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-
+  
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
@@ -65,11 +65,16 @@ const Login = () => {
         },
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
-        navigate('/Paciente/principal');
+        // Verificar el tipo de usuario y redirigir
+        if (data.user.tipo === 'administrador') {
+          navigate('/Administrador/principal');  // Redirigir a la página del administrador
+        } else if (data.user.tipo === 'paciente') {
+          navigate('/Paciente/principal');  // Redirigir a la página del paciente
+        }
       } else {
         // Mostrar notificación y resetear el captcha
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts || 0}`);
@@ -82,6 +87,7 @@ const Login = () => {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     }
   };
+  
 
   return (
     <Box
