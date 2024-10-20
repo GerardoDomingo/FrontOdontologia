@@ -102,7 +102,6 @@ const Register = () => {
       const hashes = response.data.split('\n').map(line => line.split(':')[0]);
 
       if (hashes.includes(suffix.toUpperCase())) {
-        // Si la contraseña ha sido filtrada
         setPasswordError('Contraseña insegura: ha sido filtrada en brechas de datos.');
         setIsPasswordSafe(false);
         setIsPasswordFiltered(true);
@@ -253,8 +252,6 @@ const Register = () => {
       }));
     }
   };
-
-
 
   const handleNext = () => {
     if (validateStep()) {
