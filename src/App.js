@@ -23,7 +23,7 @@ import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
 
 function App() {
   return (
-    <Router basename="/Odontologia">
+    <Router>
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} />
