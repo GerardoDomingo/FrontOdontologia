@@ -46,7 +46,7 @@ const TerminosCondiciones = () => {
 
     const fetchTerminos = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/termiCondicion/getterminos');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/getterminos');
             setTerminos(response.data);
         } catch (error) {
             console.error('Error al obtener términos:', error);
@@ -89,10 +89,10 @@ const TerminosCondiciones = () => {
 
         try {
             if (editingIndex !== null) {
-                await axios.put(`http://localhost:3001/api/termiCondicion/update/${terminos[editingIndex].id}`, terminoData);
+                await axios.put(`https://backendodontologia.onrender.com/api/termiCondicion/update/${terminos[editingIndex].id}`, terminoData);
                 setMensaje('Término actualizado con éxito');
             } else {
-                await axios.post('http://localhost:3001/api/termiCondicion/insert', terminoData);
+                await axios.post('https://backendodontologia.onrender.com/api/termiCondicion/insert', terminoData);
                 setMensaje('Término insertado con éxito');
             }
             fetchTerminos();
@@ -120,7 +120,7 @@ const TerminosCondiciones = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:3001/api/termiCondicion/delete/${id}`);
+            await axios.delete(`https://backendodontologia.onrender.com/api/termiCondicion/delete/${id}`);
             setMensaje('Término eliminado con éxito');
             fetchTerminos();
         } catch (error) {

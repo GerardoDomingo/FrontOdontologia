@@ -38,7 +38,7 @@ const PerfilEmpresa = () => {
     useEffect(() => {
         const fetchPerfilEmpresa = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/api/perfilEmpresa/get');
+                const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/get');
                 const { id_empresa, nombre_empresa, direccion, telefono, correo_electronico, descripcion, logo } = response.data;
 
                 if (id_empresa) {
@@ -131,7 +131,7 @@ const PerfilEmpresa = () => {
         formDataToSend.append('logo', formData.logo);
 
         try {
-            const response = await axios.post('http://localhost:3001/api/perfilEmpresa/insert', formDataToSend, {
+            const response = await axios.post('https://backendodontologia.onrender.com/api/perfilEmpresa/insert', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -167,7 +167,7 @@ const PerfilEmpresa = () => {
         formDataToSend.append('logo', formData.logo);
 
         try {
-            const response = await axios.put('http://localhost:3001/api/perfilEmpresa/update', formDataToSend, {
+            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/update', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
