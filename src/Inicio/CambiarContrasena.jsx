@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Card, CardContent, IconButton } from '@mui/material';
-import { Lock, ArrowBack,Visibility, VisibilityOff } from '@mui/icons-material';
+import { Box, TextField, Button, Typography, Card, CardContent, IconButton, CircularProgress } from '@mui/material';
+import { Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import zxcvbn from 'zxcvbn';
 import CryptoJS from 'crypto-js';
 import { FaCheckCircle } from 'react-icons/fa';
+import Notificaciones from '../Compartidos/Notificaciones'; // Importar componente de notificaciones
 
 const CambiarContraseña = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [passwordError, setPasswordError] = useState('');
@@ -19,8 +19,11 @@ const CambiarContraseña = () => {
     const [isPasswordFiltered, setIsPasswordFiltered] = useState(false);
     const [passwordRulesErrors, setPasswordRulesErrors] = useState([]);
     const [searchParams] = useSearchParams();
-    const [showNewPassword, setShowNewPassword] = useState(false);  // Estado para visibilidad de "Nueva Contraseña"
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);  // Estado para visibilidad de "Confirmar Contraseña"
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [openNotification, setOpenNotification] = useState(false); // Estado para controlar notificación
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [notificationType, setNotificationType] = useState(''); // Tipo de notificación (success o error)
     const navigate = useNavigate();
 
     const token = searchParams.get('token');
@@ -39,7 +42,6 @@ const CambiarContraseña = () => {
             setConfirmPassword(value);
         }
     };
-
 
     const toggleShowNewPassword = () => setShowNewPassword(!showNewPassword);
     const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
@@ -91,7 +93,6 @@ const CambiarContraseña = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');
-        setSuccessMessage('');
 
         if (!token) {
             setErrorMessage('El token es inválido o ha expirado.');
@@ -108,29 +109,43 @@ const CambiarContraseña = () => {
             return;
         }
 
-        // Solo cambiar la contraseña si es fuerte o muy fuerte
         if (passwordStrength < 3) {
             setErrorMessage('La contraseña debe ser fuerte o muy fuerte para ser cambiada.');
             return;
         }
 
         try {
+            setIsLoading(true);
             const response = await axios.post('https://backendodontologia.onrender.com/api/resetPassword', { token, newPassword }, { timeout: 5000 });
             if (response.status === 200) {
-                setSuccessMessage('Contraseña actualizada.');
+                // Mostrar notificación de éxito
+                setNotificationMessage('Contraseña actualizada correctamente.');
+                setNotificationType('success');
+                setOpenNotification(true);
+
+                // Redirigir después de 2 segundos
                 setTimeout(() => {
                     navigate('/login');
                 }, 2000);
             }
         } catch (error) {
             if (error.response && error.response.status === 400) {
-                setErrorMessage('El token ha expirado o es inválido.');
+                setNotificationMessage('El token ha expirado o es inválido.');
             } else if (error.code === 'ECONNABORTED') {
-                setErrorMessage('La solicitud ha expirado. Inténtalo de nuevo.');
+                setNotificationMessage('La solicitud ha expirado. Inténtalo de nuevo.');
             } else {
-                setErrorMessage('Error al cambiar la contraseña. Inténtalo de nuevo.');
+                setNotificationMessage('Error al cambiar la contraseña. Inténtalo de nuevo.');
             }
+            setNotificationType('error');
+            setOpenNotification(true);
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    // Cerrar notificación
+    const handleCloseNotification = () => {
+        setOpenNotification(false);
     };
 
     return (
@@ -179,7 +194,8 @@ const CambiarContraseña = () => {
                                         <IconButton sx={{ mr: 1 }}>
                                             <Lock />
                                         </IconButton>
-                                    ),  endAdornment: (
+                                    ),
+                                    endAdornment: (
                                         <IconButton onClick={toggleShowNewPassword}>
                                             {showNewPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
@@ -187,6 +203,7 @@ const CambiarContraseña = () => {
                                 }}
                             />
                         </Box>
+
                         {passwordRulesErrors.length > 0 && (
                             <Typography variant="body2" sx={{ color: 'red', fontSize: '0.8rem', mb: 2 }}>
                                 Errores: {passwordRulesErrors.join(', ')}
@@ -206,7 +223,8 @@ const CambiarContraseña = () => {
                                         <IconButton sx={{ mr: 1 }}>
                                             <Lock />
                                         </IconButton>
-                                    ),  endAdornment: (
+                                    ),
+                                    endAdornment: (
                                         <IconButton onClick={toggleShowConfirmPassword}>
                                             {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
@@ -247,7 +265,7 @@ const CambiarContraseña = () => {
                                                     ? 'yellow'
                                                     : 'green',
                                         borderRadius: '5px',
-                                        transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out', // Agregamos transición también al color
+                                        transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out', // Transición también al color
                                     }}
                                 />
                             </Box>
@@ -272,14 +290,20 @@ const CambiarContraseña = () => {
                             sx={{ mt: 2, width: '100%' }}
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Cambiando...' : 'Cambiar Contraseña'}
+                            {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Cambiar Contraseña'}
                         </Button>
 
                         {errorMessage && <Typography variant="body2" sx={{ color: 'red', mt: 2 }}>{errorMessage}</Typography>}
-                        {successMessage && <Typography variant="body2" sx={{ color: 'green', mt: 2 }}>{successMessage}</Typography>}
                     </form>
                 </CardContent>
             </Card>
+
+            <Notificaciones
+                open={openNotification}
+                message={notificationMessage}
+                type={notificationType}
+                handleClose={handleCloseNotification}
+            />
         </Box>
     );
 };
