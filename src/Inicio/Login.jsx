@@ -17,7 +17,7 @@ const Login = () => {
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
-  // Obtener el token CSRF al montar el componente
+  // Obtener el token CSRF al montar el componenteee
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
