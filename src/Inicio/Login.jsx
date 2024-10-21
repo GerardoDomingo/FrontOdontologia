@@ -76,10 +76,10 @@ const Login = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'CSRF-Token': csrfToken,  // Asegúrate de enviar el token CSRF aquí
+          'CSRF-Token': csrfToken,  // Enviar el token CSRF en el encabezado
         },
         body: JSON.stringify({ ...formData, captchaValue }),
-        credentials: 'include', // Asegúrate de que las cookies de sesión se envíen
+        credentials: 'include', // Incluir cookies en la solicitud
       });
   
       const data = await response.json();
@@ -100,8 +100,7 @@ const Login = () => {
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     }
-};
-
+  };
   return (
     <Box
       sx={{
