@@ -13,7 +13,7 @@ const CambiarContraseña = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [passwordStrength, setPasswordStrength] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // El estado inicia en "false"
     const [passwordError, setPasswordError] = useState('');
     const [isPasswordSafe, setIsPasswordSafe] = useState(true);
     const [isPasswordFiltered, setIsPasswordFiltered] = useState(false);
@@ -28,6 +28,7 @@ const CambiarContraseña = () => {
 
     const token = searchParams.get('token');
 
+    // Manejar el cambio de los campos de contraseña
     const handleChange = async (e) => {
         const { name, value } = e.target;
 
@@ -86,13 +87,14 @@ const CambiarContraseña = () => {
             console.error('Error al verificar la contraseña:', error);
             setPasswordError('Error al verificar la contraseña.');
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // Asegúrate de desactivar el loading después de la verificación
         }
     };
 
+    // Manejo del submit
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage('');
+        setErrorMessage(''); // Limpiar mensaje de error antes del submit
 
         if (!token) {
             setErrorMessage('El token es inválido o ha expirado.');
@@ -115,13 +117,13 @@ const CambiarContraseña = () => {
         }
 
         try {
-            setIsLoading(true);
+            setIsLoading(true); // Activar el loading cuando se presiona el botón
             const response = await axios.post('https://backendodontologia.onrender.com/api/resetPassword', { token, newPassword }, { timeout: 5000 });
             if (response.status === 200) {
                 // Mostrar notificación de éxito
                 setNotificationMessage('Contraseña actualizada correctamente.');
                 setNotificationType('success');
-                setOpenNotification(true);
+                setOpenNotification(true); // Mostrar la notificación
 
                 // Redirigir después de 2 segundos
                 setTimeout(() => {
@@ -137,9 +139,9 @@ const CambiarContraseña = () => {
                 setNotificationMessage('Error al cambiar la contraseña. Inténtalo de nuevo.');
             }
             setNotificationType('error');
-            setOpenNotification(true);
+            setOpenNotification(true); // Mostrar notificación de error
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // Desactivar el loading después de recibir la respuesta
         }
     };
 
@@ -265,7 +267,7 @@ const CambiarContraseña = () => {
                                                     ? 'yellow'
                                                     : 'green',
                                         borderRadius: '5px',
-                                        transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out', // Transición también al color
+                                        transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out',
                                     }}
                                 />
                             </Box>
@@ -288,7 +290,7 @@ const CambiarContraseña = () => {
                             variant="contained"
                             color="primary"
                             sx={{ mt: 2, width: '100%' }}
-                            disabled={isLoading}
+                            disabled={isLoading} // El botón sólo debe estar deshabilitado si isLoading es true
                         >
                             {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Cambiar Contraseña'}
                         </Button>
