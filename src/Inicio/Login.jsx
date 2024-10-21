@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Card, CardContent, IconButton, InputAdornment } from '@mui/material';
+import { Box, TextField, Button, Typography, Card, CardContent, IconButton, InputAdornment, CircularProgress } from '@mui/material';
 import { FaTooth } from 'react-icons/fa';
 import { Email, Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -13,6 +13,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para controlar el loader
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
@@ -27,7 +28,7 @@ const Login = () => {
     return () => clearTimeout(errorTimeout);
   }, [errorMessage]);
 
-  // Manejar el cambio de los campos del formulariooo
+  // Manejar el cambio de los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -51,12 +52,14 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-  
+
+    setIsLoading(true); // Activar el estado de carga
+
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
@@ -65,9 +68,9 @@ const Login = () => {
         },
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         // Verificar el tipo de usuario y redirigir
         if (data.user.tipo === 'administrador') {
@@ -85,9 +88,10 @@ const Login = () => {
       }
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
+    } finally {
+      setIsLoading(false); // Desactivar el estado de carga
     }
   };
-  
 
   return (
     <Box
@@ -202,9 +206,9 @@ const Login = () => {
                 py: 1.5,
                 fontSize: '16px',
               }}
-              disabled={!captchaValue}  // Deshabilitar el botón si no se ha resuelto el captcha
+              disabled={!captchaValue || isLoading}  // Deshabilitar el botón si no se ha resuelto el captcha o si está cargando
             >
-              Iniciar Sesión
+              {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}  {/* Mostrar el loader o texto */}
             </Button>
 
             <Box sx={{ mt: 3, textAlign: 'center' }}>
