@@ -6,7 +6,6 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { useNavigate, Link } from 'react-router-dom';
 import Notificaciones from '../Compartidos/Notificaciones';
 
-//TROZON
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState('');
@@ -14,7 +13,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
-  const [csrfToken, setCsrfToken] = useState('');  // Estado para almacenar el token CSRF
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
@@ -29,25 +27,7 @@ const Login = () => {
     return () => clearTimeout(errorTimeout);
   }, [errorMessage]);
 
-  // Obtener el token CSRF cuando se carga el componente
-  useEffect(() => {
-    const fetchCsrfToken = async () => {
-      try {
-        const response = await fetch('https://backendodontologia.onrender.com/api/csrf-token', {
-          method: 'GET',
-          credentials: 'include',  // Esto es importante para que las cookies sean enviadas
-        });
-        const data = await response.json();
-        setCsrfToken(data.csrfToken);  // Guardar el token CSRF en el estado
-      } catch (error) {
-        console.error('Error al obtener el token CSRF:', error);
-      }
-    };
-
-    fetchCsrfToken();
-  }, []);  // Solo se ejecuta al montar el componente
-
-  // Manejar el cambio de los campos del formulario
+  // Manejar el cambio de los campos del formulariooo
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -71,25 +51,23 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-
+  
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'CSRF-Token': csrfToken,  // Incluir el token CSRF en los headers
         },
         body: JSON.stringify({ ...formData, captchaValue }),
-        credentials: 'include',  // Asegurarse de que las cookies se envíen
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         // Verificar el tipo de usuario y redirigir
         if (data.user.tipo === 'administrador') {
@@ -109,7 +87,7 @@ const Login = () => {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     }
   };
-
+  
 
   return (
     <Box
@@ -126,7 +104,7 @@ const Login = () => {
       <IconButton
         sx={{ position: 'absolute', top: 16, left: 16, color: '#00bcd4' }}
         component={Link}
-        to="/"
+        to="/" 
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <ArrowBack />
@@ -135,7 +113,7 @@ const Login = () => {
           </Typography>
         </Box>
       </IconButton>
-
+      
       <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3, position: 'relative' }}>
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
