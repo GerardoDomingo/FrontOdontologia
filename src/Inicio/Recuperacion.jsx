@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Card, CardContent, IconButton } from '@mui/material';
+import { Box, TextField, Button, Typography, Card, CardContent, IconButton, CircularProgress } from '@mui/material';
 import { Email, ArrowBack, Lock } from '@mui/icons-material';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -9,6 +9,7 @@ const Recuperacion = () => {
   const [email, setEmail] = useState('');
   const [token, setToken] = useState(''); // Para almacenar el código ingresado
   const [emailSent, setEmailSent] = useState(false); // Estado para saber si el email fue enviado
+  const [isLoading, setIsLoading] = useState(false); // Estado para controlar la carga
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
   const navigate = useNavigate();
 
@@ -27,6 +28,9 @@ const Recuperacion = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Evitar que se envíe múltiples veces
+    if (isLoading) return;
+
     setNotification({ ...notification, open: false }); // Ocultar notificaciones previas
 
     if (!email) {
@@ -39,6 +43,7 @@ const Recuperacion = () => {
     }
 
     try {
+      setIsLoading(true); // Iniciar la carga
       const response = await axios.post('https://backendodontologia.onrender.com/api/recuperacion', { email });
 
       if (response.status === 200) {
@@ -57,11 +62,16 @@ const Recuperacion = () => {
           : 'Error de conexión. Inténtalo de nuevo más tarde.',
         type: 'error',
       });
+    } finally {
+      setIsLoading(false); // Detener la carga
     }
   };
 
   const handleVerifyToken = async (e) => {
     e.preventDefault();
+
+    // Evitar que se envíe múltiples veces
+    if (isLoading) return;
 
     if (!token) {
       setNotification({
@@ -73,6 +83,7 @@ const Recuperacion = () => {
     }
 
     try {
+      setIsLoading(true); // Iniciar la carga
       // Enviar token y email al backend
       const response = await axios.post('https://backendodontologia.onrender.com/api/verifyTokene', { token, email });
 
@@ -90,6 +101,8 @@ const Recuperacion = () => {
         message: 'Código inválido o expirado. Inténtalo de nuevo.',
         type: 'error',
       });
+    } finally {
+      setIsLoading(false); // Detener la carga
     }
   };
 
@@ -180,8 +193,9 @@ const Recuperacion = () => {
                 py: 1.5,
                 fontSize: '16px',
               }}
+              disabled={isLoading} // Deshabilitar el botón mientras está cargando
             >
-              {emailSent ? 'Verificar Código' : 'Enviar Enlace de Recuperación'}
+              {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : emailSent ? 'Verificar Código' : 'Enviar Enlace de Recuperación'}
             </Button>
           </form>
         </CardContent>
