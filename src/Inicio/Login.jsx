@@ -23,17 +23,17 @@ const Login = () => {
       try {
         const response = await fetch('https://backendodontologia.onrender.com/api/csrf-token', {
           method: 'GET',
-          credentials: 'include', // Incluye las cookies en la solicitud
+          credentials: 'include',  // Importante para incluir las cookies de sesión
         });
         const data = await response.json();
-        setCsrfToken(data.csrfToken); // Almacenar el token CSRF
+        setCsrfToken(data.csrfToken);  // Guarda el token en el estado
       } catch (error) {
         console.error('Error al obtener el token CSRF:', error);
       }
     };
 
     fetchCsrfToken();
-  }, []);
+}, []);
 
   // Eliminar mensaje de error después de 3 segundos
   useEffect(() => {
@@ -65,25 +65,25 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-
+  
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'CSRF-Token': csrfToken, // Añadir el token CSRF en el encabezado
+          'CSRF-Token': csrfToken,  // Asegúrate de enviar el token CSRF aquí
         },
         body: JSON.stringify({ ...formData, captchaValue }),
-        credentials: 'include', // Incluir cookies de sesión si son necesarias
+        credentials: 'include', // Asegúrate de que las cookies de sesión se envíen
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
@@ -100,7 +100,8 @@ const Login = () => {
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     }
-  };
+};
+
 
   return (
     <Box
