@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent, Grid, IconButton } from '@mui/material';
+import { FaUser, FaCalendarAlt, FaPhone, FaEnvelope, FaInfoCircle, FaTimes } from 'react-icons/fa'; // Íconos
+import { format } from 'date-fns';
 
 const LoginAttemptsReport = () => {
   const [loginAttempts, setLoginAttempts] = useState([]);
@@ -57,10 +59,10 @@ const LoginAttemptsReport = () => {
   return (
     <Box sx={{ padding: 3 }}>
       {error && <Typography color="error">{error}</Typography>}
-      <Typography variant="h5" sx={{ marginBottom: 2 }}>Reporte de Intentos de Login</Typography>
-      <TableContainer component={Paper}>
+      <Typography variant="h5" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#1565c0' }}>Reporte de Intentos de Login</Typography>
+      <TableContainer component={Paper} sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>IP Address</TableCell>
@@ -76,13 +78,13 @@ const LoginAttemptsReport = () => {
                 <TableCell>{attempt.id}</TableCell>
                 <TableCell>{attempt.ip_address}</TableCell>
                 <TableCell>
-                  <Button variant="contained" color="primary" onClick={() => handleMoreInfo(attempt.paciente_id)}>
+                  <Button variant="contained" color="primary" startIcon={<FaInfoCircle />} onClick={() => handleMoreInfo(attempt.paciente_id)}>
                     Más información
                   </Button>
                 </TableCell>
-                <TableCell>{attempt.fecha_hora}</TableCell>
+                <TableCell>{format(new Date(attempt.fecha_hora), 'dd/MM/yyyy HH:mm:ss')}</TableCell>
                 <TableCell>{attempt.intentos_fallidos}</TableCell>
-                <TableCell>{attempt.fecha_bloqueo}</TableCell>
+                <TableCell>{attempt.fecha_bloqueo ? format(new Date(attempt.fecha_bloqueo), 'dd/MM/yyyy HH:mm:ss') : 'N/A'}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -90,19 +92,36 @@ const LoginAttemptsReport = () => {
       </TableContainer>
 
       {/* Modal para mostrar la información del paciente */}
-      <Dialog open={open} onClose={handleClose} maxWidth="md">
-        <DialogTitle>Información del Paciente</DialogTitle>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Información del Paciente
+          <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 16, top: 16, color: '#555' }}>
+            <FaTimes />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           {selectedPaciente ? (
-            <Box>
-              <Typography><strong>Nombre:</strong> {selectedPaciente.nombre} {selectedPaciente.aPaterno} {selectedPaciente.aMaterno}</Typography>
-              <Typography><strong>Edad:</strong> {selectedPaciente.edad}</Typography>
-              <Typography><strong>Género:</strong> {selectedPaciente.genero}</Typography>
-              <Typography><strong>Email:</strong> {selectedPaciente.email}</Typography>
-              <Typography><strong>Teléfono:</strong> {selectedPaciente.telefono}</Typography>
-              <Typography><strong>Alergias:</strong> {selectedPaciente.alergias}</Typography>
-              <Typography><strong>Estado:</strong> {selectedPaciente.estado}</Typography>
-              {/* Otros detalles que quieras mostrar */}
+            <Box sx={{ p: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="h6" sx={{ mb: 1 }}><FaUser /> {selectedPaciente.nombre} {selectedPaciente.aPaterno} {selectedPaciente.aMaterno}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ mb: 1 }}><FaCalendarAlt /> <strong>Edad:</strong> {selectedPaciente.edad}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ mb: 1 }}><FaEnvelope /> <strong>Email:</strong> {selectedPaciente.email}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ mb: 1 }}><FaPhone /> <strong>Teléfono:</strong> {selectedPaciente.telefono}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ mb: 1 }}><strong>Alergias:</strong> {selectedPaciente.alergias}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1" sx={{ mb: 1 }}><strong>Estado:</strong> {selectedPaciente.estado}</Typography>
+                </Grid>
+              </Grid>
             </Box>
           ) : (
             <Typography>Cargando información...</Typography>
