@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment } from '@mui/material'; // Aquí ya no importamos Grid
-import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye } from 'react-icons/fa'; // Agrega FaInfoCircle aquí
-import { CheckCircle, AddCircle } from '@mui/icons-material';
-import zxcvbn from 'zxcvbn';
+import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye, FaPlusCircle } from 'react-icons/fa'; // Importamos 
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { useNavigate } from 'react-router-dom';
@@ -693,29 +691,29 @@ const Register = () => {
     }}
     label="Alergias"
     name="alergias"
-    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas como texto
+    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
   >
     <MenuItem value="Ninguna">
       Ninguna
-      <ListItemIcon sx={{ justifyContent: 'flex-end' }}>
+      <span style={{ float: 'right' }}>
         {formData.alergias.includes('Ninguna') ? (
-          <CheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+          <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
         ) : (
-          <AddCircle /> // Símbolo de "+" si no está seleccionada
+          <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
         )}
-      </ListItemIcon>
+      </span>
     </MenuItem>
 
     {Object.keys(alergiasInfo).map((alergia) => (
       <MenuItem key={alergia} value={alergia}>
         {alergia}
-        <ListItemIcon sx={{ justifyContent: 'flex-end' }}>
+        <span style={{ float: 'right' }}>
           {formData.alergias.includes(alergia) ? (
-            <CheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+            <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
           ) : (
-            <AddCircle /> // Símbolo de "+" si no está seleccionada
+            <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
           )}
-        </ListItemIcon>
+        </span>
       </MenuItem>
     ))}
 
@@ -741,8 +739,6 @@ const Register = () => {
   <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
   {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
 </FormControl>
-
-
                 {formData.alergias && alergiasInfo[formData.alergias] && (
                   <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
                     <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias]}
