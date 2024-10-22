@@ -19,7 +19,7 @@ const Register = () => {
     otroLugar: '',
     telefono: '',
     email: '',
-    alergias: '',
+    alergias: [],
     otraAlergia: '',
     password: '',
     confirmPassword: '',
@@ -679,9 +679,9 @@ const Register = () => {
                   }}
                 />
 <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-  <InputLabel>Alergias (Selecciona más de una)</InputLabel>
+  <InputLabel>Alergias</InputLabel>
   <Select
-    multiple
+    multiple // Permite seleccionar más de una opción
     value={formData.alergias}
     onChange={(e) => {
       const { value } = e.target;
@@ -692,12 +692,12 @@ const Register = () => {
     }}
     label="Alergias"
     name="alergias"
-    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas como texto
+    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
   >
     <MenuItem value="Ninguna">Ninguna</MenuItem>
     {Object.keys(alergiasInfo).map((alergia) => (
       <MenuItem key={alergia} value={alergia}>
-        {alergia}
+        {alergia} {" +"} {/* Agregamos el símbolo "+" */}
       </MenuItem>
     ))}
     <MenuItem value="Otro">Otro</MenuItem>
