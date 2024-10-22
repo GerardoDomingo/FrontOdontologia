@@ -6,14 +6,27 @@ const LoginAttemptsReport = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Llamar al endpoint para obtener los datos de login_attempts
-    fetch('/api/reportes/login-attempts')
-      .then((response) => response.json())
-      .then((data) => setLoginAttempts(data))
-      .catch((err) => {
-        setError('Error al cargar los datos');
-        console.error(err);
-      });
+    const fetchLoginAttempts = async () => {
+      try {
+        const response = await fetch('https://backendodontologia.onrender.com/api/reportes/login-attempts', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener los intentos de login');
+        }
+
+        const data = await response.json();
+        setLoginAttempts(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchLoginAttempts();
   }, []);
 
   return (

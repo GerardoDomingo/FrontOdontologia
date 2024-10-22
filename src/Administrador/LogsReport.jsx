@@ -6,20 +6,33 @@ const LogsReport = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Llamar al endpoint para obtener los datos de logs
-    fetch('/api/reportes/logs')
-      .then((response) => response.json())
-      .then((data) => setLogs(data))
-      .catch((err) => {
-        setError('Error al cargar los datos');
-        console.error(err);
-      });
+    const fetchLogs = async () => {
+      try {
+        const response = await fetch('https://backendodontologia.onrender.com/api/reportes/logs', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener los logs');
+        }
+
+        const data = await response.json();
+        setLogs(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchLogs();
   }, []);
 
   return (
     <Box sx={{ padding: 3 }}>
       {error && <Typography color="error">{error}</Typography>}
-      <Typography variant="h5" sx={{ marginBottom: 2 }}>Reporte de Logs</Typography>
+      <Typography variant="h5" sx={{ marginBottom: 2 }}>Reporte de Logs del Sistema</Typography>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
