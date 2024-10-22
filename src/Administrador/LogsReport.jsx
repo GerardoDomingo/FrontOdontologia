@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, CircularProgress } from '@mui/material';
+import { format } from 'date-fns';
 
 const LogsReport = () => {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true); // Estado de carga
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -25,6 +27,8 @@ const LogsReport = () => {
         setLogs(sortedLogs);
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoading(false); // Desactivar el estado de carga
       }
     };
 
@@ -33,30 +37,39 @@ const LogsReport = () => {
 
   return (
     <Box sx={{ padding: 3 }}>
-      {error && <Typography color="error">{error}</Typography>}
-      <Typography variant="h5" sx={{ marginBottom: 2 }}>Reporte de Logs del Sistema</Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Nivel</TableCell>
-              <TableCell>Mensaje</TableCell>
-              <TableCell>Timestamp</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {logs.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell>{log.id}</TableCell>
-                <TableCell>{log.level}</TableCell>
-                <TableCell>{log.message}</TableCell>
-                <TableCell>{log.timestamp}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Typography color="error">{error}</Typography>
+      ) : (
+        <>
+          <Typography variant="h5" sx={{ marginBottom: 2 }}>Reporte de Logs del Sistema</Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Nivel</TableCell>
+                  <TableCell>Mensaje</TableCell>
+                  <TableCell>Timestamp</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {logs.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell>{log.id}</TableCell>
+                    <TableCell>{log.level}</TableCell>
+                    <TableCell>{log.message}</TableCell>
+                    <TableCell>{format(new Date(log.timestamp), 'dd/MM/yyyy HH:mm:ss')}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
     </Box>
   );
 };
