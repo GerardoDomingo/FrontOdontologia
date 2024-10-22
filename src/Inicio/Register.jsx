@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment } from '@mui/material'; // Aquí ya no importamos Grid
 import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye } from 'react-icons/fa'; // Agrega FaInfoCircle aquí
+import { CheckCircle, AddCircle } from '@mui/icons-material';
 import zxcvbn from 'zxcvbn';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
@@ -681,7 +682,7 @@ const Register = () => {
 <FormControl fullWidth margin="normal" error={!!errors.alergias}>
   <InputLabel>Alergias</InputLabel>
   <Select
-    multiple // Permite seleccionar más de una opción
+    multiple
     value={formData.alergias}
     onChange={(e) => {
       const { value } = e.target;
@@ -692,16 +693,51 @@ const Register = () => {
     }}
     label="Alergias"
     name="alergias"
-    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
+    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas como texto
   >
-    <MenuItem value="Ninguna">Ninguna</MenuItem>
+    <MenuItem value="Ninguna">
+      Ninguna
+      <ListItemIcon sx={{ justifyContent: 'flex-end' }}>
+        {formData.alergias.includes('Ninguna') ? (
+          <CheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+        ) : (
+          <AddCircle /> // Símbolo de "+" si no está seleccionada
+        )}
+      </ListItemIcon>
+    </MenuItem>
+
     {Object.keys(alergiasInfo).map((alergia) => (
       <MenuItem key={alergia} value={alergia}>
-        {alergia} {" +"} {/* Agregamos el símbolo "+" */}
+        {alergia}
+        <ListItemIcon sx={{ justifyContent: 'flex-end' }}>
+          {formData.alergias.includes(alergia) ? (
+            <CheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+          ) : (
+            <AddCircle /> // Símbolo de "+" si no está seleccionada
+          )}
+        </ListItemIcon>
       </MenuItem>
     ))}
-    <MenuItem value="Otro">Otro</MenuItem>
+
+    <MenuItem value="Otro">
+      Otro
+      {/* No mostramos el ícono de "+" para la opción "Otro" */}
+    </MenuItem>
   </Select>
+
+  {formData.alergias.includes('Otro') && (
+    <TextField
+      fullWidth
+      label="Especificar Alergia"
+      name="otraAlergia"
+      value={formData.otraAlergia}
+      onChange={handleChange}
+      margin="normal"
+      error={!!errors.otraAlergia}
+      helperText={errors.otraAlergia}
+    />
+  )}
+
   <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
   {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
 </FormControl>
