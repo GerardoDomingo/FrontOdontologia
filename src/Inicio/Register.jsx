@@ -238,21 +238,19 @@ const Register = () => {
       }
     }
 
-    // Validación de alergias adicionales cuando se selecciona "Otro"
-    if (name === 'alergias' && value.includes('Otro')) { // Verificar si "Otro" está en el array de alergias
+    if (name === 'alergias' && value.includes('Otro')) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         otraAlergia: formData.otraAlergia ? '' : 'Especifica la alergia',
       }));
     }
 
-    if (name === 'otraAlergia' && formData.alergias.includes('Otro')) { // Cambia aquí a includes para verificar el array
+    if (name === 'otraAlergia') {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        otraAlergia: value ? '' : 'Especifica la alergia',
+        otraAlergia: value.trim() ? '' : 'Especifica la alergia',
       }));
     }
-
 
   };
 
@@ -447,7 +445,9 @@ const Register = () => {
     if (activeStep === 1) {
       if (!formData.telefono) stepErrors.telefono = 'El teléfono es requerido';
       if (!formData.email) stepErrors.email = 'El correo electrónico es requerido';
-      if (formData.alergias === 'Otro' && !formData.otraAlergia) stepErrors.otraAlergia = 'Especifica la alergia';
+      if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
+        stepErrors.otraAlergia = 'Especifica la alergia';
+      }
     }
 
     if (activeStep === 2) {
@@ -758,6 +758,9 @@ const Register = () => {
                     </Typography>
                   )}
 
+                  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
+                  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+
                   {formData.alergias.includes('Otro') && (
                     <TextField
                       fullWidth
@@ -772,12 +775,7 @@ const Register = () => {
                     />
                   )}
 
-
-                  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
-                  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
                 </FormControl>
-
-
               </>
             )}
           </Box>
