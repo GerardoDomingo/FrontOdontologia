@@ -705,8 +705,9 @@ const Register = () => {
                       </span>
                     </MenuItem>
 
+                    {/* Deshabilitar otras opciones si "Ninguna" está seleccionada */}
                     {Object.keys(alergiasInfo).map((alergia) => (
-                      <MenuItem key={alergia} value={alergia}>
+                      <MenuItem key={alergia} value={alergia} disabled={formData.alergias.includes('Ninguna')}>
                         {alergia}
                         <span style={{ float: 'right' }}>
                           {formData.alergias.includes(alergia) ? (
@@ -718,9 +719,8 @@ const Register = () => {
                       </MenuItem>
                     ))}
 
-                    <MenuItem value="Otro">
+                    <MenuItem value="Otro" disabled={formData.alergias.includes('Ninguna')}>
                       Otro
-                      {/* No mostramos el ícono de "+" para la opción "Otro" */}
                     </MenuItem>
                   </Select>
 
@@ -740,6 +740,7 @@ const Register = () => {
                   <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
                   {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
                 </FormControl>
+
                 {formData.alergias && alergiasInfo[formData.alergias] && (
                   <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
                     <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias]}
@@ -758,6 +759,7 @@ const Register = () => {
                     helperText={errors.otraAlergia}
                   />
                 )}
+
               </>
             )}
           </Box>
