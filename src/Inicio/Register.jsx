@@ -238,19 +238,21 @@ const Register = () => {
       }
     }
 
-    // Validación de alergias adicionales cuando se selecciona "Otro"
-    if (name === 'alergias' && value === 'Otro') {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        otraAlergia: formData.otraAlergia ? '' : 'Especifica la alergia',
-      }));
-    }
-    if (name === 'otraAlergia' && formData.alergias === 'Otro') {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        otraAlergia: value ? '' : 'Especifica la alergia',
-      }));
-    }
+  // Validación de alergias adicionales cuando se selecciona "Otro"
+  if (name === 'alergias' && value.includes('Otro')) { // Verificar si "Otro" está en el array de alergias
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      otraAlergia: formData.otraAlergia ? '' : 'Especifica la alergia',
+    }));
+  }
+  
+  if (name === 'otraAlergia' && formData.alergias.includes('Otro')) { // Cambia aquí a includes para verificar el array
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      otraAlergia: value ? '' : 'Especifica la alergia',
+    }));
+  }
+
   };
 
   const handleNext = () => {
@@ -737,17 +739,18 @@ const Register = () => {
   </Select>
 
   {formData.alergias.includes('Otro') && (
-    <TextField
-      fullWidth
-      label="Especificar Alergia"
-      name="otraAlergia"
-      value={formData.otraAlergia}
-      onChange={handleChange}
-      margin="normal"
-      error={!!errors.otraAlergia}
-      helperText={errors.otraAlergia}
-    />
-  )}
+  <TextField
+    fullWidth
+    label="Especificar Alergia"
+    name="otraAlergia"
+    value={formData.otraAlergia}
+    onChange={handleChange}
+    margin="normal"
+    error={!!errors.otraAlergia} // Mostrar el error si está definido
+    helperText={errors.otraAlergia} // Mostrar mensaje de error si existe
+  />
+)}
+
 
   <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
   {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
