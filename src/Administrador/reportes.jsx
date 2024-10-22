@@ -110,27 +110,6 @@ const Reportes = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Botón flotante para ir al perfil de la empresa */}
-      <IconButton
-        component={Link}
-        to="/Administrador/PerfilEmpresa"
-        sx={{
-          position: 'fixed',
-          bottom: 32,
-          right: 32,
-          backgroundColor: '#1976d2',
-          color: '#fff',
-          '&:hover': {
-            backgroundColor: '#1565c0',
-          },
-          boxShadow: '0px 6px 16px rgba(0, 0, 0, 0.2)',
-          p: 2,
-          borderRadius: '50%',
-        }}
-      >
-        <FaBuilding size={24} />
-      </IconButton>
     </Box>
   );
 };

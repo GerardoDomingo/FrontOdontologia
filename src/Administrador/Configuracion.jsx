@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Tab, Tabs, Card, CardContent, IconButton } from '@mui/material';
+import { Box, Typography, Tab, Tabs, Card, CardContent, IconButton, CircularProgress } from '@mui/material';
 import { FaUserShield, FaFileAlt, FaExclamationTriangle, FaFileContract, FaBuilding } from 'react-icons/fa'; // Íconos
 import AvisoDePrivacidad from './AvisoPriva';
 import DeslindeLegal from './DeslindeLegal';
@@ -8,9 +8,17 @@ import { Link } from 'react-router-dom';
 
 const Configuracion = () => {
   const [selectedTab, setSelectedTab] = useState(0); // Estado para la pestaña seleccionada
+  const [loading, setLoading] = useState(false); // Estado para controlar el indicador de carga
 
+  // Manejar el cambio de pestaña y mostrar "Cargando" por 2 segundos
   const handleTabChange = (event, newValue) => {
+    setLoading(true); // Activar estado de carga
     setSelectedTab(newValue);
+
+    // Simular carga de 2 segundos antes de mostrar el contenido
+    setTimeout(() => {
+      setLoading(false); // Desactivar estado de carga después de 2 segundos
+    }, 2000);
   };
 
   return (
@@ -91,9 +99,22 @@ const Configuracion = () => {
         }}
       >
         <CardContent>
-          {selectedTab === 0 && <AvisoDePrivacidad />}
-          {selectedTab === 1 && <DeslindeLegal />}
-          {selectedTab === 2 && <TerminosCondiciones />}
+          {loading ? (
+            // Mostrar el indicador de carga cuando loading es true
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+              <CircularProgress />
+              <Typography variant="body1" sx={{ ml: 2 }}>
+                Cargando...
+              </Typography>
+            </Box>
+          ) : (
+            // Mostrar el contenido del reporte cuando loading es false
+            <>
+              {selectedTab === 0 && <AvisoDePrivacidad />}
+              {selectedTab === 1 && <DeslindeLegal />}
+              {selectedTab === 2 && <TerminosCondiciones />}
+            </>
+          )}
         </CardContent>
       </Card>
 
