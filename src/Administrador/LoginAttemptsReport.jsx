@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 
 const LoginAttemptsReport = () => {
   const [loginAttempts, setLoginAttempts] = useState([]);
-  const [selectedPaciente, setSelectedPaciente] = useState(null); // Para almacenar el paciente seleccionado
+  const [selectedPaciente, setSelectedPaciente] = useState(null); // Para almacenar el paciente seleccionadooo
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false); // Estado para controlar el modal
 
