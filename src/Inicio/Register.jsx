@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment } from '@mui/material'; // Aquí ya no importamos Grid
 import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye, FaPlusCircle } from 'react-icons/fa'; // Importamos 
+import zxcvbn from 'zxcvbn';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { useNavigate } from 'react-router-dom';
@@ -265,22 +266,22 @@ const Register = () => {
   // Manejar el registro del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Verificar la validez de la contraseña antes de permitir el registro (reglas y filtrado)
     const isPasswordValid = await checkPasswordValidity(formData.password);
-  
+
     // Verificar que la fortaleza de la contraseña sea al menos "Fuerte"
     if (!isPasswordValid || passwordStrength < 3) {
       setNotificationMessage(
-        passwordStrength < 3 
-        ? 'La contraseña debe ser al menos "Fuerte" para continuar con el registro.' 
-        : 'La contraseña debe cumplir con los requisitos y no haber sido filtrada.'
+        passwordStrength < 3
+          ? 'La contraseña debe ser al menos "Fuerte" para continuar con el registro.'
+          : 'La contraseña debe cumplir con los requisitos y no haber sido filtrada.'
       );
       setNotificationType('error');
       setOpenNotification(true);
       return;  // Evitar el registro si la contraseña no es válida o no es fuerte
     }
-  
+
     // Si todo es válido, proceder con el registro
     try {
       const response = await axios.post('https://backendodontologia.onrender.com/api/register', formData, {
@@ -288,12 +289,12 @@ const Register = () => {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (response.status === 200 || response.status === 201) {
         setNotificationMessage('Usuario registrado exitosamente');
         setNotificationType('success');
         setOpenNotification(true);
-  
+
         setTimeout(() => {
           navigate('/login');  // Redirigir al login
         }, 2000);  // Retraso de 2 segundos
@@ -312,7 +313,7 @@ const Register = () => {
       setOpenNotification(true);
     }
   };
-  
+
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
@@ -677,68 +678,68 @@ const Register = () => {
                     ),
                   }}
                 />
-<FormControl fullWidth margin="normal" error={!!errors.alergias}>
-  <InputLabel>Alergias</InputLabel>
-  <Select
-    multiple
-    value={formData.alergias}
-    onChange={(e) => {
-      const { value } = e.target;
-      setFormData({
-        ...formData,
-        alergias: typeof value === 'string' ? value.split(',') : value, // Asegura que el valor sea un array
-      });
-    }}
-    label="Alergias"
-    name="alergias"
-    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
-  >
-    <MenuItem value="Ninguna">
-      Ninguna
-      <span style={{ float: 'right' }}>
-        {formData.alergias.includes('Ninguna') ? (
-          <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-        ) : (
-          <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-        )}
-      </span>
-    </MenuItem>
+                <FormControl fullWidth margin="normal" error={!!errors.alergias}>
+                  <InputLabel>Alergias</InputLabel>
+                  <Select
+                    multiple
+                    value={formData.alergias}
+                    onChange={(e) => {
+                      const { value } = e.target;
+                      setFormData({
+                        ...formData,
+                        alergias: typeof value === 'string' ? value.split(',') : value, // Asegura que el valor sea un array
+                      });
+                    }}
+                    label="Alergias"
+                    name="alergias"
+                    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
+                  >
+                    <MenuItem value="Ninguna">
+                      Ninguna
+                      <span style={{ float: 'right' }}>
+                        {formData.alergias.includes('Ninguna') ? (
+                          <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+                        ) : (
+                          <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
+                        )}
+                      </span>
+                    </MenuItem>
 
-    {Object.keys(alergiasInfo).map((alergia) => (
-      <MenuItem key={alergia} value={alergia}>
-        {alergia}
-        <span style={{ float: 'right' }}>
-          {formData.alergias.includes(alergia) ? (
-            <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-          ) : (
-            <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-          )}
-        </span>
-      </MenuItem>
-    ))}
+                    {Object.keys(alergiasInfo).map((alergia) => (
+                      <MenuItem key={alergia} value={alergia}>
+                        {alergia}
+                        <span style={{ float: 'right' }}>
+                          {formData.alergias.includes(alergia) ? (
+                            <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+                          ) : (
+                            <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
+                          )}
+                        </span>
+                      </MenuItem>
+                    ))}
 
-    <MenuItem value="Otro">
-      Otro
-      {/* No mostramos el ícono de "+" para la opción "Otro" */}
-    </MenuItem>
-  </Select>
+                    <MenuItem value="Otro">
+                      Otro
+                      {/* No mostramos el ícono de "+" para la opción "Otro" */}
+                    </MenuItem>
+                  </Select>
 
-  {formData.alergias.includes('Otro') && (
-    <TextField
-      fullWidth
-      label="Especificar Alergia"
-      name="otraAlergia"
-      value={formData.otraAlergia}
-      onChange={handleChange}
-      margin="normal"
-      error={!!errors.otraAlergia}
-      helperText={errors.otraAlergia}
-    />
-  )}
+                  {formData.alergias.includes('Otro') && (
+                    <TextField
+                      fullWidth
+                      label="Especificar Alergia"
+                      name="otraAlergia"
+                      value={formData.otraAlergia}
+                      onChange={handleChange}
+                      margin="normal"
+                      error={!!errors.otraAlergia}
+                      helperText={errors.otraAlergia}
+                    />
+                  )}
 
-  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
-  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
-</FormControl>
+                  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
+                  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+                </FormControl>
                 {formData.alergias && alergiasInfo[formData.alergias] && (
                   <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
                     <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias]}
@@ -784,7 +785,7 @@ const Register = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <Button onClick={togglePasswordVisibility}>
-                      {showPassword ?  <FaEye /> : <FaEyeSlash />}  {/* Cambia el ícono */}
+                      {showPassword ? <FaEye /> : <FaEyeSlash />}  {/* Cambia el ícono */}
                     </Button>
                   </InputAdornment>
                 ),
