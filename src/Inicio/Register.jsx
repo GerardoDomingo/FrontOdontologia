@@ -678,24 +678,33 @@ const Register = () => {
                     ),
                   }}
                 />
-                <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-                  <InputLabel>Alergias </InputLabel>
-                  <Select
-                    value={formData.alergias}
-                    onChange={handleChange}
-                    label="Alergias"
-                    name="alergias"
-                  >
-                    <MenuItem value="Ninguna">Ninguna</MenuItem>
-                    {Object.keys(alergiasInfo).map((alergia) => (
-                      <MenuItem key={alergia} value={alergia}>
-                        {alergia}
-                      </MenuItem>
-                    ))}
-                    <MenuItem value="Otro">Otro</MenuItem>
-                  </Select>
-                  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
-                </FormControl>
+<FormControl fullWidth margin="normal" error={!!errors.alergias}>
+  <InputLabel>Alergias</InputLabel>
+  <Select
+    multiple
+    value={formData.alergias}
+    onChange={(e) => {
+      const { value } = e.target;
+      setFormData({
+        ...formData,
+        alergias: typeof value === 'string' ? value.split(',') : value, // Asegura que el valor sea un array
+      });
+    }}
+    label="Alergias"
+    name="alergias"
+    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas como texto
+  >
+    <MenuItem value="Ninguna">Ninguna</MenuItem>
+    {Object.keys(alergiasInfo).map((alergia) => (
+      <MenuItem key={alergia} value={alergia}>
+        {alergia}
+      </MenuItem>
+    ))}
+    <MenuItem value="Otro">Otro</MenuItem>
+  </Select>
+  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+</FormControl>
+
 
                 {formData.alergias && alergiasInfo[formData.alergias] && (
                   <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
