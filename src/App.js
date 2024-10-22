@@ -17,7 +17,7 @@ import LayoutAdmin from './Administrador/LayoutAdmin.jsx';
 import PrincipalAdmin from './Administrador/Principal.jsx';
 import Configuracion from './Administrador/Configuracion.jsx';
 import Reportes from './Administrador/reportes.jsx';
-
+import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
 
 function App() {
   return (
@@ -38,7 +38,7 @@ function App() {
         <Route path="/Administrador/principal" element={<LayoutAdmin><PrincipalAdmin /></LayoutAdmin>} />
         <Route path="/Administrador/configuracion" element={<LayoutAdmin><Configuracion /></LayoutAdmin>} />
         <Route path="/Administrador/reportes" element={<LayoutAdmin><Reportes /></LayoutAdmin>} />
-
+        <Route path="/Administrador/PerfilEmpresa" element={<LayoutAdmin><PerfilEmpresa /></LayoutAdmin>} />
 
       </Routes>
     </Router>

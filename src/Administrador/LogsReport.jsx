@@ -20,7 +20,9 @@ const LogsReport = () => {
         }
 
         const data = await response.json();
-        setLogs(data);
+        // Ordenar los logs para mostrar los más recientes primero
+        const sortedLogs = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setLogs(sortedLogs);
       } catch (err) {
         setError(err.message);
       }
