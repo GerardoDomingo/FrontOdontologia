@@ -679,7 +679,7 @@ const Register = () => {
                   }}
                 />
 <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-  <InputLabel>Alergias</InputLabel>
+  <InputLabel>Alergias (Selecciona más de una)</InputLabel>
   <Select
     multiple
     value={formData.alergias}
@@ -702,6 +702,7 @@ const Register = () => {
     ))}
     <MenuItem value="Otro">Otro</MenuItem>
   </Select>
+  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
   {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
 </FormControl>
 
