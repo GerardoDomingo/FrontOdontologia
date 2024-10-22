@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment } from '@mui/material'; // Aquí ya no importamos Grid
+import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment, CircularProgress } from '@mui/material'; // Aquí ya no importamos Grid
 import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye, FaPlusCircle } from 'react-icons/fa'; // Importamos 
 import zxcvbn from 'zxcvbn';
 import axios from 'axios';
@@ -268,6 +268,9 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Iniciar el estado de cargando
+    setIsLoading(true);
+
     let newErrors = {};
     // Verificar la opción de "Otro" en alergias
     if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
@@ -275,8 +278,9 @@ const Register = () => {
     }
 
     setErrors(newErrors);
-    // Si hay errores, no continuar con el registro
+    // Si hay errores, detener la carga y no continuar con el registro
     if (Object.keys(newErrors).length > 0) {
+      setIsLoading(false); // Detener la carga si hay errores
       return;
     }
 
@@ -292,7 +296,8 @@ const Register = () => {
       );
       setNotificationType('error');
       setOpenNotification(true);
-      return;  // Evitar el registro si la contraseña no es válida o no es fuerte
+      setIsLoading(false); // Detener la carga si la contraseña no es válida
+      return;
     }
 
     // Si todo es válido, proceder con el registro
@@ -324,6 +329,9 @@ const Register = () => {
       }
       setNotificationType('error');
       setOpenNotification(true);
+    } finally {
+      // Finalizar el estado de cargando después del envío o el error
+      setIsLoading(false);
     }
   };
 
@@ -942,21 +950,29 @@ const Register = () => {
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
               {activeStep !== 0 && (
-                <Button onClick={handleBack} sx={{ mr: 2 }}>
+                <Button onClick={handleBack} sx={{ mr: 2 }} disabled={isLoading}>
                   Regresar
                 </Button>
               )}
               {activeStep === steps.length - 1 ? (
-                <Button variant="contained" color="primary" type="submit" sx={{ px: 4 }}>
-                  Registrar
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  sx={{ px: 4 }}
+                  disabled={isLoading} // Deshabilitar el botón mientras se carga
+                >
+                  {isLoading ? <CircularProgress size={24} /> : 'Registrar'} {/* Mostrar spinner si está cargando */}
                 </Button>
+
               ) : (
-                <Button variant="contained" color="primary" onClick={handleNext} sx={{ px: 4 }}>
-                  Siguiente
+                <Button variant="contained" color="primary" onClick={handleNext} sx={{ px: 4 }} disabled={isLoading}>
+                  {isLoading ? <CircularProgress size={24} /> : 'Siguiente'}
                 </Button>
               )}
             </Box>
           </form>
+
         </CardContent>
       </Card>
     </Container>
