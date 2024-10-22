@@ -189,22 +189,10 @@ const PerfilEmpresa = () => {
         <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f9f9f9', position: 'relative' }}>
             <Container maxWidth="md">
 
-                {/* Botón de regreso */}
+                {/* Botón "X" en la esquina superior derecha */}
                 <IconButton
                     component={Link}
                     to="/Administrador/principal"
-                    sx={{
-                        position: 'absolute',
-                        top: 24,
-                        left: 24,
-                        color: '#1976d2',
-                    }}
-                >
-                    <ArrowBackIcon fontSize="large" />
-                </IconButton>
-
-                {/* Botón "X" en la esquina superior derecha */}
-                <IconButton
                     sx={{
                         position: 'absolute',
                         top: 24,
