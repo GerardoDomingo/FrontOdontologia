@@ -679,77 +679,79 @@ const Register = () => {
       }}
     />
 
-    <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-      <InputLabel>Alergias</InputLabel>
-      <Select
-        multiple
-        value={formData.alergias}
-        onChange={(e) => {
-          const { value } = e.target;
+<FormControl fullWidth margin="normal" error={!!errors.alergias}>
+  <InputLabel>Alergias</InputLabel>
+  <Select
+    multiple
+    value={formData.alergias}
+    onChange={(e) => {
+      const { value } = e.target;
 
-          // Si seleccionas "Ninguna", deselecciona todas las demás
-          if (value.includes('Ninguna')) {
-            setFormData({
-              ...formData,
-              alergias: ['Ninguna'],
-            });
-          } else {
-            // Remover "Ninguna" si se seleccionan otras alergias
-            setFormData({
-              ...formData,
-              alergias: typeof value === 'string' ? value.split(',') : value.filter((alergia) => alergia !== 'Ninguna'),
-            });
-          }
-        }}
-        label="Alergias"
-        name="alergias"
-        renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
-      >
-        <MenuItem value="Ninguna">
-          Ninguna
-          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
-            {formData.alergias.includes('Ninguna') ? (
-              <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-            ) : (
-              <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-            )}
-          </div>
-        </MenuItem>
+      // Si seleccionas "Ninguna", deselecciona todas las demás
+      if (value.includes('Ninguna')) {
+        setFormData({
+          ...formData,
+          alergias: ['Ninguna'],
+        });
+      } else {
+        // Remover "Ninguna" si se seleccionan otras alergias
+        setFormData({
+          ...formData,
+          alergias: typeof value === 'string' ? value.split(',') : value.filter((alergia) => alergia !== 'Ninguna'),
+        });
+      }
+    }}
+    label="Alergias"
+    name="alergias"
+    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
+  >
+    <MenuItem value="Ninguna">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        Ninguna
+        {formData.alergias.includes('Ninguna') ? (
+          <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+        ) : (
+          <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
+        )}
+      </div>
+    </MenuItem>
 
-        {Object.keys(alergiasInfo).map((alergia) => (
-          <MenuItem key={alergia} value={alergia} disabled={formData.alergias.includes('Ninguna')}>
-            {alergia}
-            <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
-              {formData.alergias.includes(alergia) ? (
-                <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-              ) : (
-                <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-              )}
-            </div>
-          </MenuItem>
-        ))}
+    {Object.keys(alergiasInfo).map((alergia) => (
+      <MenuItem key={alergia} value={alergia} disabled={formData.alergias.includes('Ninguna')}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          {alergia}
+          {formData.alergias.includes(alergia) ? (
+            <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+          ) : (
+            <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
+          )}
+        </div>
+      </MenuItem>
+    ))}
 
-        <MenuItem value="Otro" disabled={formData.alergias.includes('Ninguna')}>
-          Otro
-        </MenuItem>
-      </Select>
+    <MenuItem value="Otro" disabled={formData.alergias.includes('Ninguna')}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        Otro
+      </div>
+    </MenuItem>
+  </Select>
 
-      {formData.alergias.includes('Otro') && (
-        <TextField
-          fullWidth
-          label="Especificar Alergia"
-          name="otraAlergia"
-          value={formData.otraAlergia}
-          onChange={handleChange}
-          margin="normal"
-          error={!!errors.otraAlergia}
-          helperText={errors.otraAlergia}
-        />
-      )}
+  {formData.alergias.includes('Otro') && (
+    <TextField
+      fullWidth
+      label="Especificar Alergia"
+      name="otraAlergia"
+      value={formData.otraAlergia}
+      onChange={handleChange}
+      margin="normal"
+      error={!!errors.otraAlergia}
+      helperText={errors.otraAlergia}
+    />
+  )}
 
-      <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
-      {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
-    </FormControl>
+  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
+  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+</FormControl>
 
     {/* Mostrar información sobre la alergia seleccionada si está en alergiasInfo */}
     {formData.alergias.some((alergia) => alergiasInfo[alergia]) && (
