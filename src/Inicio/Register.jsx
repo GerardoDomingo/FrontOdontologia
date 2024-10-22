@@ -658,110 +658,107 @@ const Register = () => {
             )}
 
             {/* Mostrar el resto de los campos sólo si el correo ha sido verificado */}
-            {isEmailVerified && (
-              <>
-                <TextField
-                  fullWidth
-                  label="Teléfono"
-                  name="telefono"
-                  value={formData.telefono}
-                  onChange={handleChange}
-                  margin="normal"
-                  required
-                  error={!!errors.telefono}
-                  helperText={errors.telefono}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <FaPhone />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-                  <InputLabel>Alergias</InputLabel>
-                  <Select
-                    multiple
-                    value={formData.alergias}
-                    onChange={(e) => {
-                      const { value } = e.target;
-                      setFormData({
-                        ...formData,
-                        alergias: typeof value === 'string' ? value.split(',') : value, // Asegura que el valor sea un array
-                      });
-                    }}
-                    label="Alergias"
-                    name="alergias"
-                    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
-                  >
-                    <MenuItem value="Ninguna">
-                      Ninguna
-                      <span style={{ float: 'right' }}>
-                        {formData.alergias.includes('Ninguna') ? (
-                          <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-                        ) : (
-                          <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-                        )}
-                      </span>
-                    </MenuItem>
+{isEmailVerified && (
+  <>
+    <TextField
+      fullWidth
+      label="Teléfono"
+      name="telefono"
+      value={formData.telefono}
+      onChange={handleChange}
+      margin="normal"
+      required
+      error={!!errors.telefono}
+      helperText={errors.telefono}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <FaPhone />
+          </InputAdornment>
+        ),
+      }}
+    />
 
-                    {/* Deshabilitar otras opciones si "Ninguna" está seleccionada */}
-                    {Object.keys(alergiasInfo).map((alergia) => (
-                      <MenuItem key={alergia} value={alergia} disabled={formData.alergias.includes('Ninguna')}>
-                        {alergia}
-                        <span style={{ float: 'right' }}>
-                          {formData.alergias.includes(alergia) ? (
-                            <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-                          ) : (
-                            <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-                          )}
-                        </span>
-                      </MenuItem>
-                    ))}
+    <FormControl fullWidth margin="normal" error={!!errors.alergias}>
+      <InputLabel>Alergias</InputLabel>
+      <Select
+        multiple
+        value={formData.alergias}
+        onChange={(e) => {
+          const { value } = e.target;
 
-                    <MenuItem value="Otro" disabled={formData.alergias.includes('Ninguna')}>
-                      Otro
-                    </MenuItem>
-                  </Select>
-
-                  {formData.alergias.includes('Otro') && (
-                    <TextField
-                      fullWidth
-                      label="Especificar Alergia"
-                      name="otraAlergia"
-                      value={formData.otraAlergia}
-                      onChange={handleChange}
-                      margin="normal"
-                      error={!!errors.otraAlergia}
-                      helperText={errors.otraAlergia}
-                    />
-                  )}
-
-                  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
-                  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
-                </FormControl>
-
-                {formData.alergias && alergiasInfo[formData.alergias] && (
-                  <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
-                    <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias]}
-                  </Typography>
-                )}
-
-                {formData.alergias === 'Otro' && (
-                  <TextField
-                    fullWidth
-                    label="Especificar Alergia"
-                    name="otraAlergia"
-                    value={formData.otraAlergia}
-                    onChange={handleChange}
-                    margin="normal"
-                    error={!!errors.otraAlergia}
-                    helperText={errors.otraAlergia}
-                  />
-                )}
-
-              </>
+          // Si seleccionas "Ninguna", deselecciona todas las demás
+          if (value.includes('Ninguna')) {
+            setFormData({
+              ...formData,
+              alergias: ['Ninguna'],
+            });
+          } else {
+            // Remover "Ninguna" si se seleccionan otras alergias
+            setFormData({
+              ...formData,
+              alergias: typeof value === 'string' ? value.split(',') : value.filter((alergia) => alergia !== 'Ninguna'),
+            });
+          }
+        }}
+        label="Alergias"
+        name="alergias"
+        renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
+      >
+        <MenuItem value="Ninguna">
+          Ninguna
+          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+            {formData.alergias.includes('Ninguna') ? (
+              <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+            ) : (
+              <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
             )}
+          </div>
+        </MenuItem>
+
+        {Object.keys(alergiasInfo).map((alergia) => (
+          <MenuItem key={alergia} value={alergia} disabled={formData.alergias.includes('Ninguna')}>
+            {alergia}
+            <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+              {formData.alergias.includes(alergia) ? (
+                <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
+              ) : (
+                <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
+              )}
+            </div>
+          </MenuItem>
+        ))}
+
+        <MenuItem value="Otro" disabled={formData.alergias.includes('Ninguna')}>
+          Otro
+        </MenuItem>
+      </Select>
+
+      {formData.alergias.includes('Otro') && (
+        <TextField
+          fullWidth
+          label="Especificar Alergia"
+          name="otraAlergia"
+          value={formData.otraAlergia}
+          onChange={handleChange}
+          margin="normal"
+          error={!!errors.otraAlergia}
+          helperText={errors.otraAlergia}
+        />
+      )}
+
+      <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
+      {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+    </FormControl>
+
+    {/* Mostrar información sobre la alergia seleccionada si está en alergiasInfo */}
+    {formData.alergias.some((alergia) => alergiasInfo[alergia]) && (
+      <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
+        <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias.find((alergia) => alergiasInfo[alergia])]}
+      </Typography>
+    )}
+  </>
+)}
           </Box>
         );
       case 2:
