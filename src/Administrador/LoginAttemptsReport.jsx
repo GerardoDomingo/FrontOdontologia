@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent, Grid, IconButton } from '@mui/material';
-import { FaUser, FaCalendarAlt, FaPhone, FaEnvelope, FaInfoCircle, FaTimes } from 'react-icons/fa'; // Íconos
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent, Grid, IconButton, Card, CardContent, Avatar } from '@mui/material';
+import { FaUser, FaCalendarAlt, FaPhone, FaEnvelope, FaInfoCircle, FaTimes, FaIdCard } from 'react-icons/fa'; // Íconos
 import { format } from 'date-fns';
 
 const LoginAttemptsReport = () => {
   const [loginAttempts, setLoginAttempts] = useState([]);
-  const [selectedPaciente, setSelectedPaciente] = useState(null); // Para almacenar el paciente seleccionadooo
+  const [selectedPaciente, setSelectedPaciente] = useState(null); // Para almacenar el paciente seleccionado
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false); // Estado para controlar el modal
 
@@ -93,28 +93,36 @@ const LoginAttemptsReport = () => {
 
       {/* Modal para mostrar la información del paciente */}
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>
-          Información del Paciente
-          <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 16, top: 16, color: '#555' }}>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1565c0' }}>Información del Paciente</Typography>
+          <IconButton aria-label="close" onClick={handleClose} sx={{ color: '#555' }}>
             <FaTimes />
           </IconButton>
         </DialogTitle>
         <DialogContent>
           {selectedPaciente ? (
             <Box sx={{ p: 2 }}>
+              <Card sx={{ mb: 3, boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
+                <CardContent>
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <Avatar sx={{ width: 100, height: 100, bgcolor: '#1565c0', color: '#fff', fontSize: '2rem' }}>
+                        {selectedPaciente.nombre.charAt(0)}
+                      </Avatar>
+                    </Grid>
+                    <Grid item xs={12} sm={8}>
+                      <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1565c0', mb: 1 }}>
+                        {selectedPaciente.nombre} {selectedPaciente.aPaterno} {selectedPaciente.aMaterno}
+                      </Typography>
+                      <Typography variant="body1" sx={{ mb: 1 }}><FaIdCard /> <strong>ID:</strong> {selectedPaciente.id}</Typography>
+                      <Typography variant="body1" sx={{ mb: 1 }}><FaCalendarAlt /> <strong>Edad:</strong> {selectedPaciente.edad}</Typography>
+                      <Typography variant="body1" sx={{ mb: 1 }}><FaEnvelope /> <strong>Email:</strong> {selectedPaciente.email}</Typography>
+                      <Typography variant="body1" sx={{ mb: 1 }}><FaPhone /> <strong>Teléfono:</strong> {selectedPaciente.telefono}</Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="h6" sx={{ mb: 1 }}><FaUser /> {selectedPaciente.nombre} {selectedPaciente.aPaterno} {selectedPaciente.aMaterno}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body1" sx={{ mb: 1 }}><FaCalendarAlt /> <strong>Edad:</strong> {selectedPaciente.edad}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body1" sx={{ mb: 1 }}><FaEnvelope /> <strong>Email:</strong> {selectedPaciente.email}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body1" sx={{ mb: 1 }}><FaPhone /> <strong>Teléfono:</strong> {selectedPaciente.telefono}</Typography>
-                </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body1" sx={{ mb: 1 }}><strong>Alergias:</strong> {selectedPaciente.alergias}</Typography>
                 </Grid>
