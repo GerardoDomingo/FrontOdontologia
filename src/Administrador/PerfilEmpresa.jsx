@@ -255,7 +255,7 @@ const PerfilEmpresa = () => {
                         </Typography>
 
                         {logoPreview ? (
-                            <Box sx={{ position: 'relative' }}>
+                            <Box sx={{ position: 'relative', display: 'inline-block' }}>
                                 <Avatar
                                     src={logoPreview}
                                     alt="Logo de la empresa"
@@ -268,64 +268,50 @@ const PerfilEmpresa = () => {
                                         boxShadow: 2,
                                     }}
                                 />
-                                <IconButton
-                                    color="primary"
-                                    component="label"
-                                    sx={{
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        right: '50%',
-                                        transform: 'translateX(50%)',
-                                        backgroundColor: '#fff',
-                                        borderRadius: '50%',
-                                        boxShadow: 1,
-                                    }}
-                                >
-                                    <PhotoCameraIcon />
-                                    <input type="file" hidden onChange={handleFileChange} />
-                                </IconButton>
-
-                                {logoChanged && (
-                                    <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<CloseIcon />}
-                                            onClick={handleCancel}
-                                            sx={{
-                                                mr: 2,
-                                                borderRadius: '24px',
-                                                textTransform: 'none',
-                                                borderColor: '#1976d2',
-                                                color: '#1976d2',
-                                                '&:hover': {
-                                                    borderColor: '#105da5',
-                                                    backgroundColor: '#e8f0ff',
-                                                },
-                                            }}
-                                        >
-                                            Cancelar
-                                        </Button>
-
-                                        <Button
-                                            variant="contained"
-                                            startIcon={<SaveIcon />}
-                                            color="primary"
-                                            onClick={handleUpdate}
-                                            sx={{
-                                                borderRadius: '24px',
-                                                textTransform: 'none',
-                                                backgroundColor: '#1976D2',
-                                                color: '#fff',
-                                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                                '&:hover': {
-                                                    backgroundColor: '#105da5',
-                                                },
-                                            }}
-                                        >
-                                            Guardar
-                                        </Button>
-                                    </Box>
-                                )}
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                    {logoChanged && (
+                                        <>
+                                            <Button
+                                                variant="outlined"
+                                                startIcon={<CloseIcon />}
+                                                onClick={handleCancel}
+                                                sx={{
+                                                    borderRadius: '24px',
+                                                    padding: '12px 24px',
+                                                    textTransform: 'none',
+                                                    borderColor: '#1976d2',
+                                                    color: '#1976d2',
+                                                    '&:hover': {
+                                                        borderColor: '#105da5',
+                                                        backgroundColor: '#e8f0ff',
+                                                    },
+                                                    mr: 1
+                                                }}
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleUpdate}
+                                                startIcon={<SaveIcon />}
+                                                sx={{
+                                                    borderRadius: '24px',
+                                                    padding: '12px 24px',
+                                                    backgroundColor: '#1976D2',
+                                                    color: '#fff',
+                                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                                    textTransform: 'none',
+                                                    '&:hover': {
+                                                        backgroundColor: '#105da5',
+                                                    },
+                                                }}
+                                            >
+                                                Guardar
+                                            </Button>
+                                        </>
+                                    )}
+                                </Box>
                             </Box>
                         ) : (
                             <Button
@@ -476,48 +462,7 @@ const PerfilEmpresa = () => {
                                         Editar
                                     </Button>
                                 ) : (
-                                    <>
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<CloseIcon />}
-                                            onClick={handleCancel}
-                                            sx={{
-                                                borderRadius: '24px',
-                                                padding: '12px 24px',
-                                                textTransform: 'none',
-                                                borderColor: '#1976d2',
-                                                color: '#1976d2',
-                                                '&:hover': {
-                                                    borderColor: '#105da5',
-                                                    backgroundColor: '#e8f0ff',
-                                                },
-                                            }}
-                                        >
-                                            Cancelar
-                                        </Button>
-
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            fullWidth
-                                            type="submit"
-                                            startIcon={<SaveIcon />}
-                                            disabled={!hasChanges && !logoChanged}
-                                            sx={{
-                                                borderRadius: '24px',
-                                                padding: '12px 24px',
-                                                backgroundColor: '#1976D2',
-                                                color: '#fff',
-                                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                                textTransform: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: '#105da5',
-                                                },
-                                            }}
-                                        >
-                                            Actualizar
-                                        </Button>
-                                    </>
+                                    <></>
                                 )}
                             </Grid>
                         </Grid>
