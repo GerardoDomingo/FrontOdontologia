@@ -300,9 +300,18 @@ const Register = () => {
       return;
     }
 
+    // Si el valor de "lugar" es "Otro", reemplazar con el valor de "otroLugar"
+    const lugarFinal = formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar;
+
+    // Preparar datos finales para el envío
+    const dataToSubmit = {
+      ...formData,
+      lugar: lugarFinal // Usar el valor correcto del lugar
+    };
+
     // Si todo es válido, proceder con el registro
     try {
-      const response = await axios.post('https://backendodontologia.onrender.com/api/register', formData, {
+      const response = await axios.post('https://backendodontologia.onrender.com/api/register', dataToSubmit, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -594,6 +603,7 @@ const Register = () => {
                 helperText={errors.otroLugar}
               />
             )}
+
           </Box>
         );
       case 1:
