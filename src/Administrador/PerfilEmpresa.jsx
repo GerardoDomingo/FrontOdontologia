@@ -9,11 +9,11 @@ import {
     Avatar,
     IconButton,
 } from '@mui/material';
-import { UploadFile as UploadFileIcon, Save as SaveIcon, Edit as EditIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
-import { ArrowBack as ArrowBackIcon, Close as CloseIcon } from '@mui/icons-material';
+import { UploadFile as UploadFileIcon, Save as SaveIcon, Edit as EditIcon, CheckCircle as CheckCircleIcon, Close as CloseIcon } from '@mui/icons-material';
 import axios from 'axios';
-import Notificaciones from '../Compartidos/Notificaciones'; // Importar Notificaciones
+import Notificaciones from '../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
+import RedesSociales from './RedesSociales';  // Importar el componente RedesSociales
 
 const PerfilEmpresa = () => {
     const [formData, setFormData] = useState({
@@ -24,6 +24,8 @@ const PerfilEmpresa = () => {
         correo_electronico: '',
         descripcion: '',
         logo: null,
+        slogan: '', // Nuevo campo
+        titulo_pagina: '' // Nuevo campo
     });
     const [logoPreview, setLogoPreview] = useState('');
     const [isEditing, setIsEditing] = useState(false);
@@ -39,7 +41,7 @@ const PerfilEmpresa = () => {
         const fetchPerfilEmpresa = async () => {
             try {
                 const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/get');
-                const { id_empresa, nombre_empresa, direccion, telefono, correo_electronico, descripcion, logo } = response.data;
+                const { id_empresa, nombre_empresa, direccion, telefono, correo_electronico, descripcion, logo, slogan, titulo_pagina } = response.data;
 
                 if (id_empresa) {
                     setFormData({
@@ -49,6 +51,8 @@ const PerfilEmpresa = () => {
                         telefono,
                         correo_electronico,
                         descripcion,
+                        slogan, // Asignar slogan si ya existe
+                        titulo_pagina, // Asignar titulo_pagina si ya existe
                     });
                     setDataFetched(true); // Datos obtenidos
                 } else {
@@ -60,7 +64,6 @@ const PerfilEmpresa = () => {
                     setLogoPreview(`data:image/png;base64,${logo}`);
                 }
             } catch (error) {
-                console.error('Error al obtener el perfil de la empresa:', error);
                 mostrarNotificacion('Error al obtener el perfil de la empresa', 'error');
             }
         };
@@ -95,11 +98,16 @@ const PerfilEmpresa = () => {
 
     const validateForm = () => {
         const errors = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[0-9]{10,15}$/;
+
         if (!formData.nombre_empresa) errors.nombre_empresa = "El nombre de la empresa es obligatorio.";
         if (!formData.direccion) errors.direccion = "La dirección es obligatoria.";
-        if (!formData.telefono) errors.telefono = "El teléfono es obligatorio.";
-        if (!formData.correo_electronico) errors.correo_electronico = "El correo electrónico es obligatorio.";
+        if (!formData.telefono || !phoneRegex.test(formData.telefono)) errors.telefono = "El teléfono es inválido.";
+        if (!formData.correo_electronico || !emailRegex.test(formData.correo_electronico)) errors.correo_electronico = "El correo electrónico es inválido.";
         if (!formData.descripcion) errors.descripcion = "La descripción es obligatoria.";
+        if (!formData.slogan) errors.slogan = "El slogan es obligatorio."; // Validación de slogan
+        if (!formData.titulo_pagina) errors.titulo_pagina = "El título de la página es obligatorio."; // Validación de título de página
 
         setErrorMessages(errors);
         return Object.keys(errors).length === 0;
@@ -128,6 +136,8 @@ const PerfilEmpresa = () => {
         formDataToSend.append('telefono', formData.telefono);
         formDataToSend.append('correo_electronico', formData.correo_electronico);
         formDataToSend.append('descripcion', formData.descripcion);
+        formDataToSend.append('slogan', formData.slogan); // Incluir slogan en el envío
+        formDataToSend.append('titulo_pagina', formData.titulo_pagina); // Incluir título de página
         formDataToSend.append('logo', formData.logo);
 
         try {
@@ -143,7 +153,6 @@ const PerfilEmpresa = () => {
                 mostrarNotificacion('Error al insertar el perfil de empresa', 'error');
             }
         } catch (error) {
-            console.error('Error al enviar los datos:', error);
             mostrarNotificacion('Error al insertar el perfil de empresa', 'error');
         }
     };
@@ -164,6 +173,8 @@ const PerfilEmpresa = () => {
         formDataToSend.append('telefono', formData.telefono);
         formDataToSend.append('correo_electronico', formData.correo_electronico);
         formDataToSend.append('descripcion', formData.descripcion);
+        formDataToSend.append('slogan', formData.slogan); // Actualizar slogan
+        formDataToSend.append('titulo_pagina', formData.titulo_pagina); // Actualizar título de página
         formDataToSend.append('logo', formData.logo);
 
         try {
@@ -180,7 +191,6 @@ const PerfilEmpresa = () => {
                 mostrarNotificacion('Error al actualizar el perfil de empresa', 'error');
             }
         } catch (error) {
-            console.error('Error al actualizar los datos:', error);
             mostrarNotificacion('Error al actualizar el perfil de empresa', 'error');
         }
     };
@@ -311,6 +321,37 @@ const PerfilEmpresa = () => {
                                     sx={{ borderRadius: '12px' }}
                                 />
                             </Grid>
+
+                            {/* Campo para el Slogan */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="Slogan"
+                                    name="slogan"
+                                    value={formData.slogan}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing}
+                                    error={!!errorMessages.slogan}
+                                    helperText={errorMessages.slogan}
+                                    sx={{ borderRadius: '12px' }}
+                                />
+                            </Grid>
+
+                            {/* Campo para el Título de la Página */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="Título de la Página"
+                                    name="titulo_pagina"
+                                    value={formData.titulo_pagina}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing}
+                                    error={!!errorMessages.titulo_pagina}
+                                    helperText={errorMessages.titulo_pagina}
+                                    sx={{ borderRadius: '12px' }}
+                                />
+                            </Grid>
+
                             {isEditing && (
                                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
                                     <Button
@@ -382,6 +423,10 @@ const PerfilEmpresa = () => {
                         </Grid>
                     </form>
                 </Box>
+
+                {/* Redes Sociales */}
+                <RedesSociales />
+
             </Container>
 
             {/* Componente de Notificaciones */}
