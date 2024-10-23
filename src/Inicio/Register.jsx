@@ -267,26 +267,26 @@ const Register = () => {
   // Manejar el registro del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Iniciar el estado de cargando
     setIsLoading(true);
-
+  
     let newErrors = {};
     // Verificar la opción de "Otro" en alergias
     if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
       newErrors.otraAlergia = 'Especifica la alergia';
     }
-
+  
     setErrors(newErrors);
     // Si hay errores, detener la carga y no continuar con el registro
     if (Object.keys(newErrors).length > 0) {
       setIsLoading(false); // Detener la carga si hay errores
       return;
     }
-
+  
     // Verificar la validez de la contraseña antes de permitir el registro (reglas y filtrado)
     const isPasswordValid = await checkPasswordValidity(formData.password);
-
+  
     // Verificar que la fortaleza de la contraseña sea al menos "Fuerte"
     if (!isPasswordValid || passwordStrength < 3) {
       setNotificationMessage(
@@ -299,16 +299,22 @@ const Register = () => {
       setIsLoading(false); // Detener la carga si la contraseña no es válida
       return;
     }
-
+  
+    // Reemplazar "Otro" con el valor de "otraAlergia" en el arreglo de alergias
+    const alergiasFinal = formData.alergias.map(alergia =>
+      alergia === 'Otro' ? formData.otraAlergia : alergia
+    );
+  
     // Si el valor de "lugar" es "Otro", reemplazar con el valor de "otroLugar"
     const lugarFinal = formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar;
-
+  
     // Preparar datos finales para el envío
     const dataToSubmit = {
       ...formData,
-      lugar: lugarFinal // Usar el valor correcto del lugar
+      lugar: lugarFinal, // Usar el valor correcto del lugar
+      alergias: alergiasFinal, // Reemplazar "Otro" con el valor especificado
     };
-
+  
     // Si todo es válido, proceder con el registro
     try {
       const response = await axios.post('https://backendodontologia.onrender.com/api/register', dataToSubmit, {
@@ -316,12 +322,12 @@ const Register = () => {
           'Content-Type': 'application/json',
         },
       });
-
+  
       if (response.status === 200 || response.status === 201) {
         setNotificationMessage('Usuario registrado exitosamente');
         setNotificationType('success');
         setOpenNotification(true);
-
+  
         setTimeout(() => {
           navigate('/login');  // Redirigir al login
         }, 2000);  // Retraso de 2 segundos
@@ -343,7 +349,7 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-
+  
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
