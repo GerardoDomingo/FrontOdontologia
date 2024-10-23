@@ -281,7 +281,25 @@ const PerfilEmpresa = () => {
                                 </IconButton>
                             </Box>
                         ) : (
-                            <Typography>No se ha cargado ninguna imagen</Typography>
+                            <Button
+                                variant="contained"
+                                component="label"
+                                startIcon={<UploadFileIcon />}
+                                sx={{
+                                    backgroundColor: '#1976d2',
+                                    color: '#fff',
+                                    borderRadius: '24px',
+                                    textTransform: 'none',
+                                    padding: '10px 24px',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                    '&:hover': {
+                                        backgroundColor: '#1565c0',
+                                    },
+                                }}
+                            >
+                                Subir Logo de la Empresa
+                                <input type="file" hidden onChange={handleFileChange} />
+                            </Button>
                         )}
                     </Box>
 
@@ -413,46 +431,69 @@ const PerfilEmpresa = () => {
                             )}
 
                             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<CloseIcon />}
-                                    onClick={handleCancel}
-                                    sx={{
-                                        borderRadius: '24px',
-                                        padding: '12px 24px',
-                                        textTransform: 'none',
-                                        borderColor: '#1976d2',
-                                        color: '#1976d2',
-                                        '&:hover': {
-                                            borderColor: '#105da5',
-                                            backgroundColor: '#e8f0ff',
-                                        },
-                                    }}
-                                >
-                                    Cancelar
-                                </Button>
+                                {!isEditing ? (
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<EditIcon />}
+                                        onClick={() => setIsEditing(true)}
+                                        sx={{
+                                            borderRadius: '24px',
+                                            padding: '12px 24px',
+                                            textTransform: 'none',
+                                            borderColor: '#28a745',
+                                            color: '#28a745',
+                                            '&:hover': {
+                                                borderColor: '#218838',
+                                                backgroundColor: '#e9f9eb',
+                                            },
+                                        }}
+                                    >
+                                        Editar
+                                    </Button>
+                                ) : (
+                                    <>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<CloseIcon />}
+                                            onClick={handleCancel}
+                                            sx={{
+                                                borderRadius: '24px',
+                                                padding: '12px 24px',
+                                                textTransform: 'none',
+                                                borderColor: '#1976d2',
+                                                color: '#1976d2',
+                                                '&:hover': {
+                                                    borderColor: '#105da5',
+                                                    backgroundColor: '#e8f0ff',
+                                                },
+                                            }}
+                                        >
+                                            Cancelar
+                                        </Button>
 
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    fullWidth
-                                    type="submit"
-                                    startIcon={<SaveIcon />}
-                                    disabled={!hasChanges}
-                                    sx={{
-                                        borderRadius: '24px',
-                                        padding: '12px 24px',
-                                        backgroundColor: '#1976D2',
-                                        color: '#fff',
-                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                        textTransform: 'none',
-                                        '&:hover': {
-                                            backgroundColor: '#105da5',
-                                        },
-                                    }}
-                                >
-                                    {isEditing ? 'Actualizar' : 'Subir cambios'}
-                                </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            fullWidth
+                                            type="submit"
+                                            startIcon={<SaveIcon />}
+                                            disabled={!hasChanges}
+                                            sx={{
+                                                borderRadius: '24px',
+                                                padding: '12px 24px',
+                                                backgroundColor: '#1976D2',
+                                                color: '#fff',
+                                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                                textTransform: 'none',
+                                                '&:hover': {
+                                                    backgroundColor: '#105da5',
+                                                },
+                                            }}
+                                        >
+                                            Actualizar
+                                        </Button>
+                                    </>
+                                )}
                             </Grid>
                         </Grid>
                     </form>
