@@ -14,11 +14,17 @@ import {
     DialogContentText,
     DialogTitle,
 } from '@mui/material';
-import { UploadFile as UploadFileIcon, Save as SaveIcon, Edit as EditIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon } from '@mui/icons-material';
+import {
+    UploadFile as UploadFileIcon,
+    Save as SaveIcon,
+    Edit as EditIcon,
+    Close as CloseIcon,
+    PhotoCamera as PhotoCameraIcon
+} from '@mui/icons-material';
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
-import RedesSociales from './RedesSociales'; // Importar el componente RedesSociales
+import RedesSociales from './RedesSociales';
 
 const PerfilEmpresa = () => {
     const [formData, setFormData] = useState({
@@ -33,10 +39,10 @@ const PerfilEmpresa = () => {
         titulo_pagina: ''
     });
     const [logoPreview, setLogoPreview] = useState('');
-    const [isEditingDatos, setIsEditingDatos] = useState(false); // Para los datos de la empresa
-    const [isEditingLogo, setIsEditingLogo] = useState(false); // Para el logo
-    const [hasChanges, setHasChanges] = useState(false); // Para detectar si hay cambios en los datos
-    const [logoChanged, setLogoChanged] = useState(false); // Detectar si se ha cambiado el logo
+    const [isEditingDatos, setIsEditingDatos] = useState(false);
+    const [isEditingLogo, setIsEditingLogo] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+    const [logoChanged, setLogoChanged] = useState(false);
     const [errorMessages, setErrorMessages] = useState({});
     const [dataFetched, setDataFetched] = useState(false);
     const [notification, setNotification] = useState({
@@ -44,7 +50,7 @@ const PerfilEmpresa = () => {
         message: '',
         type: 'success',
     });
-    const [openConfirmDialog, setOpenConfirmDialog] = useState(false); // Diálogo de confirmación de cancelar
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
     useEffect(() => {
         const fetchPerfilEmpresa = async () => {
@@ -86,7 +92,7 @@ const PerfilEmpresa = () => {
             ...formData,
             [name]: value,
         });
-        setHasChanges(true); // Detectar cambios en los datos
+        setHasChanges(true);
     };
 
     const handleFileChange = (e) => {
@@ -100,7 +106,7 @@ const PerfilEmpresa = () => {
                 });
                 const objectUrl = URL.createObjectURL(file);
                 setLogoPreview(objectUrl);
-                setLogoChanged(true); // Detectar que se ha cambiado el logo
+                setLogoChanged(true);
             } else {
                 mostrarNotificacion('Por favor, sube una imagen válida (PNG o JPEG)', 'error');
             }
@@ -136,7 +142,6 @@ const PerfilEmpresa = () => {
         setNotification({ ...notification, open: false });
     };
 
-    // Funciones para el logo
     const handleSaveLogo = async () => {
         const formDataToSend = new FormData();
         formDataToSend.append('id_empresa', formData.id_empresa);
@@ -162,12 +167,16 @@ const PerfilEmpresa = () => {
     };
 
     const handleCancelLogo = () => {
+        setOpenConfirmDialog(true); // Abrir diálogo de confirmación
+    };
+
+    const handleConfirmCancelLogo = () => {
         setIsEditingLogo(false);
         setLogoChanged(false);
         setLogoPreview('');
+        setOpenConfirmDialog(false); // Cerrar diálogo
     };
 
-    // Funciones para los datos
     const handleSaveDatos = async (e) => {
         e.preventDefault();
         if (!dataFetched) {
@@ -203,14 +212,18 @@ const PerfilEmpresa = () => {
     };
 
     const handleCancelDatos = () => {
+        setOpenConfirmDialog(true); // Abrir diálogo de confirmación
+    };
+
+    const handleConfirmCancelDatos = () => {
         setIsEditingDatos(false);
         setHasChanges(false);
+        setOpenConfirmDialog(false); // Cerrar diálogo
     };
 
     return (
         <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f9f9f9', position: 'relative' }}>
             <Container maxWidth="md">
-                {/* Botón "X" en la esquina superior derecha */}
                 <IconButton
                     component={Link}
                     to="/Administrador/principal"
@@ -230,7 +243,6 @@ const PerfilEmpresa = () => {
                             Perfil de la Empresa
                         </Typography>
 
-                        {/* Sección de edición del logo */}
                         <Avatar
                             src={logoPreview}
                             alt="Logo de la empresa"
@@ -253,7 +265,6 @@ const PerfilEmpresa = () => {
                             <input type="file" hidden onChange={handleFileChange} />
                         </IconButton>
 
-                        {/* Botones de Guardar/Cancelar para el logo */}
                         {logoChanged && (
                             <Box sx={{ textAlign: 'center', mt: 2 }}>
                                 <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelLogo}>
@@ -266,7 +277,6 @@ const PerfilEmpresa = () => {
                         )}
                     </Box>
 
-                    {/* Sección de edición de los datos */}
                     <form onSubmit={handleSaveDatos}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
@@ -388,11 +398,9 @@ const PerfilEmpresa = () => {
                     </form>
                 </Box>
 
-                {/* Redes Sociales */}
                 <RedesSociales />
             </Container>
 
-            {/* Componente de Notificaciones */}
             <Notificaciones
                 open={notification.open}
                 message={notification.message}
@@ -400,7 +408,6 @@ const PerfilEmpresa = () => {
                 handleClose={handleCloseNotification}
             />
 
-            {/* Diálogo de confirmación de cancelar */}
             <Dialog
                 open={openConfirmDialog}
                 onClose={() => setOpenConfirmDialog(false)}
@@ -415,7 +422,7 @@ const PerfilEmpresa = () => {
                     <Button onClick={() => setOpenConfirmDialog(false)} color="primary">
                         No
                     </Button>
-                    <Button onClick={handleCancelDatos} color="primary" autoFocus>
+                    <Button onClick={handleConfirmCancelDatos} color="primary" autoFocus>
                         Sí
                     </Button>
                 </DialogActions>
