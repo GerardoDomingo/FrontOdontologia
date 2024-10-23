@@ -33,8 +33,9 @@ const PerfilEmpresa = () => {
         titulo_pagina: ''
     });
     const [logoPreview, setLogoPreview] = useState('');
-    const [isEditing, setIsEditing] = useState(false);
-    const [hasChanges, setHasChanges] = useState(false); // Para detectar si hay cambios
+    const [isEditing, setIsEditing] = useState(false);  // Para los campos de texto
+    const [isEditingLogo, setIsEditingLogo] = useState(false);  // Para la imagen de perfil
+    const [hasChanges, setHasChanges] = useState(false); // Para detectar si hay cambios en los campos de texto
     const [logoChanged, setLogoChanged] = useState(false); // Detectar si se ha cambiado el logo
     const [errorMessages, setErrorMessages] = useState({});
     const [dataFetched, setDataFetched] = useState(false);
@@ -85,7 +86,7 @@ const PerfilEmpresa = () => {
             ...formData,
             [name]: value,
         });
-        setHasChanges(true); // Detectar cambios
+        setHasChanges(true); // Detectar cambios en los campos de texto
     };
 
     const handleFileChange = (e) => {
@@ -100,7 +101,7 @@ const PerfilEmpresa = () => {
                 const objectUrl = URL.createObjectURL(file);
                 setLogoPreview(objectUrl);
                 setLogoChanged(true); // Detectar que se ha cambiado el logo
-                setHasChanges(true); // Detectar cambios
+                setIsEditingLogo(true); // Activar edición de logo
             } else {
                 mostrarNotificacion('Por favor, sube una imagen válida (PNG o JPEG)', 'error');
             }
@@ -202,6 +203,7 @@ const PerfilEmpresa = () => {
                 setIsEditing(false);
                 setHasChanges(false);
                 setLogoChanged(false);
+                setIsEditingLogo(false);
             } else {
                 mostrarNotificacion('Error al actualizar el perfil de empresa', 'error');
             }
@@ -218,6 +220,7 @@ const PerfilEmpresa = () => {
         setIsEditing(false);
         setHasChanges(false);
         setLogoChanged(false);
+        setIsEditingLogo(false);
         setOpenConfirmDialog(false); // Cerrar el diálogo de confirmación
     };
 
@@ -254,6 +257,7 @@ const PerfilEmpresa = () => {
                             Perfil de la Empresa
                         </Typography>
 
+                        {/* Imagen de perfil y edición */}
                         {logoPreview ? (
                             <Box sx={{ textAlign: 'center' }}>
                                 <Avatar
@@ -284,7 +288,8 @@ const PerfilEmpresa = () => {
                                     </IconButton>
                                 </Box>
 
-                                {logoChanged && (
+                                {/* Botones para guardar o cancelar solo si cambia el logo */}
+                                {isEditingLogo && (
                                     <Box sx={{ textAlign: 'center', mt: 2 }}>
                                         <Button
                                             variant="outlined"
@@ -349,6 +354,7 @@ const PerfilEmpresa = () => {
                         )}
                     </Box>
 
+                    {/* Formulario de los campos de texto */}
                     <form onSubmit={isEditing ? handleUpdate : handleSubmit}>
                         <Grid container spacing={2}>
                             {/* Distribuir campos en dos por fila */}
