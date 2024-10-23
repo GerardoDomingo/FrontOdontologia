@@ -18,7 +18,7 @@ import { UploadFile as UploadFileIcon, Save as SaveIcon, Edit as EditIcon, Close
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
-import RedesSociales from './RedesSociales';  // Importar el componente RedesSociales
+import RedesSociales from './RedesSociales';
 
 const PerfilEmpresa = () => {
     const [formData, setFormData] = useState({
@@ -137,47 +137,34 @@ const PerfilEmpresa = () => {
         setNotification({ ...notification, open: false });
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!validateForm()) return;
-
+    const handleUpdateLogo = async () => {
+        // Actualización solo del logo
         const formDataToSend = new FormData();
-        formDataToSend.append('nombre_empresa', formData.nombre_empresa);
-        formDataToSend.append('direccion', formData.direccion);
-        formDataToSend.append('telefono', formData.telefono);
-        formDataToSend.append('correo_electronico', formData.correo_electronico);
-        formDataToSend.append('descripcion', formData.descripcion);
-        formDataToSend.append('slogan', formData.slogan);
-        formDataToSend.append('titulo_pagina', formData.titulo_pagina);
+        formDataToSend.append('id_empresa', formData.id_empresa);
         formDataToSend.append('logo', formData.logo);
 
         try {
-            const response = await axios.post('https://backendodontologia.onrender.com/api/perfilEmpresa/insert', formDataToSend, {
+            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/updateLogo', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
             if (response.status === 200) {
-                mostrarNotificacion('Perfil de empresa insertado con éxito', 'success');
-                setHasChanges(false);
+                mostrarNotificacion('Logo actualizado con éxito', 'success');
                 setLogoChanged(false);
+                setIsEditingLogo(false);
             } else {
-                mostrarNotificacion('Error al insertar el perfil de empresa', 'error');
+                mostrarNotificacion('Error al actualizar el logo', 'error');
             }
         } catch (error) {
-            mostrarNotificacion('Error al insertar el perfil de empresa', 'error');
+            mostrarNotificacion('Error al actualizar el logo', 'error');
         }
     };
 
-    const handleUpdate = async (e) => {
+    const handleUpdateFields = async (e) => {
         e.preventDefault();
-        if (!dataFetched) {
-            mostrarNotificacion('No hay información para actualizar', 'error');
-            return;
-        }
-
+        // Actualización solo de los campos de texto
         if (!validateForm()) return;
 
         const formDataToSend = new FormData();
@@ -189,26 +176,23 @@ const PerfilEmpresa = () => {
         formDataToSend.append('descripcion', formData.descripcion);
         formDataToSend.append('slogan', formData.slogan);
         formDataToSend.append('titulo_pagina', formData.titulo_pagina);
-        formDataToSend.append('logo', formData.logo);
 
         try {
-            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/update', formDataToSend, {
+            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/updateFields', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
             if (response.status === 200) {
-                mostrarNotificacion('Perfil de empresa actualizado con éxito', 'success');
+                mostrarNotificacion('Datos actualizados con éxito', 'success');
                 setIsEditing(false);
                 setHasChanges(false);
-                setLogoChanged(false);
-                setIsEditingLogo(false);
             } else {
-                mostrarNotificacion('Error al actualizar el perfil de empresa', 'error');
+                mostrarNotificacion('Error al actualizar los datos', 'error');
             }
         } catch (error) {
-            mostrarNotificacion('Error al actualizar el perfil de empresa', 'error');
+            mostrarNotificacion('Error al actualizar los datos', 'error');
         }
     };
 
@@ -314,7 +298,7 @@ const PerfilEmpresa = () => {
                                             variant="contained"
                                             startIcon={<SaveIcon />}
                                             color="primary"
-                                            onClick={handleUpdate}
+                                            onClick={handleUpdateLogo}
                                             sx={{
                                                 borderRadius: '24px',
                                                 textTransform: 'none',
@@ -355,7 +339,7 @@ const PerfilEmpresa = () => {
                     </Box>
 
                     {/* Formulario de los campos de texto */}
-                    <form onSubmit={isEditing ? handleUpdate : handleSubmit}>
+                    <form onSubmit={handleUpdateFields}>
                         <Grid container spacing={2}>
                             {/* Distribuir campos en dos por fila */}
                             <Grid item xs={12} sm={6}>
@@ -481,7 +465,42 @@ const PerfilEmpresa = () => {
                                         Editar
                                     </Button>
                                 ) : (
-                                    <></>
+                                    <>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<CloseIcon />}
+                                            onClick={handleCancel}
+                                            sx={{
+                                                borderRadius: '24px',
+                                                textTransform: 'none',
+                                                borderColor: '#1976d2',
+                                                color: '#1976d2',
+                                                '&:hover': {
+                                                    borderColor: '#105da5',
+                                                    backgroundColor: '#e8f0ff',
+                                                },
+                                            }}
+                                        >
+                                            Cancelar
+                                        </Button>
+
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            startIcon={<SaveIcon />}
+                                            sx={{
+                                                borderRadius: '24px',
+                                                backgroundColor: '#1976D2',
+                                                color: '#fff',
+                                                '&:hover': {
+                                                    backgroundColor: '#105da5',
+                                                },
+                                            }}
+                                            type="submit"
+                                        >
+                                            Guardar
+                                        </Button>
+                                    </>
                                 )}
                             </Grid>
                         </Grid>
