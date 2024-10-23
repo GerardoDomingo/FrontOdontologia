@@ -906,7 +906,7 @@ const Register = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 6, mb: 14 }}> {/* Aquí agregamos marginTop y marginBottom */}
+    <Container maxWidth="md" sx={{ mt: 6, mb: 14 }}> {/* Aquí agregamos marginTop y marginBottoom */}
       {/* Aquí va la notificación */}
       <Notificaciones
         open={openNotification}
