@@ -35,6 +35,7 @@ const PerfilEmpresa = () => {
     const [logoPreview, setLogoPreview] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [hasChanges, setHasChanges] = useState(false); // Para detectar si hay cambios
+    const [logoChanged, setLogoChanged] = useState(false); // Detectar si se ha cambiado el logo
     const [errorMessages, setErrorMessages] = useState({});
     const [dataFetched, setDataFetched] = useState(false);
     const [notification, setNotification] = useState({
@@ -98,6 +99,7 @@ const PerfilEmpresa = () => {
                 });
                 const objectUrl = URL.createObjectURL(file);
                 setLogoPreview(objectUrl);
+                setLogoChanged(true); // Detectar que se ha cambiado el logo
                 setHasChanges(true); // Detectar cambios
             } else {
                 mostrarNotificacion('Por favor, sube una imagen válida (PNG o JPEG)', 'error');
@@ -159,6 +161,7 @@ const PerfilEmpresa = () => {
             if (response.status === 200) {
                 mostrarNotificacion('Perfil de empresa insertado con éxito', 'success');
                 setHasChanges(false);
+                setLogoChanged(false);
             } else {
                 mostrarNotificacion('Error al insertar el perfil de empresa', 'error');
             }
@@ -198,6 +201,7 @@ const PerfilEmpresa = () => {
                 mostrarNotificacion('Perfil de empresa actualizado con éxito', 'success');
                 setIsEditing(false);
                 setHasChanges(false);
+                setLogoChanged(false);
             } else {
                 mostrarNotificacion('Error al actualizar el perfil de empresa', 'error');
             }
@@ -213,6 +217,7 @@ const PerfilEmpresa = () => {
     const handleConfirmCancel = () => {
         setIsEditing(false);
         setHasChanges(false);
+        setLogoChanged(false);
         setOpenConfirmDialog(false); // Cerrar el diálogo de confirmación
     };
 
@@ -455,7 +460,7 @@ const PerfilEmpresa = () => {
                                             fullWidth
                                             type="submit"
                                             startIcon={<SaveIcon />}
-                                            disabled={!hasChanges}
+                                            disabled={!hasChanges && !logoChanged}
                                             sx={{
                                                 borderRadius: '24px',
                                                 padding: '12px 24px',
