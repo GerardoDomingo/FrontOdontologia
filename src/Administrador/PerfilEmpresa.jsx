@@ -14,7 +14,7 @@ import {
     DialogContentText,
     DialogTitle,
 } from '@mui/material';
-import { UploadFile as UploadFileIcon, Save as SaveIcon, Edit as EditIcon, CheckCircle as CheckCircleIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon } from '@mui/icons-material';
+import { UploadFile as UploadFileIcon, Save as SaveIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon } from '@mui/icons-material';
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
@@ -284,6 +284,48 @@ const PerfilEmpresa = () => {
                                     <PhotoCameraIcon />
                                     <input type="file" hidden onChange={handleFileChange} />
                                 </IconButton>
+
+                                {logoChanged && (
+                                    <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<CloseIcon />}
+                                            onClick={handleCancel}
+                                            sx={{
+                                                mr: 2,
+                                                borderRadius: '24px',
+                                                textTransform: 'none',
+                                                borderColor: '#1976d2',
+                                                color: '#1976d2',
+                                                '&:hover': {
+                                                    borderColor: '#105da5',
+                                                    backgroundColor: '#e8f0ff',
+                                                },
+                                            }}
+                                        >
+                                            Cancelar
+                                        </Button>
+
+                                        <Button
+                                            variant="contained"
+                                            startIcon={<SaveIcon />}
+                                            color="primary"
+                                            onClick={handleUpdate}
+                                            sx={{
+                                                borderRadius: '24px',
+                                                textTransform: 'none',
+                                                backgroundColor: '#1976D2',
+                                                color: '#fff',
+                                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                                '&:hover': {
+                                                    backgroundColor: '#105da5',
+                                                },
+                                            }}
+                                        >
+                                            Guardar
+                                        </Button>
+                                    </Box>
+                                )}
                             </Box>
                         ) : (
                             <Button
