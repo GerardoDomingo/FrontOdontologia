@@ -408,28 +408,6 @@ const PerfilEmpresa = () => {
                                 />
                             </Grid>
 
-                            {isEditing && (
-                                <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<UploadFileIcon />}
-                                        sx={{
-                                            backgroundColor: '#1976d2',
-                                            color: '#fff',
-                                            borderRadius: '24px',
-                                            textTransform: 'none',
-                                            padding: '10px 24px',
-                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                            '&:hover': {
-                                                backgroundColor: '#1565c0',
-                                            },
-                                        }}
-                                    >
-                                        Subir Logo de la Empresa
-                                    </Button>
-                                </Grid>
-                            )}
-
                             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                                 {!isEditing ? (
                                     <Button
