@@ -18,7 +18,7 @@ import { UploadFile as UploadFileIcon, Save as SaveIcon, Edit as EditIcon, Close
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
-import RedesSociales from './RedesSociales';
+import RedesSociales from './RedesSociales';  // Importar el componente RedesSociales
 
 const PerfilEmpresa = () => {
     const [formData, setFormData] = useState({
@@ -33,9 +33,8 @@ const PerfilEmpresa = () => {
         titulo_pagina: ''
     });
     const [logoPreview, setLogoPreview] = useState('');
-    const [isEditing, setIsEditing] = useState(false);  // Para los campos de texto
-    const [isEditingLogo, setIsEditingLogo] = useState(false);  // Para la imagen de perfil
-    const [hasChanges, setHasChanges] = useState(false); // Para detectar si hay cambios en los campos de texto
+    const [isEditing, setIsEditing] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false); // Para detectar si hay cambios
     const [logoChanged, setLogoChanged] = useState(false); // Detectar si se ha cambiado el logo
     const [errorMessages, setErrorMessages] = useState({});
     const [dataFetched, setDataFetched] = useState(false);
@@ -86,7 +85,7 @@ const PerfilEmpresa = () => {
             ...formData,
             [name]: value,
         });
-        setHasChanges(true); // Detectar cambios en los campos de texto
+        setHasChanges(true); // Detectar cambios
     };
 
     const handleFileChange = (e) => {
@@ -101,44 +100,15 @@ const PerfilEmpresa = () => {
                 const objectUrl = URL.createObjectURL(file);
                 setLogoPreview(objectUrl);
                 setLogoChanged(true); // Detectar que se ha cambiado el logo
-                setIsEditingLogo(true); // Activar edición de logo
             } else {
                 mostrarNotificacion('Por favor, sube una imagen válida (PNG o JPEG)', 'error');
             }
         }
     };
 
-    const validateForm = () => {
-        const errors = {};
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^[0-9]{10,15}$/;
-
-        if (!formData.nombre_empresa) errors.nombre_empresa = "El nombre de la empresa es obligatorio.";
-        if (!formData.direccion) errors.direccion = "La dirección es obligatoria.";
-        if (!formData.telefono || !phoneRegex.test(formData.telefono)) errors.telefono = "El teléfono es inválido.";
-        if (!formData.correo_electronico || !emailRegex.test(formData.correo_electronico)) errors.correo_electronico = "El correo electrónico es inválido.";
-        if (!formData.descripcion) errors.descripcion = "La descripción es obligatoria.";
-        if (!formData.slogan) errors.slogan = "El slogan es obligatorio.";
-        if (!formData.titulo_pagina) errors.titulo_pagina = "El título de la página es obligatorio.";
-
-        setErrorMessages(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-    const mostrarNotificacion = (mensaje, tipo) => {
-        setNotification({
-            open: true,
-            message: mensaje,
-            type: tipo,
-        });
-    };
-
-    const handleCloseNotification = () => {
-        setNotification({ ...notification, open: false });
-    };
-
     const handleUpdateLogo = async () => {
-        // Actualización solo del logo
+        if (!logoChanged) return;
+
         const formDataToSend = new FormData();
         formDataToSend.append('id_empresa', formData.id_empresa);
         formDataToSend.append('logo', formData.logo);
@@ -153,7 +123,6 @@ const PerfilEmpresa = () => {
             if (response.status === 200) {
                 mostrarNotificacion('Logo actualizado con éxito', 'success');
                 setLogoChanged(false);
-                setIsEditingLogo(false);
             } else {
                 mostrarNotificacion('Error al actualizar el logo', 'error');
             }
@@ -164,7 +133,11 @@ const PerfilEmpresa = () => {
 
     const handleUpdateFields = async (e) => {
         e.preventDefault();
-        // Actualización solo de los campos de texto
+        if (!dataFetched) {
+            mostrarNotificacion('No hay información para actualizar', 'error');
+            return;
+        }
+
         if (!validateForm()) return;
 
         const formDataToSend = new FormData();
@@ -178,40 +151,37 @@ const PerfilEmpresa = () => {
         formDataToSend.append('titulo_pagina', formData.titulo_pagina);
 
         try {
-            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/updateFields', formDataToSend, {
+            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/update', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
             if (response.status === 200) {
-                mostrarNotificacion('Datos actualizados con éxito', 'success');
+                mostrarNotificacion('Perfil actualizado con éxito', 'success');
                 setIsEditing(false);
                 setHasChanges(false);
             } else {
-                mostrarNotificacion('Error al actualizar los datos', 'error');
+                mostrarNotificacion('Error al actualizar el perfil', 'error');
             }
         } catch (error) {
-            mostrarNotificacion('Error al actualizar los datos', 'error');
+            mostrarNotificacion('Error al actualizar el perfil', 'error');
         }
     };
 
-    const handleCancel = () => {
-        setOpenConfirmDialog(true); // Abrir diálogo de confirmación
+    const handleCancelLogo = () => {
+        setLogoChanged(false);
+        setLogoPreview(''); // Restablecer la vista previa del logo
     };
 
-    const handleConfirmCancel = () => {
+    const handleCancelFields = () => {
         setIsEditing(false);
         setHasChanges(false);
-        setLogoChanged(false);
-        setIsEditingLogo(false);
-        setOpenConfirmDialog(false); // Cerrar el diálogo de confirmación
     };
 
     return (
         <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f9f9f9', position: 'relative' }}>
             <Container maxWidth="md">
-
                 {/* Botón "X" en la esquina superior derecha */}
                 <IconButton
                     component={Link}
@@ -236,112 +206,88 @@ const PerfilEmpresa = () => {
                         boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
                     }}
                 >
+                    {/* Sección de edición del logo */}
                     <Box sx={{ textAlign: 'center', mb: 4 }}>
                         <Typography variant="h4" gutterBottom>
                             Perfil de la Empresa
                         </Typography>
 
-                        {/* Imagen de perfil y edición */}
-                        {logoPreview ? (
-                            <Box sx={{ textAlign: 'center' }}>
-                                <Avatar
-                                    src={logoPreview}
-                                    alt="Logo de la empresa"
-                                    sx={{
-                                        width: 100,
-                                        height: 100,
-                                        margin: '0 auto',
-                                        borderRadius: '50%',
-                                        objectFit: 'cover',
-                                        boxShadow: 2,
-                                    }}
-                                />
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                                    <IconButton
-                                        color="primary"
-                                        component="label"
-                                        sx={{
-                                            backgroundColor: '#fff',
-                                            borderRadius: '50%',
-                                            boxShadow: 1,
-                                            padding: '6px',
-                                        }}
-                                    >
-                                        <PhotoCameraIcon />
-                                        <input type="file" hidden onChange={handleFileChange} />
-                                    </IconButton>
-                                </Box>
-
-                                {/* Botones para guardar o cancelar solo si cambia el logo */}
-                                {isEditingLogo && (
-                                    <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<CloseIcon />}
-                                            onClick={handleCancel}
-                                            sx={{
-                                                mr: 2,
-                                                borderRadius: '24px',
-                                                textTransform: 'none',
-                                                borderColor: '#1976d2',
-                                                color: '#1976d2',
-                                                '&:hover': {
-                                                    borderColor: '#105da5',
-                                                    backgroundColor: '#e8f0ff',
-                                                },
-                                            }}
-                                        >
-                                            Cancelar
-                                        </Button>
-
-                                        <Button
-                                            variant="contained"
-                                            startIcon={<SaveIcon />}
-                                            color="primary"
-                                            onClick={handleUpdateLogo}
-                                            sx={{
-                                                borderRadius: '24px',
-                                                textTransform: 'none',
-                                                backgroundColor: '#1976D2',
-                                                color: '#fff',
-                                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                                '&:hover': {
-                                                    backgroundColor: '#105da5',
-                                                },
-                                            }}
-                                        >
-                                            Guardar
-                                        </Button>
-                                    </Box>
-                                )}
-                            </Box>
-                        ) : (
-                            <Button
-                                variant="contained"
-                                component="label"
-                                startIcon={<UploadFileIcon />}
+                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Avatar
+                                src={logoPreview || 'path/to/default/logo.png'}
+                                alt="Logo de la empresa"
                                 sx={{
-                                    backgroundColor: '#1976d2',
-                                    color: '#fff',
-                                    borderRadius: '24px',
-                                    textTransform: 'none',
-                                    padding: '10px 24px',
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                    '&:hover': {
-                                        backgroundColor: '#1565c0',
-                                    },
+                                    width: 100,
+                                    height: 100,
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                    boxShadow: 2,
+                                }}
+                            />
+                            <IconButton
+                                color="primary"
+                                component="label"
+                                sx={{
+                                    position: 'absolute',
+                                    top: '110%',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    backgroundColor: '#fff',
+                                    borderRadius: '50%',
+                                    boxShadow: 1,
                                 }}
                             >
-                                Subir Logo de la Empresa
+                                <PhotoCameraIcon />
                                 <input type="file" hidden onChange={handleFileChange} />
-                            </Button>
+                            </IconButton>
+                        </Box>
+
+                        {logoChanged && (
+                            <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<CloseIcon />}
+                                    onClick={handleCancelLogo}
+                                    sx={{
+                                        mr: 2,
+                                        borderRadius: '24px',
+                                        textTransform: 'none',
+                                        borderColor: '#1976d2',
+                                        color: '#1976d2',
+                                        '&:hover': {
+                                            borderColor: '#105da5',
+                                            backgroundColor: '#e8f0ff',
+                                        },
+                                    }}
+                                >
+                                    Cancelar
+                                </Button>
+
+                                <Button
+                                    variant="contained"
+                                    startIcon={<SaveIcon />}
+                                    color="primary"
+                                    onClick={handleUpdateLogo}
+                                    sx={{
+                                        borderRadius: '24px',
+                                        textTransform: 'none',
+                                        backgroundColor: '#1976D2',
+                                        color: '#fff',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                        '&:hover': {
+                                            backgroundColor: '#105da5',
+                                        },
+                                    }}
+                                >
+                                    Guardar
+                                </Button>
+                            </Box>
                         )}
                     </Box>
 
-                    {/* Formulario de los campos de texto */}
+                    {/* Sección de edición de los campos */}
                     <form onSubmit={handleUpdateFields}>
                         <Grid container spacing={2}>
-                            {/* Distribuir campos en dos por fila */}
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
@@ -444,71 +390,52 @@ const PerfilEmpresa = () => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                                {!isEditing ? (
+                            {/* Botones de guardar y cancelar para los campos de texto */}
+                            {isEditing && (
+                                <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                                     <Button
                                         variant="outlined"
-                                        startIcon={<EditIcon />}
-                                        onClick={() => setIsEditing(true)}
+                                        startIcon={<CloseIcon />}
+                                        onClick={handleCancelFields}
                                         sx={{
                                             borderRadius: '24px',
-                                            padding: '12px 24px',
                                             textTransform: 'none',
-                                            borderColor: '#28a745',
-                                            color: '#28a745',
+                                            borderColor: '#1976d2',
+                                            color: '#1976d2',
                                             '&:hover': {
-                                                borderColor: '#218838',
-                                                backgroundColor: '#e9f9eb',
+                                                borderColor: '#105da5',
+                                                backgroundColor: '#e8f0ff',
                                             },
                                         }}
                                     >
-                                        Editar
+                                        Cancelar
                                     </Button>
-                                ) : (
-                                    <>
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={<CloseIcon />}
-                                            onClick={handleCancel}
-                                            sx={{
-                                                borderRadius: '24px',
-                                                textTransform: 'none',
-                                                borderColor: '#1976d2',
-                                                color: '#1976d2',
-                                                '&:hover': {
-                                                    borderColor: '#105da5',
-                                                    backgroundColor: '#e8f0ff',
-                                                },
-                                            }}
-                                        >
-                                            Cancelar
-                                        </Button>
 
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            startIcon={<SaveIcon />}
-                                            sx={{
-                                                borderRadius: '24px',
-                                                backgroundColor: '#1976D2',
-                                                color: '#fff',
-                                                '&:hover': {
-                                                    backgroundColor: '#105da5',
-                                                },
-                                            }}
-                                            type="submit"
-                                        >
-                                            Guardar
-                                        </Button>
-                                    </>
-                                )}
-                            </Grid>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<SaveIcon />}
+                                        type="submit"
+                                        disabled={!hasChanges}
+                                        sx={{
+                                            borderRadius: '24px',
+                                            padding: '12px 24px',
+                                            backgroundColor: '#1976D2',
+                                            color: '#fff',
+                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                            textTransform: 'none',
+                                            '&:hover': {
+                                                backgroundColor: '#105da5',
+                                            },
+                                        }}
+                                    >
+                                        Guardar
+                                    </Button>
+                                </Grid>
+                            )}
                         </Grid>
                     </form>
                 </Box>
-
-                {/* Redes Sociales */}
-                <RedesSociales />
             </Container>
 
             {/* Componente de Notificaciones */}
