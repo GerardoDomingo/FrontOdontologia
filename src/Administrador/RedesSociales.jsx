@@ -12,28 +12,29 @@ import {
   ListItemText,
   ListItemSecondaryAction,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import axios from 'axios';
 
+// Redes sociales disponibles
 const availableSocials = [
-  { label: 'Facebook', name: 'facebook' },
-  { label: 'Twitter', name: 'twitter' },
-  { label: 'LinkedIn', name: 'linkedin' },
-  { label: 'Instagram', name: 'instagram' },
-  { label: 'WhatsApp', name: 'whatsapp' },
+  { label: 'Facebook', name: 'facebook', type: 'url' },
+  { label: 'Twitter', name: 'twitter', type: 'url' },
+  { label: 'LinkedIn', name: 'linkedin', type: 'url' },
+  { label: 'Instagram', name: 'instagram', type: 'url' },
+  { label: 'WhatsApp', name: 'whatsapp', type: 'phone' },
 ];
 
-const RedesSociales = ({ id_empresa }) => {
+const RedesSociales = () => {
   const [socialData, setSocialData] = useState({});
   const [selectedSocial, setSelectedSocial] = useState('');
   const [url, setUrl] = useState('');
-  const [isEditing, setIsEditing] = useState(null); // Track editing index
+  const [isEditing, setIsEditing] = useState(null);
 
-  // Cargar redes sociales al montar el componente
+  // Cargar las redes sociales de la base de datos
   useEffect(() => {
     const fetchSocials = async () => {
       try {
-        const response = await axios.get(`https://backendodontologia.onrender.com/api/redesSociales/${id_empresa}`);
+        const response = await axios.get('https://backendodontologia.onrender.com/api/redesSociales');
         setSocialData(response.data.reduce((acc, item) => ({ ...acc, [item.nombre_red]: item.url }), {}));
       } catch (error) {
         console.error('Error al obtener las redes sociales:', error);
@@ -41,39 +42,76 @@ const RedesSociales = ({ id_empresa }) => {
     };
 
     fetchSocials();
-  }, [id_empresa]);
+  }, []);
 
   const handleInputChange = (e) => {
-    setUrl(e.target.value);
+    if (selectedSocial === 'whatsapp') {
+      // Restringir a solo números y asegurar que solo ingrese 10 dígitos
+      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+      setUrl(`+52${value}`);
+    } else {
+      setUrl(e.target.value);
+    }
   };
 
   const handleSocialSelect = (e) => {
     setSelectedSocial(e.target.value);
+    setUrl(''); // Limpiar el campo de URL al seleccionar una nueva red social
   };
 
-  const validateAndSave = async () => {
-    if (selectedSocial && url) {
+  // Validación de URL o número de WhatsApp
+  const validateInput = () => {
+    if (!url) {
+      alert('Por favor, ingresa un enlace o número.');
+      return false;
+    }
+
+    if (selectedSocial === 'whatsapp') {
+      const whatsappRegex = /^\+52\d{10}$/;
+      if (!whatsappRegex.test(url)) {
+        alert('Por favor ingresa un número de WhatsApp válido con 10 dígitos.');
+        return false;
+      }
+    } else {
+      const urlRegex = /^(https?:\/\/)?([a-z0-9]+\.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$/;
+      if (!urlRegex.test(url)) {
+        alert('Por favor ingresa un enlace válido.');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (validateInput()) {
       try {
-        await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
-          id_empresa,
-          nombre_red: selectedSocial,
-          url,
-        });
-        setSocialData({ ...socialData, [selectedSocial]: url });
+        if (isEditing !== null) {
+          // Si está editando
+          await axios.put(`https://backendodontologia.onrender.com/api/redesSociales/${isEditing}`, {
+            nombre_red: selectedSocial,
+            url,
+          });
+          setSocialData({ ...socialData, [selectedSocial]: url });
+          setIsEditing(null);
+        } else {
+          // Si está añadiendo uno nuevo
+          await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
+            nombre_red: selectedSocial,
+            url,
+          });
+          setSocialData({ ...socialData, [selectedSocial]: url });
+        }
         setSelectedSocial('');
         setUrl('');
       } catch (error) {
-        console.error('Error al agregar la red social:', error);
+        console.error('Error al guardar la red social:', error);
       }
-    } else {
-      alert('Por favor ingresa un enlace válido.');
     }
   };
 
   const handleDelete = async (social) => {
     try {
-      const socialId = Object.keys(socialData).find(key => key === social);
-      await axios.delete(`https://backendodontologia.onrender.com/api/redesSociales/${socialId}`);
+      await axios.delete(`https://backendodontologia.onrender.com/api/redesSociales/${social}`);
       const updatedData = { ...socialData };
       delete updatedData[social];
       setSocialData(updatedData);
@@ -88,26 +126,16 @@ const RedesSociales = ({ id_empresa }) => {
     setUrl(socialData[social]);
   };
 
-  const saveEdit = async () => {
-    if (url) {
-      try {
-        const socialId = Object.keys(socialData).find(key => key === selectedSocial);
-        await axios.put(`https://backendodontologia.onrender.com/api/redesSociales/${socialId}`, {
-          nombre_red: selectedSocial,
-          url,
-        });
-        setSocialData({ ...socialData, [selectedSocial]: url });
-        setSelectedSocial('');
-        setUrl('');
-        setIsEditing(null);
-      } catch (error) {
-        console.error('Error al editar la red social:', error);
-      }
-    }
-  };
-
   return (
-    <Box sx={{ mt: 4 }}>
+    <Box
+      sx={{
+        mt: 4,
+        backgroundColor: '#fff',
+        p: 3,
+        borderRadius: '10px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      }}
+    >
       <Typography variant="h5" gutterBottom>
         Redes Sociales
       </Typography>
@@ -132,30 +160,40 @@ const RedesSociales = ({ id_empresa }) => {
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label="Enlace"
+            label={selectedSocial === 'whatsapp' ? 'Número de WhatsApp' : 'Enlace'}
             value={url}
             onChange={handleInputChange}
-            helperText="Ingresa el enlace de la red social"
+            InputProps={{
+              startAdornment: selectedSocial === 'whatsapp' && <Typography sx={{ color: 'gray' }}>+52</Typography>,
+            }}
+            helperText={
+              selectedSocial === 'whatsapp'
+                ? 'Ingresa los 10 dígitos restantes, ej: 1234567890'
+                : 'Ingresa el enlace de la red social'
+            }
           />
         </Grid>
 
         <Grid item xs={12}>
-          {isEditing !== null ? (
-            <Button variant="contained" color="primary" startIcon={<EditIcon />} onClick={saveEdit}>
-              Guardar Edición
-            </Button>
-          ) : (
-            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={validateAndSave}>
-              Añadir
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SaveIcon />}
+            onClick={handleSave}
+            disabled={!selectedSocial || !url}
+          >
+            Guardar
+          </Button>
         </Grid>
       </Grid>
 
       <List>
         {Object.keys(socialData).map((social) => (
           <ListItem key={social}>
-            <ListItemText primary={availableSocials.find((s) => s.name === social).label} secondary={socialData[social]} />
+            <ListItemText
+              primary={availableSocials.find((s) => s.name === social)?.label || social}
+              secondary={socialData[social]}
+            />
             <ListItemSecondaryAction>
               <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(social)}>
                 <EditIcon />
