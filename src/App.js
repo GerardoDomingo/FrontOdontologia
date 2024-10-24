@@ -25,34 +25,37 @@ function App() {
   const [tituloPagina, setTituloPagina] = useState(''); // Para el título de la página
   const [logo, setLogo] = useState(''); // Para el logo (favicon)
 
-  // useEffect para cargar los datos del título y el logo desde el backend
-  useEffect(() => {
-    const fetchTitleAndLogo = async () => {
-      try {
-        const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
-        const { titulo_pagina, logo } = response.data;
+  // Función para cargar los datos del título y el logo desde el backend
+  const fetchTitleAndLogo = async () => {
+    try {
+      const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
+      const { titulo_pagina, logo } = response.data;
 
-        // Actualizar el título de la página
-        if (titulo_pagina) {
-          document.title = titulo_pagina;
-          setTituloPagina(titulo_pagina);
-        }
-
-        // Actualizar el favicon dinámicamente con el logo
-        if (logo) {
-          const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-          link.type = 'image/x-icon';
-          link.rel = 'shortcut icon';
-          link.href = `data:image/png;base64,${logo}`; // Usar el logo en base64 como favicon
-          document.getElementsByTagName('head')[0].appendChild(link);
-          setLogo(`data:image/png;base64,${logo}`);
-        }
-      } catch (error) {
-        console.error('Error al obtener los datos del backend:', error);
+      // Actualizar el título de la página
+      if (titulo_pagina) {
+        document.title = titulo_pagina;
+        setTituloPagina(titulo_pagina);
       }
-    };
 
+      // Actualizar el favicon dinámicamente con el logo
+      if (logo) {
+        const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = `data:image/png;base64,${logo}`; // Usar el logo en base64 como favicon
+        document.getElementsByTagName('head')[0].appendChild(link);
+        setLogo(`data:image/png;base64,${logo}`);
+      }
+    } catch (error) {
+      console.error('Error al obtener los datos del backend:', error);
+    }
+  };
+
+  // useEffect para cargar los datos de la empresa al inicio y periódicamente
+  useEffect(() => {
     fetchTitleAndLogo();
+    const interval = setInterval(fetchTitleAndLogo, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
