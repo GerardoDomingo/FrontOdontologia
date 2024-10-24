@@ -108,7 +108,7 @@ const Principal = () => {
           </Card>
         </Grid>
 
-        {/* Tarjeta de Historial Médico */}
+        {/* Tarjeta de Historial Médiico */}
         <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{
