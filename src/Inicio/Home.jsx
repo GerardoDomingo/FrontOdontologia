@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, IconButton } from '@mui/material';
-import { CleaningServices, MedicalServices, LocalHospital, Phone, Email } from '@mui/icons-material'; // Importación correcta de iconos
+import { CleaningServices, MedicalServices, LocalHospital, Phone, Email } from '@mui/icons-material';
 
 // Importar las imágenes locales
 import img1 from '../img/img1_1.jpeg';
@@ -9,7 +9,14 @@ import img3 from '../img/img3_1.png';
 
 const Home = () => {
   return (
-    <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh', margin: 0, padding: 0 }}>
+    <Box
+      sx={{
+        background: 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Degradado de fondo
+        minHeight: '100vh',
+        margin: 0,
+        padding: 0,
+      }}
+    >
       <Container maxWidth="lg" sx={{ py: 10 }}>
         {/* Encabezado principal */}
         <Box sx={{ textAlign: 'center', mb: 8 }}>
@@ -22,7 +29,7 @@ const Home = () => {
               fontFamily: 'Roboto, sans-serif',
             }}
           >
-          Odontología Carol
+            Odontología Carol
           </Typography>
           <Typography
             variant="subtitle1"
@@ -79,12 +86,15 @@ const Home = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     height: '100%',
-                    transition: '0.3s',
-                    backgroundColor: '#FFFFFF', // Fondo blanco garantizado
-                    '&:hover': { boxShadow: 6 },
+                    transition: 'transform 0.3s ease',
+                    backgroundColor: '#FFFFFF',
+                    '&:hover': {
+                      boxShadow: 6,
+                      transform: 'scale(1.05)', // Animación de zoom al pasar el ratón
+                    },
                   }}
                 >
-                  <Box sx={{ textAlign: 'center', mt: 2 }}>{service.icon}</Box> {/* Mostrar icono */}
+                  <Box sx={{ textAlign: 'center', mt: 2 }}>{service.icon}</Box>
                   <CardMedia
                     component="img"
                     alt={service.title}
@@ -157,6 +167,8 @@ const Home = () => {
                     backgroundColor: '#FFFFFF',
                     borderRadius: '16px',
                     boxShadow: 3,
+                    transition: '0.3s',
+                    '&:hover': { boxShadow: 6 },
                   }}
                 >
                   <Typography
@@ -200,24 +212,18 @@ const Home = () => {
             Visítanos en nuestra clínica o llámanos para agendar tu cita.
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
-            <IconButton color="primary">
+            <IconButton color="primary" sx={{ fontSize: 40 }}>
               <Phone />
             </IconButton>
-            <Typography
-              variant="body2"
-              sx={{ color: '#424242', fontFamily: 'Roboto, sans-serif', mb: 2 }}
-            >
+            <Typography variant="body2" sx={{ color: '#424242', fontFamily: 'Roboto, sans-serif' }}>
               <strong>Teléfonos:</strong> 5582758840, 7713339456
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 2 }}>
-            <IconButton color="primary">
+            <IconButton color="primary" sx={{ fontSize: 40 }}>
               <Email />
             </IconButton>
-            <Typography
-              variant="body2"
-              sx={{ color: '#424242', fontFamily: 'Roboto, sans-serif' }}
-            >
+            <Typography variant="body2" sx={{ color: '#424242', fontFamily: 'Roboto, sans-serif' }}>
               <strong>Email:</strong> e_gr@hotmail.com
             </Typography>
           </Box>
