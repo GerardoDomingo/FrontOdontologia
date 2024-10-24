@@ -14,13 +14,7 @@ import {
     DialogContentText,
     DialogTitle,
 } from '@mui/material';
-import {
-    UploadFile as UploadFileIcon,
-    Save as SaveIcon,
-    Edit as EditIcon,
-    Close as CloseIcon,
-    PhotoCamera as PhotoCameraIcon
-} from '@mui/icons-material';
+import { Save as SaveIcon, Edit as EditIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon } from '@mui/icons-material';
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
@@ -222,7 +216,7 @@ const PerfilEmpresa = () => {
     };
 
     return (
-        <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f9f9f9', position: 'relative' }}>
+        <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: 'rgba(173, 216, 230, 0.2)', position: 'relative' }}>
             <Container maxWidth="md">
                 <IconButton
                     component={Link}
@@ -267,7 +261,7 @@ const PerfilEmpresa = () => {
 
                         {logoChanged && (
                             <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelLogo}>
+                                <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelLogo} sx={{ mr: 2 }}>
                                     Cancelar
                                 </Button>
                                 <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSaveLogo}>
@@ -374,7 +368,7 @@ const PerfilEmpresa = () => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                                 {!isEditingDatos ? (
                                     <Button
                                         variant="outlined"
@@ -385,10 +379,15 @@ const PerfilEmpresa = () => {
                                     </Button>
                                 ) : (
                                     <>
-                                        <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelDatos}>
+                                        <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelDatos} sx={{ mr: 2 }}>
                                             Cancelar
                                         </Button>
-                                        <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSaveDatos}>
+                                        <Button
+                                            variant="contained"
+                                            startIcon={<SaveIcon />}
+                                            onClick={handleSaveDatos}
+                                            disabled={!hasChanges} // Desactiva el botón si no hay cambios
+                                        >
                                             Guardar
                                         </Button>
                                     </>
