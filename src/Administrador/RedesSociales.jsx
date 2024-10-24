@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import axios from 'axios';
+import Notificaciones from '../Compartidos/Notificaciones';  // Importar el componente de notificaciones
 
 // Redes sociales disponibles
 const availableSocials = [
@@ -29,6 +30,18 @@ const RedesSociales = () => {
   const [selectedSocial, setSelectedSocial] = useState('');
   const [url, setUrl] = useState('');
   const [isEditing, setIsEditing] = useState(null);
+  
+  // Estado para manejar notificaciones
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    type: 'success',  // success, error, warning, info
+  });
+
+  // Manejar el cierre de la notificación
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
 
   // Cargar las redes sociales de la base de datos
   useEffect(() => {
@@ -62,7 +75,11 @@ const RedesSociales = () => {
   // Validación simplificada: solo se valida que el campo no esté vacío
   const validateInput = () => {
     if (!url) {
-      alert('Por favor, ingresa un enlace o número.');
+      setNotification({
+        open: true,
+        message: 'Por favor, ingresa un enlace o número.',
+        type: 'error',
+      });
       return false;
     }
     return true;
@@ -79,6 +96,11 @@ const RedesSociales = () => {
           });
           setSocialData({ ...socialData, [selectedSocial]: { ...socialData[selectedSocial], url: `+52${url}` } });
           setIsEditing(null);
+          setNotification({
+            open: true,
+            message: 'Red social actualizada con éxito.',
+            type: 'success',
+          });
         } else {
           const response = await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
             nombre_red: selectedSocial,
@@ -86,11 +108,21 @@ const RedesSociales = () => {
           });
           const newSocial = response.data;
           setSocialData({ ...socialData, [selectedSocial]: newSocial });
+          setNotification({
+            open: true,
+            message: 'Red social agregada con éxito.',
+            type: 'success',
+          });
         }
         setSelectedSocial('');
         setUrl('');
       } catch (error) {
         console.error('Error al guardar la red social:', error);
+        setNotification({
+          open: true,
+          message: 'Error al guardar la red social.',
+          type: 'error',
+        });
       }
     }
   };
@@ -103,8 +135,18 @@ const RedesSociales = () => {
       const updatedData = { ...socialData };
       delete updatedData[social];
       setSocialData(updatedData);
+      setNotification({
+        open: true,
+        message: 'Red social eliminada con éxito.',
+        type: 'success',
+      });
     } catch (error) {
       console.error('Error al eliminar la red social:', error);
+      setNotification({
+        open: true,
+        message: 'Error al eliminar la red social.',
+        type: 'error',
+      });
     }
   };
 
@@ -194,6 +236,13 @@ const RedesSociales = () => {
           </ListItem>
         ))}
       </List>
+
+      <Notificaciones
+        open={notification.open}
+        message={notification.message}
+        type={notification.type}
+        handleClose={handleCloseNotification}
+      />
     </Box>
   );
 };
