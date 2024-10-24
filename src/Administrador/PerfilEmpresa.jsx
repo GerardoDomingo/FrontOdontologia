@@ -177,22 +177,23 @@ const PerfilEmpresa = () => {
             mostrarNotificacion('No hay información para actualizar', 'error');
             return;
         }
-
+    
         if (!validateForm()) return;
-
-        const formDataToSend = new FormData();
-        formDataToSend.append('id_empresa', formData.id_empresa);
-        formDataToSend.append('nombre_empresa', formData.nombre_empresa);
-        formDataToSend.append('direccion', formData.direccion);
-        formDataToSend.append('telefono', formData.telefono);
-        formDataToSend.append('correo_electronico', formData.correo_electronico);
-        formDataToSend.append('descripcion', formData.descripcion);
-        formDataToSend.append('slogan', formData.slogan);
-        formDataToSend.append('titulo_pagina', formData.titulo_pagina);
-
+    
+        const formDataToSend = {
+            id_empresa: formData.id_empresa,
+            nombre_empresa: formData.nombre_empresa,
+            direccion: formData.direccion,
+            telefono: formData.telefono,
+            correo_electronico: formData.correo_electronico,
+            descripcion: formData.descripcion,
+            slogan: formData.slogan,
+            titulo_pagina: formData.titulo_pagina
+        };
+    
         try {
             const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/updateDatos', formDataToSend);
-
+    
             if (response.status === 200) {
                 mostrarNotificacion('Datos actualizados con éxito', 'success');
                 setHasChanges(false);
@@ -204,6 +205,7 @@ const PerfilEmpresa = () => {
             mostrarNotificacion('Error al actualizar los datos', 'error');
         }
     };
+    
 
     const handleCancelDatos = () => {
         setOpenConfirmDialog(true); // Abrir diálogo de confirmación
