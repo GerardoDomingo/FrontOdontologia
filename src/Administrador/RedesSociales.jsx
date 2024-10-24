@@ -34,7 +34,7 @@ const RedesSociales = () => {
   useEffect(() => {
     const fetchSocials = async () => {
       try {
-        const response = await axios.get('https://backendodontologia.onrender.com/api/redesSociales');
+        const response = await axios.get('https://backendodontologia.onrender.com/api/redesSociales/get');
         setSocialData(response.data.reduce((acc, item) => ({ ...acc, [item.nombre_red]: item.url }), {}));
       } catch (error) {
         console.error('Error al obtener las redes sociales:', error);
@@ -46,8 +46,7 @@ const RedesSociales = () => {
 
   const handleInputChange = (e) => {
     if (selectedSocial === 'whatsapp') {
-      // Restringir a solo números y asegurar que solo ingrese 10 dígitos
-      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+      const value = e.target.value.replace(/\D/g, '').slice(0, 10); // Solo permite 10 dígitos para WhatsApp
       setUrl(`+52${value}`);
     } else {
       setUrl(e.target.value);
@@ -86,15 +85,13 @@ const RedesSociales = () => {
     if (validateInput()) {
       try {
         if (isEditing !== null) {
-          // Si está editando
-          await axios.put(`https://backendodontologia.onrender.com/api/redesSociales/${isEditing}`, {
+          await axios.put(`https://backendodontologia.onrender.com/api/redesSociales/editar/${isEditing}`, {
             nombre_red: selectedSocial,
             url,
           });
           setSocialData({ ...socialData, [selectedSocial]: url });
           setIsEditing(null);
         } else {
-          // Si está añadiendo uno nuevo
           await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
             nombre_red: selectedSocial,
             url,
@@ -111,7 +108,7 @@ const RedesSociales = () => {
 
   const handleDelete = async (social) => {
     try {
-      await axios.delete(`https://backendodontologia.onrender.com/api/redesSociales/${social}`);
+      await axios.delete(`https://backendodontologia.onrender.com/api/redesSociales/eliminar/${social}`);
       const updatedData = { ...socialData };
       delete updatedData[social];
       setSocialData(updatedData);
