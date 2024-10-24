@@ -44,10 +44,11 @@ const RedesSociales = () => {
     fetchSocials();
   }, []);
 
+  // Manejar la entrada del número de WhatsApp o URL
   const handleInputChange = (e) => {
     if (selectedSocial === 'whatsapp') {
-      const value = e.target.value.replace(/\D/g, '').slice(0, 10); // Solo permite 10 dígitos para WhatsApp
-      setUrl(`+52${value}`);
+      const value = e.target.value.replace(/\D/g, '').slice(0, 10); // Limitar a 10 dígitos
+      setUrl(value);  // No añades `+52` aquí
     } else {
       setUrl(e.target.value);
     }
@@ -66,7 +67,7 @@ const RedesSociales = () => {
     }
 
     if (selectedSocial === 'whatsapp') {
-      const whatsappRegex = /^\+52\d{10}$/;
+      const whatsappRegex = /^\d{10}$/;
       if (!whatsappRegex.test(url)) {
         alert('Por favor ingresa un número de WhatsApp válido con 10 dígitos.');
         return false;
@@ -81,22 +82,23 @@ const RedesSociales = () => {
     return true;
   };
 
+  // Guardar red social (añadir o editar)
   const handleSave = async () => {
     if (validateInput()) {
       try {
         if (isEditing !== null) {
           await axios.put(`https://backendodontologia.onrender.com/api/redesSociales/editar/${isEditing}`, {
             nombre_red: selectedSocial,
-            url,
+            url: selectedSocial === 'whatsapp' ? `+52${url}` : url,  // Añadir +52 solo si es WhatsApp
           });
-          setSocialData({ ...socialData, [selectedSocial]: url });
+          setSocialData({ ...socialData, [selectedSocial]: `+52${url}` });
           setIsEditing(null);
         } else {
           await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
             nombre_red: selectedSocial,
-            url,
+            url: selectedSocial === 'whatsapp' ? `+52${url}` : url,
           });
-          setSocialData({ ...socialData, [selectedSocial]: url });
+          setSocialData({ ...socialData, [selectedSocial]: `+52${url}` });
         }
         setSelectedSocial('');
         setUrl('');
@@ -106,9 +108,11 @@ const RedesSociales = () => {
     }
   };
 
+  // Eliminar red social
   const handleDelete = async (social) => {
     try {
-      await axios.delete(`https://backendodontologia.onrender.com/api/redesSociales/eliminar/${social}`);
+      const id = Object.keys(socialData).find(key => key === social);
+      await axios.delete(`https://backendodontologia.onrender.com/api/redesSociales/eliminar/${id}`);
       const updatedData = { ...socialData };
       delete updatedData[social];
       setSocialData(updatedData);
@@ -117,10 +121,11 @@ const RedesSociales = () => {
     }
   };
 
+  // Editar red social
   const handleEdit = (social) => {
     setIsEditing(social);
     setSelectedSocial(social);
-    setUrl(socialData[social]);
+    setUrl(socialData[social].replace('+52', '')); // Quita +52 para WhatsApp
   };
 
   return (
@@ -161,7 +166,7 @@ const RedesSociales = () => {
             value={url}
             onChange={handleInputChange}
             InputProps={{
-              startAdornment: selectedSocial === 'whatsapp' && <Typography sx={{ color: 'gray' }}></Typography>,
+              startAdornment: selectedSocial === 'whatsapp' && <Typography sx={{ color: 'gray' }}>+52</Typography>, // Visualmente +52
             }}
             helperText={
               selectedSocial === 'whatsapp'
