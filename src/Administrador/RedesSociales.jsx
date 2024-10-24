@@ -161,7 +161,7 @@ const RedesSociales = () => {
             value={url}
             onChange={handleInputChange}
             InputProps={{
-              startAdornment: selectedSocial === 'whatsapp' && <Typography sx={{ color: 'gray' }}>+52</Typography>,
+              startAdornment: selectedSocial === 'whatsapp' && <Typography sx={{ color: 'gray' }}></Typography>,
             }}
             helperText={
               selectedSocial === 'whatsapp'
