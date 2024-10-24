@@ -35,7 +35,7 @@ const RedesSociales = () => {
     const fetchSocials = async () => {
       try {
         const response = await axios.get('https://backendodontologia.onrender.com/api/redesSociales/get');
-        setSocialData(response.data.reduce((acc, item) => ({ ...acc, [item.nombre_red]: item.url }), {}));
+        setSocialData(response.data.reduce((acc, item) => ({ ...acc, [item.nombre_red]: item }), {})); // Guardamos el objeto completo
       } catch (error) {
         console.error('Error al obtener las redes sociales:', error);
       }
@@ -44,11 +44,11 @@ const RedesSociales = () => {
     fetchSocials();
   }, []);
 
-  // Manejar la entrada del número de WhatsApp o URL
   const handleInputChange = (e) => {
     if (selectedSocial === 'whatsapp') {
-      const value = e.target.value.replace(/\D/g, '').slice(0, 10); // Limitar a 10 dígitos
-      setUrl(value);  // No añades `+52` aquí
+      // Solo permitir números y hasta 10 dígitos
+      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+      setUrl(value);
     } else {
       setUrl(e.target.value);
     }
@@ -59,25 +59,11 @@ const RedesSociales = () => {
     setUrl(''); // Limpiar el campo de URL al seleccionar una nueva red social
   };
 
-  // Validación de URL o número de WhatsApp
+  // Validación simplificada: solo se valida que el campo no esté vacío
   const validateInput = () => {
     if (!url) {
       alert('Por favor, ingresa un enlace o número.');
       return false;
-    }
-
-    if (selectedSocial === 'whatsapp') {
-      const whatsappRegex = /^\d{10}$/;
-      if (!whatsappRegex.test(url)) {
-        alert('Por favor ingresa un número de WhatsApp válido con 10 dígitos.');
-        return false;
-      }
-    } else {
-      const urlRegex = /^(https?:\/\/)?([a-z0-9]+\.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$/;
-      if (!urlRegex.test(url)) {
-        alert('Por favor ingresa un enlace válido.');
-        return false;
-      }
     }
     return true;
   };
@@ -89,16 +75,17 @@ const RedesSociales = () => {
         if (isEditing !== null) {
           await axios.put(`https://backendodontologia.onrender.com/api/redesSociales/editar/${isEditing}`, {
             nombre_red: selectedSocial,
-            url: selectedSocial === 'whatsapp' ? `+52${url}` : url,  // Añadir +52 solo si es WhatsApp
+            url: selectedSocial === 'whatsapp' ? `+52${url}` : url,
           });
-          setSocialData({ ...socialData, [selectedSocial]: `+52${url}` });
+          setSocialData({ ...socialData, [selectedSocial]: { ...socialData[selectedSocial], url: `+52${url}` } });
           setIsEditing(null);
         } else {
-          await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
+          const response = await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
             nombre_red: selectedSocial,
             url: selectedSocial === 'whatsapp' ? `+52${url}` : url,
           });
-          setSocialData({ ...socialData, [selectedSocial]: `+52${url}` });
+          const newSocial = response.data;
+          setSocialData({ ...socialData, [selectedSocial]: newSocial });
         }
         setSelectedSocial('');
         setUrl('');
@@ -111,7 +98,7 @@ const RedesSociales = () => {
   // Eliminar red social
   const handleDelete = async (social) => {
     try {
-      const id = Object.keys(socialData).find(key => key === social);
+      const id = socialData[social]?.id;
       await axios.delete(`https://backendodontologia.onrender.com/api/redesSociales/eliminar/${id}`);
       const updatedData = { ...socialData };
       delete updatedData[social];
@@ -123,9 +110,9 @@ const RedesSociales = () => {
 
   // Editar red social
   const handleEdit = (social) => {
-    setIsEditing(social);
+    setIsEditing(socialData[social].id);
     setSelectedSocial(social);
-    setUrl(socialData[social].replace('+52', '')); // Quita +52 para WhatsApp
+    setUrl(socialData[social].url.replace('+52', '')); // Quitar +52 si es WhatsApp
   };
 
   return (
@@ -194,7 +181,7 @@ const RedesSociales = () => {
           <ListItem key={social}>
             <ListItemText
               primary={availableSocials.find((s) => s.name === social)?.label || social}
-              secondary={socialData[social]}
+              secondary={socialData[social]?.url}
             />
             <ListItemSecondaryAction>
               <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(social)}>
