@@ -46,8 +46,25 @@ const BarraPaciente = () => {
         >
             <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 {/* Logo de la barra y título */}
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <FaTooth style={{ fontSize: 32, marginRight: '8px', color: isDarkTheme ? '#fff' : '#333' }} />
+
+                <Box
+                    component={Link} // Usamos el componente Link
+                    to="/Administrador/principal" // La ruta a la que quieres redirigir
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        textDecoration: 'none', // Para quitar el subrayado típico de los enlaces
+                        color: 'inherit', // Inherita el color para que no cambie por defecto a azul
+                    }}
+                    onClick={handleMenuClose} // Llama a la misma función para cerrar el menú si es necesario
+                >
+                    <FaTooth
+                        style={{
+                            fontSize: 32,
+                            marginRight: '8px',
+                            color: isDarkTheme ? '#fff' : '#333',
+                        }}
+                    />
                     <Typography
                         variant="h6"
                         component="div"

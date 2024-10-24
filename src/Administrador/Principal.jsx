@@ -9,7 +9,7 @@ const Principal = () => {
   return (
     <Box
       sx={{
-        backgroundColor: '#f3f4f6',
+        background: 'linear-gradient(to right, #1976d2, #42a5f5)', // Gradiente de fondo
         minHeight: '100vh',
         display: 'flex',
         justifyContent: 'center',
@@ -18,10 +18,18 @@ const Principal = () => {
       }}
     >
       <Box sx={{ textAlign: 'center', mb: 8 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: '#1976d2' }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            mb: 2,
+            color: '#fff', // Texto blanco
+            letterSpacing: 1, // Espaciado de letras para estilo
+          }}
+        >
           Panel Administrativo de Odontología Carol
         </Typography>
-        <Typography variant="body1" sx={{ color: '#616161', mb: 6 }}>
+        <Typography variant="body1" sx={{ color: '#e3f2fd', mb: 6 }}>
           Accede a las distintas funcionalidades de la plataforma.
         </Typography>
       </Box>
@@ -32,17 +40,26 @@ const Principal = () => {
         <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{
-              boxShadow: 3,
-              borderRadius: '16px',
-              transition: 'transform 0.3s ease',
+              boxShadow: 6,
+              borderRadius: '20px',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
               '&:hover': {
-                boxShadow: 6,
-                transform: 'scale(1.05)', // Efecto de zoom al pasar el ratón
+                boxShadow: 10,
+                transform: 'scale(1.07)', // Efecto de zoom al pasar el ratón
               },
+              backgroundColor: '#fff',
             }}
           >
-            <CardContent>
-              <Settings sx={{ fontSize: 50, color: '#1976d2', mb: 2 }} />
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Settings
+                sx={{
+                  fontSize: 60,
+                  color: '#1976d2',
+                  mb: 2,
+                  transition: '0.3s',
+                  '&:hover': { opacity: 0.8 }, // Opacidad en hover
+                }}
+              />
               <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242' }}>
                 Configuración
               </Typography>
@@ -55,6 +72,7 @@ const Principal = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
+                sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px' }}
                 onClick={() => navigate('/Administrador/configuracion')}
               >
                 Ir a Configuración
@@ -67,17 +85,26 @@ const Principal = () => {
         <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{
-              boxShadow: 3,
-              borderRadius: '16px',
-              transition: 'transform 0.3s ease',
+              boxShadow: 6,
+              borderRadius: '20px',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
               '&:hover': {
-                boxShadow: 6,
-                transform: 'scale(1.05)',
+                boxShadow: 10,
+                transform: 'scale(1.07)',
               },
+              backgroundColor: '#fff',
             }}
           >
-            <CardContent>
-              <Assessment sx={{ fontSize: 50, color: '#1976d2', mb: 2 }} />
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Assessment
+                sx={{
+                  fontSize: 60,
+                  color: '#1976d2',
+                  mb: 2,
+                  transition: '0.3s',
+                  '&:hover': { opacity: 0.8 },
+                }}
+              />
               <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242' }}>
                 Reportes
               </Typography>
@@ -90,6 +117,7 @@ const Principal = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
+                sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px' }}
                 onClick={() => navigate('/Administrador/reportes')}
               >
                 Ver Reportes
@@ -102,17 +130,26 @@ const Principal = () => {
         <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{
-              boxShadow: 3,
-              borderRadius: '16px',
-              transition: 'transform 0.3s ease',
+              boxShadow: 6,
+              borderRadius: '20px',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
               '&:hover': {
-                boxShadow: 6,
-                transform: 'scale(1.05)',
+                boxShadow: 10,
+                transform: 'scale(1.07)',
               },
+              backgroundColor: '#fff',
             }}
           >
-            <CardContent>
-              <Business sx={{ fontSize: 50, color: '#1976d2', mb: 2 }} />
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Business
+                sx={{
+                  fontSize: 60,
+                  color: '#1976d2',
+                  mb: 2,
+                  transition: '0.3s',
+                  '&:hover': { opacity: 0.8 },
+                }}
+              />
               <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242' }}>
                 Perfil de Empresa
               </Typography>
@@ -125,6 +162,7 @@ const Principal = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
+                sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px' }}
                 onClick={() => navigate('/Administrador/PerfilEmpresa')}
               >
                 Ver Perfil
