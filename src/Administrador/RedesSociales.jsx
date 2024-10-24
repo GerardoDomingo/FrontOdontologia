@@ -72,7 +72,7 @@ const RedesSociales = () => {
     setUrl(''); // Limpiar el campo de URL al seleccionar una nueva red social
   };
 
-  // Validación simplificada: solo se valida que el campo no esté vacío
+  // Validación simplificada: solo se valida que el campo no esté vacío y que no se duplique
   const validateInput = () => {
     if (!url) {
       setNotification({
@@ -82,6 +82,16 @@ const RedesSociales = () => {
       });
       return false;
     }
+
+    if (socialData[selectedSocial] && !isEditing) {
+      setNotification({
+        open: true,
+        message: `La red social ${selectedSocial} ya está registrada. Puedes editarla en lugar de agregar una nueva.`,
+        type: 'warning',
+      });
+      return false;
+    }
+
     return true;
   };
 
@@ -90,6 +100,7 @@ const RedesSociales = () => {
     if (validateInput()) {
       try {
         if (isEditing !== null) {
+          // Editar la red social
           await axios.put(`https://backendodontologia.onrender.com/api/redesSociales/editar/${isEditing}`, {
             nombre_red: selectedSocial,
             url: selectedSocial === 'whatsapp' ? `+52${url}` : url,
@@ -102,6 +113,7 @@ const RedesSociales = () => {
             type: 'success',
           });
         } else {
+          // Añadir nueva red social
           const response = await axios.post('https://backendodontologia.onrender.com/api/redesSociales/nuevo', {
             nombre_red: selectedSocial,
             url: selectedSocial === 'whatsapp' ? `+52${url}` : url,
