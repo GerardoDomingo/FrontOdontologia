@@ -14,10 +14,10 @@ const Principal = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '40px',
+        padding: { xs: '20px', sm: '40px' }, // Ajustar padding en pantallas pequeñas
       }}
     >
-      <Box sx={{ textAlign: 'center', mb: 8 }}>
+      <Box sx={{ textAlign: 'center', mb: { xs: 4, sm: 8 } }}>
         <Typography
           variant="h4"
           sx={{
@@ -25,11 +25,12 @@ const Principal = () => {
             mb: 2,
             color: '#fff', // Texto blanco
             letterSpacing: 1, // Espaciado de letras para estilo
+            fontSize: { xs: '1.8rem', sm: '2.4rem' }, // Ajuste de tamaño en pantallas pequeñas
           }}
         >
           Panel Administrativo de Odontología Carol
         </Typography>
-        <Typography variant="body1" sx={{ color: '#e3f2fd', mb: 6 }}>
+        <Typography variant="body1" sx={{ color: '#e3f2fd', mb: { xs: 4, sm: 6 } }}>
           Accede a las distintas funcionalidades de la plataforma.
         </Typography>
       </Box>
@@ -53,17 +54,17 @@ const Principal = () => {
             <CardContent sx={{ textAlign: 'center' }}>
               <Settings
                 sx={{
-                  fontSize: 60,
+                  fontSize: { xs: 50, sm: 60 }, // Ajustar tamaño del ícono para pantallas pequeñas
                   color: '#1976d2',
                   mb: 2,
                   transition: '0.3s',
                   '&:hover': { opacity: 0.8 }, // Opacidad en hover
                 }}
               />
-              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242' }}>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242', fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
                 Configuración
               </Typography>
-              <Typography variant="body2" sx={{ color: '#757575' }}>
+              <Typography variant="body2" sx={{ color: '#757575', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                 Modifica las configuraciones generales del sistema.
               </Typography>
             </CardContent>
@@ -98,17 +99,17 @@ const Principal = () => {
             <CardContent sx={{ textAlign: 'center' }}>
               <Assessment
                 sx={{
-                  fontSize: 60,
+                  fontSize: { xs: 50, sm: 60 },
                   color: '#1976d2',
                   mb: 2,
                   transition: '0.3s',
                   '&:hover': { opacity: 0.8 },
                 }}
               />
-              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242' }}>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242', fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
                 Reportes
               </Typography>
-              <Typography variant="body2" sx={{ color: '#757575' }}>
+              <Typography variant="body2" sx={{ color: '#757575', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                 Consulta los reportes de actividad y rendimiento.
               </Typography>
             </CardContent>
@@ -143,17 +144,17 @@ const Principal = () => {
             <CardContent sx={{ textAlign: 'center' }}>
               <Business
                 sx={{
-                  fontSize: 60,
+                  fontSize: { xs: 50, sm: 60 },
                   color: '#1976d2',
                   mb: 2,
                   transition: '0.3s',
                   '&:hover': { opacity: 0.8 },
                 }}
               />
-              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242' }}>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#424242', fontSize: { xs: '1.3rem', sm: '1.5rem' } }}>
                 Perfil de Empresa
               </Typography>
-              <Typography variant="body2" sx={{ color: '#757575' }}>
+              <Typography variant="body2" sx={{ color: '#757575', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                 Gestiona la información y el perfil de tu empresa.
               </Typography>
             </CardContent>
