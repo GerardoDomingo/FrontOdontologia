@@ -35,20 +35,12 @@ const PoliticasPrivacidad = () => {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
             const data = response.data;
 
-            const grouped = data.reduce((acc, curr) => {
-                const versionMain = Math.floor(curr.version);  // Obtener la parte principal de la versión
-                if (!acc[versionMain]) {
-                    acc[versionMain] = [];
-                }
-                acc[versionMain].push(curr);  // Agrupar por la versión principal
-                return acc;
-            }, {});
-
-            setGroupedPoliticas(grouped);
+            setPoliticas(data);
         } catch (error) {
             console.error('Error al cargar políticas:', error);
         }
     };
+
 
     const fetchPoliticaActiva = async () => {
         try {
@@ -276,35 +268,43 @@ const PoliticasPrivacidad = () => {
                 Historial de Políticas por Versión
             </Typography>
 
-            <TableContainer>
-    <Table>
-        <TableHead>
-            <TableRow>
-                <TableCell>Número de Política</TableCell>
-                <TableCell>Título</TableCell>
-                <TableCell>Versión</TableCell>
-                <TableCell>Estado</TableCell>
-                <TableCell>Fecha de Creación</TableCell>
-                <TableCell>Fecha de Actualización</TableCell>
-            </TableRow>
-        </TableHead>
-        <TableBody>
-            {
-                politicas.length > 0 && politicas.map((politica, index) => (
-                    <TableRow key={index}>
-                        <TableCell>{politica.numero_politica}</TableCell>
-                        <TableCell>{politica.titulo}</TableCell>
-                        <TableCell>{politica.version}</TableCell>
-                        <TableCell>{politica.estado}</TableCell>
-                        <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
-                        <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                ))
-            }
-        </TableBody>
-    </Table>
-</TableContainer>
-
+            <TableContainer component={Paper} sx={{ mt: 4, boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)' }}>
+                <Table>
+                    <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+                        <TableRow>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Número de Política</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Título</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Versión</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Estado</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Fecha de Creación</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>Fecha de Actualización</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {
+                            politicas.length > 0 && politicas.map((politica, index) => (
+                                <TableRow key={index} hover sx={{ transition: 'background-color 0.3s ease', '&:hover': { backgroundColor: '#f1f1f1' } }}>
+                                    <TableCell>{politica.numero_politica}</TableCell>
+                                    <TableCell>{politica.titulo}</TableCell>
+                                    <TableCell>{politica.version}</TableCell>
+                                    <TableCell>
+                                        <Typography sx={{ color: politica.estado === 'activo' ? 'green' : 'red' }}>
+                                            {politica.estado}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                    <TableCell sx={{ textAlign: 'center' }}>
+                                        <IconButton onClick={() => handleEdit(index)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
+                                        <IconButton onClick={() => handleDelete(politica.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        }
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
 
             {/* Diálogo para visualizar el contenido completo de la política */}
