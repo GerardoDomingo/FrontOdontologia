@@ -30,6 +30,7 @@ const PoliticasPrivacidad = () => {
         fetchPoliticas();
     }, []);
 
+    // Función para obtener todas las políticas inactivas
     const fetchPoliticas = async () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
@@ -38,9 +39,7 @@ const PoliticasPrivacidad = () => {
             // Filtrar solo las políticas que estén inactivas
             const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
 
-            console.log("Políticas inactivas:", politicasInactivas);  // Verificar las políticas después del filtro
-
-            setPoliticas(politicasInactivas);
+            setPoliticas(politicasInactivas);  // Guardar las políticas inactivas en el estado
         } catch (error) {
             console.error('Error al cargar políticas:', error);
         }
@@ -284,6 +283,7 @@ const PoliticasPrivacidad = () => {
                 Historial de Políticas por Versión
             </Typography>
 
+            
             <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <Table>
                     <TableHead>
@@ -296,26 +296,23 @@ const PoliticasPrivacidad = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {
-                            politicas.length > 0
-                                ? politicas
-                                    .map((politica, index) => (
-                                        <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' } }}>
-                                            <TableCell>{politica.numero_politica}</TableCell>
-                                            <TableCell>{politica.titulo}</TableCell>
-                                            <TableCell>{politica.version}</TableCell>
-                                            <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
-                                            <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
-                                        </TableRow>
-                                    ))
-                                : (
-                                    <TableRow>
-                                        <TableCell colSpan={5} align="center">
-                                            No hay políticas inactivas.
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                        }
+                        {politicas.length > 0 ? (
+                            politicas.map((politica, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{politica.numero_politica}</TableCell>
+                                    <TableCell>{politica.titulo}</TableCell>
+                                    <TableCell>{politica.version}</TableCell>
+                                    <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center">
+                                    No hay políticas inactivas.
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>
