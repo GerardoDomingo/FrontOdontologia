@@ -49,7 +49,7 @@ const PoliticasPrivacidad = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -62,11 +62,14 @@ const PoliticasPrivacidad = () => {
             const oldVersion = parseFloat(politicas[editingIndex].version);
             newVersion = (oldVersion + 0.1).toFixed(1); // Ejemplo: de 1.0 a 1.1
         } else {
-            // Si es una nueva política, determinar el máximo número de versión
-            const maxVersion = politicas.length > 0 
-                ? Math.max(...politicas.map(p => Math.floor(p.version))) + 1
-                : 1;
-            newVersion = maxVersion.toString() + ".0"; // Asegurar que sea 1.0, 2.0, etc.
+            // Si no hay políticas, la primera versión será 1.0
+            if (politicas.length === 0) {
+                newVersion = "1.0";
+            } else {
+                // Si es una nueva política, determinar el máximo número de versión
+                const maxVersion = Math.max(...politicas.map(p => Math.floor(p.version))) + 1;
+                newVersion = maxVersion.toString() + ".0"; // Asegurar que sea 1.0, 2.0, etc.
+            }
         }
     
         const politicaData = { numero_politica: numeroPolitica, titulo, contenido, version: newVersion, estado: 'activo' };
