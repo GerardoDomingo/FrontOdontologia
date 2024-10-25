@@ -120,9 +120,9 @@ const LoginAttemptsReport = () => {
       <Typography variant="h5" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#1565c0' }}>
         Reporte de Intentos de Login
       </Typography>
-
-      {/* Mostrar intentos máximos y tiempo de bloqueo si están disponibles */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+  
+      {/* Campos para intentos máximos y tiempo de bloqueo */}
+      <Box sx={{ mb: 3 }}>
         <TextField
           label="Intentos máximos permitidos"
           value={maxAttempts}
@@ -139,24 +139,29 @@ const LoginAttemptsReport = () => {
           sx={{ mb: 2 }}
           disabled={!isEditing}
         />
-        {!isEditing ? (
-          <Button variant="contained" color="primary" onClick={handleEdit}>
-            Editar
-          </Button>
-        ) : (
-          <>
-            <Button variant="contained" color="primary" onClick={handleSaveConfig}>
-              Guardar
+  
+        {/* Botones para editar, guardar y cancelar */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+          {!isEditing ? (
+            <Button variant="contained" color="primary" onClick={handleEdit}>
+              Editar
             </Button>
-            <Button variant="outlined" color="secondary" onClick={handleCancelEdit}>
-              Cancelar
-            </Button>
-          </>
-        )}
+          ) : (
+            <>
+              <Button variant="contained" color="primary" onClick={handleSaveConfig}>
+                Guardar
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={handleCancelEdit}>
+                Cancelar
+              </Button>
+            </>
+          )}
+        </Box>
       </Box>
-
+  
       {message && <Typography color="success" sx={{ mt: 2 }}>{message}</Typography>}
-
+  
+      {/* Tabla de intentos de login */}
       <TableContainer component={Paper} sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
         <Table>
           <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
@@ -187,7 +192,7 @@ const LoginAttemptsReport = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
+  
       {/* Modal para mostrar la información del paciente */}
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -235,6 +240,7 @@ const LoginAttemptsReport = () => {
       </Dialog>
     </Box>
   );
+  
 };
 
 export default LoginAttemptsReport;
