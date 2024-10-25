@@ -1,21 +1,44 @@
 // LayoutConEncabezado.js
 import React from 'react';
+import { Box } from '@mui/material';
 import BarraNav from './barraNav';
 import PieDePagina from './Footer';
 
 const LayoutConEncabezado = ({ children }) => {
   return (
-    <div className="layout">
-      <header>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh', // Asegura que ocupe toda la altura de la pantalla
+      }}
+    >
+      <Box component="header">
         <BarraNav />
-      </header>
-      <main className="main-content">
+      </Box>
+
+      <Box
+        component="main"
+        sx={{
+          flex: 1, // Hace que el main ocupe todo el espacio disponible
+          p: 3, // Espaciado alrededor del contenido
+        }}
+      >
         {children}
-      </main>
-      <footer>
+      </Box>
+
+      <Box
+        component="footer"
+        sx={{
+          backgroundColor: '#00bcd4',
+          color: '#ffffff',
+          p: 2, // Padding para el footer
+          textAlign: 'center',
+        }}
+      >
         <PieDePagina />
-      </footer>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
