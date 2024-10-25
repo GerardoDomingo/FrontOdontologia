@@ -91,14 +91,15 @@ const PoliticasPrivacidad = () => {
         setErrors({});
         setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
-
+    
     const handleEdit = (index) => {
         setNumeroPolitica(politicas[index].numero_politica);
         setTitulo(politicas[index].titulo);
         setContenido(politicas[index].contenido);
-        setEditingIndex(index); // Guardamos el índice de la política que se está editando
-        setIsAddingNewPolicy(true); // Abrimos el formulario de nueva política para editar
+        setEditingIndex(index); // Guarda correctamente el índice de la política a editar
+        setIsAddingNewPolicy(true); // Abrir el formulario para editar
     };
+    
 
     const handleDelete = async (id) => {
         try {
