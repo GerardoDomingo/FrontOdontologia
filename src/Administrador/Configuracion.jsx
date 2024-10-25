@@ -118,40 +118,48 @@ const Configuracion = () => {
         </CardContent>
       </Card>
 
-      {/* Botón flotante para ir al perfil de la empresa */}
-      <IconButton
-        component={Link}
-        to="/Administrador/PerfilEmpresa"
-        sx={{
-          position: 'fixed',
-          bottom: 32,
-          right: 32,
-          backgroundColor: '#1976d2',
-          color: '#fff',
-          '&:hover': {
-            backgroundColor: '#1565c0',
-          },
-          boxShadow: '0px 6px 16px rgba(0, 0, 0, 0.2)',
-          p: 2,
-          borderRadius: '50%',
-          display: 'flex',
-          flexDirection: 'column',  // Asegura que el texto quede debajo del icono
-          alignItems: 'center',
-        }}
-      >
-        <FaBuilding size={24} />
-        <Typography
-          variant="caption"
-          sx={{
-            color: '#fff',
-            fontSize: '12px',
-            mt: 1,  // Margen para separar el texto del icono
-            textAlign: 'center',
-          }}
-        >
-          Perfil Empresa
-        </Typography>
-      </IconButton>
+{/* Contenedor del botón flotante y texto */}
+<Box
+  sx={{
+    position: 'fixed',
+    bottom: 32,
+    right: 32,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  }}
+>
+  {/* Botón flotante para ir al perfil de la empresa */}
+  <IconButton
+    component={Link}
+    to="/Administrador/PerfilEmpresa"
+    sx={{
+      backgroundColor: '#1976d2',
+      color: '#fff',
+      '&:hover': {
+        backgroundColor: '#1565c0',
+      },
+      boxShadow: '0px 6px 16px rgba(0, 0, 0, 0.2)',
+      p: 2,
+      borderRadius: '50%',
+    }}
+  >
+    <FaBuilding size={24} />
+  </IconButton>
+
+  {/* Texto debajo del botón */}
+  <Typography
+    variant="caption"
+    sx={{
+      color: '#1976d2',
+      fontSize: '12px',
+      mt: 1, // Margen superior para separar el texto del botón
+      textAlign: 'center',
+    }}
+  >
+    Perfil Empresa
+  </Typography>
+</Box>
 
     </Box>
   );

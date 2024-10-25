@@ -10,6 +10,7 @@ const LoginAttemptsReport = () => {
   const [open, setOpen] = useState(false); // Estado para controlar el modal
   const [maxAttempts, setMaxAttempts] = useState(''); // Estado para los intentos máximos
   const [lockTimeMinutes, setLockTimeMinutes] = useState(''); // Estado para el tiempo de bloqueo
+  const [isEditing, setIsEditing] = useState(false); // Estado para controlar si se está en modo edición
   const [message, setMessage] = useState(''); // Estado para mostrar mensajes
 
   // Obtener los intentos de login y la configuración
@@ -64,8 +65,13 @@ const LoginAttemptsReport = () => {
     setSelectedPaciente(null);
   };
 
-  // Función para actualizar la configuración (intentos máximos y tiempo de bloqueo)
-  const handleUpdateConfig = async () => {
+  // Función para iniciar el modo de edición
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  // Función para guardar la configuración actualizada (intentos máximos y tiempo de bloqueo)
+  const handleSaveConfig = async () => {
     try {
       const response1 = await fetch('https://backendodontologia.onrender.com/api/reportes/update-config', {
         method: 'POST',
@@ -85,11 +91,26 @@ const LoginAttemptsReport = () => {
 
       if (response1.ok && response2.ok) {
         setMessage('Configuración actualizada exitosamente');
+        setIsEditing(false);
       } else {
         setMessage('Error al actualizar la configuración');
       }
     } catch (err) {
       setMessage('Error al actualizar la configuración');
+    }
+  };
+
+  // Función para cancelar la edición
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setMessage('');
+  };
+
+  // Validación para permitir solo números positivos
+  const handleInputChange = (setter) => (event) => {
+    const value = event.target.value;
+    if (/^\d*$/.test(value)) {
+      setter(value);
     }
   };
 
@@ -101,26 +122,40 @@ const LoginAttemptsReport = () => {
       </Typography>
 
       {/* Mostrar intentos máximos y tiempo de bloqueo si están disponibles */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
         <TextField
           label="Intentos máximos permitidos"
           value={maxAttempts}
-          onChange={(e) => setMaxAttempts(e.target.value)}
+          onChange={handleInputChange(setMaxAttempts)}
           fullWidth
           sx={{ mb: 2 }}
+          disabled={!isEditing}
         />
         <TextField
           label="Tiempo de bloqueo (minutos)"
           value={lockTimeMinutes}
-          onChange={(e) => setLockTimeMinutes(e.target.value)}
+          onChange={handleInputChange(setLockTimeMinutes)}
           fullWidth
           sx={{ mb: 2 }}
+          disabled={!isEditing}
         />
-        <Button variant="contained" color="primary" onClick={handleUpdateConfig}>
-          Actualizar Configuración
-        </Button>
-        {message && <Typography color="success" sx={{ mt: 2 }}>{message}</Typography>}
+        {!isEditing ? (
+          <Button variant="contained" color="primary" onClick={handleEdit}>
+            Editar
+          </Button>
+        ) : (
+          <>
+            <Button variant="contained" color="primary" onClick={handleSaveConfig}>
+              Guardar
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={handleCancelEdit}>
+              Cancelar
+            </Button>
+          </>
+        )}
       </Box>
+
+      {message && <Typography color="success" sx={{ mt: 2 }}>{message}</Typography>}
 
       <TableContainer component={Paper} sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
         <Table>
