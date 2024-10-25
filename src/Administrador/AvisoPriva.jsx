@@ -58,12 +58,12 @@ const PoliticasPrivacidad = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) return;
-    
+
         // Determinar la nueva versión
         let newVersion;
         if (editingIndex !== null) {
@@ -80,27 +80,27 @@ const PoliticasPrivacidad = () => {
                 newVersion = maxVersion.toString() + ".0"; // Asegurar que sea 1.0, 2.0, etc.
             }
         }
-    
+
         const politicaData = { numero_politica: numeroPolitica, titulo, contenido, version: newVersion, estado: 'activo' };
-    
+
         try {
             if (editingIndex !== null) {
                 const oldPolitica = politicas[editingIndex];
-    
+
                 // Actualizar política existente (desactivar primero)
                 await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${oldPolitica.id}`, { estado: 'inactivo' });
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-    
+
                 setNotification({ open: true, message: `Política actualizada a versión ${newVersion} correctamente`, type: 'success' });
             } else {
                 // Desactivar todas las políticas actuales antes de insertar una nueva
                 await Promise.all(politicas.map(p => axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${p.id}`, { estado: 'inactivo' })));
-    
+
                 // Insertar nueva política
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
-    
+
             fetchPoliticas(); // Actualizar la lista de políticas
             resetForm();
             setIsAddingNewPolicy(false);
@@ -108,7 +108,7 @@ const PoliticasPrivacidad = () => {
             setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
         }
     };
-    
+
     const resetForm = () => {
         setNumeroPolitica('');
         setTitulo('');
@@ -117,7 +117,7 @@ const PoliticasPrivacidad = () => {
         setErrors({});
         setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
-    
+
     const handleEdit = (index) => {
         setNumeroPolitica(politicas[index].numero_politica); // Setear número de política en edición
         setTitulo(politicas[index].titulo);
@@ -180,6 +180,7 @@ const PoliticasPrivacidad = () => {
                         </Grid>
                     </Paper>
                 )}
+
 
                 {/* Botón Nueva Política */}
                 <Button
