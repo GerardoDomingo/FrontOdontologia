@@ -134,10 +134,25 @@ const Configuracion = () => {
           boxShadow: '0px 6px 16px rgba(0, 0, 0, 0.2)',
           p: 2,
           borderRadius: '50%',
+          display: 'flex',
+          flexDirection: 'column',  // Asegura que el texto quede debajo del icono
+          alignItems: 'center',
         }}
       >
         <FaBuilding size={24} />
+        <Typography
+          variant="caption"
+          sx={{
+            color: '#fff',
+            fontSize: '12px',
+            mt: 1,  // Margen para separar el texto del icono
+            textAlign: 'center',
+          }}
+        >
+          Perfil Empresa
+        </Typography>
       </IconButton>
+
     </Box>
   );
 };
