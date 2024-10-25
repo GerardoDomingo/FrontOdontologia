@@ -110,8 +110,8 @@ const PoliticasPrivacidad = () => {
         }
     };
 
-    const handleDialogOpen = (contenido) => {
-        setDialogContent(contenido);
+    const handleDialogOpen = (politica) => {
+        setDialogContent(politica); // Guardamos todo el objeto de la política en lugar de solo el contenido
         setOpenDialog(true);
     };
 
@@ -148,7 +148,7 @@ const PoliticasPrivacidad = () => {
                             <Grid item xs={12}>
                                 <Typography variant="body2">
                                     {truncateContent(politicas[0].contenido)}{' '}
-                                    <Button variant="outlined" onClick={() => handleDialogOpen(politicas[0].contenido)}>Ver más</Button>
+                                    <Button variant="outlined" onClick={() => handleDialogOpen(politicas[0])}>Ver más</Button>
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -250,23 +250,24 @@ const PoliticasPrivacidad = () => {
                 <DialogContent>
                     {/* Título de la política */}
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                        Título: {politicas[0]?.titulo}
+                        Título: {dialogContent?.titulo}
                     </Typography>
 
                     {/* Número de la política */}
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        Número de Política: {politicas[0]?.numero_politica}
+                        Número de Política: {dialogContent?.numero_politica}
                     </Typography>
 
                     {/* Contenido de la política */}
                     <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
-                        {politicas[0]?.contenido}
+                        {dialogContent?.contenido}
                     </Typography>
 
                     {/* Fecha de creación o de vigencia */}
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        Fecha de Creación: {new Date(politicas[0]?.fecha_creacion).toLocaleDateString()}
+                        Fecha de Creación: {new Date(dialogContent?.fecha_creacion).toLocaleDateString()}
                     </Typography>
+
                 </DialogContent>
 
                 <DialogActions>
@@ -275,6 +276,7 @@ const PoliticasPrivacidad = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
 
 
             {/* Componente de Notificaciones */}
