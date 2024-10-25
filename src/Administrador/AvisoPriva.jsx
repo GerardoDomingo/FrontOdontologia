@@ -9,7 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
-
+//POLITICAS
 const PoliticasPrivacidad = () => {
     const [numeroPolitica, setNumeroPolitica] = useState('');
     const [titulo, setTitulo] = useState('');
