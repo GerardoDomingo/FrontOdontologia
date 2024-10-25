@@ -13,7 +13,14 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    Box
+    Box,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TablePagination,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,13 +37,14 @@ const PoliticasPrivacidad = () => {
     const [mensaje, setMensaje] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
-    
-    // Estado para errores
+
     const [errors, setErrors] = useState({});
 
-    // Estado para la paginación
     const [currentPage, setCurrentPage] = useState(1);
-    const policiesPerPage = 3; // Número de políticas por página
+    const policiesPerPage = 3;
+
+    const [historico, setHistorico] = useState([]); // Para guardar políticas inactivas
+    const [page, setPage] = useState(0); // Para paginación del historial
 
     useEffect(() => {
         fetchPoliticas();
@@ -45,7 +53,10 @@ const PoliticasPrivacidad = () => {
     const fetchPoliticas = async () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
-            setPoliticas(response.data);
+            const activePolicies = response.data.filter(politica => politica.estado === 'activo');
+            const inactivePolicies = response.data.filter(politica => politica.estado === 'inactivo');
+            setPoliticas(activePolicies);
+            setHistorico(inactivePolicies);
         } catch (error) {
             console.error('Error al obtener políticas:', error);
             setMensaje('Error al cargar políticas.');
@@ -59,29 +70,30 @@ const PoliticasPrivacidad = () => {
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Retorna true si no hay errores
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMensaje('');
 
-        // Validar el formulario antes de enviar
         if (!validateForm()) return;
 
         const politicaData = { numero_politica: numeroPolitica, titulo, contenido };
 
         try {
             if (editingIndex !== null) {
-                // Actualizar política
-                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${politicas[editingIndex].id}`, politicaData);
+                const updatedPolitica = {
+                    ...politicaData,
+                    version: politicas[editingIndex].version + 1 // Aumentamos la versión
+                };
+                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${politicas[editingIndex].id}`, updatedPolitica);
                 setMensaje('Política actualizada con éxito');
             } else {
-                // Insertar nueva política
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
                 setMensaje('Política insertada con éxito');
             }
-            fetchPoliticas(); // Refrescar la lista de políticas
+            fetchPoliticas();
             resetForm();
         } catch (error) {
             console.error('Error al enviar política:', error);
@@ -94,7 +106,7 @@ const PoliticasPrivacidad = () => {
         setTitulo('');
         setContenido('');
         setEditingIndex(null);
-        setErrors({}); // Reiniciar los errores al resetear el formulario
+        setErrors({});
     };
 
     const handleEdit = (index) => {
@@ -106,9 +118,9 @@ const PoliticasPrivacidad = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://backendodontologia.onrender.com/api/politicas/delete/${id}`);
-            setMensaje('Política eliminada con éxito');
-            fetchPoliticas(); // Refrescar la lista de políticas
+            await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${id}`, { estado: 'inactivo' });
+            setMensaje('Política eliminada (lógicamente) con éxito');
+            fetchPoliticas();
         } catch (error) {
             console.error('Error al eliminar política:', error);
             setMensaje('Error al eliminar política.');
@@ -124,28 +136,15 @@ const PoliticasPrivacidad = () => {
         setOpenDialog(false);
     };
 
-    // Funciones de paginación
-    const indexOfLastPolicy = currentPage * policiesPerPage;
-    const indexOfFirstPolicy = indexOfLastPolicy - policiesPerPage;
-    const currentPolicies = politicas.slice(indexOfFirstPolicy, indexOfLastPolicy);
-
-    const handleNextPage = () => {
-        if (currentPage < Math.ceil(politicas.length / policiesPerPage)) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
     };
 
     return (
         <Box sx={{ padding: '60px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
             <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" component="h2" align="center" gutterBottom>
-                    Políticas de Privacidad
+                    Políticas de Privacidad Vigentes
                 </Typography>
                 <form onSubmit={handleSubmit}>
                     <TextField
@@ -189,66 +188,42 @@ const PoliticasPrivacidad = () => {
                 )}
             </Paper>
 
-            {/* Tarjeta que encierra las políticas y paginación */}
-            {politicas.length > 0 ? (
-                <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.5)' }}>
-                    <List sx={{ mt: 3 }}>
-                        {currentPolicies.map((politica, index) => (
-                            <ListItem key={politica.id} sx={{ mb: 2 }}>
-                                <Paper sx={{ padding: '10px', width: '100%', boxShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={8}>
-                                            <ListItemText
-                                                primary={`Política ${politica.numero_politica}:`}
-                                                secondary={`Título: ${politica.titulo}`}
-                                                sx={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}
-                                            />
-                                            <Typography variant="body2" color="textSecondary">
-                                                {`Última actualización: ${new Date(politica.fecha_actualizacion).toLocaleDateString()}`}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                                    Acciones
-                                                </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%' }}>
-                                                    <IconButton title="Ver contenido" aria-label="view" onClick={() => handleDialogOpen(politica.contenido)}>
-                                                        <VisibilityIcon sx={{ color: 'blue' }} />
-                                                    </IconButton>
-                                                    <IconButton title="Editar" aria-label="edit" onClick={() => handleEdit(index)}>
-                                                        <EditIcon sx={{ color: '#1976d2' }} />
-                                                    </IconButton>
-                                                    <IconButton title="Eliminar" aria-label="delete" onClick={() => handleDelete(politica.id)}>
-                                                        <DeleteIcon sx={{ color: 'red' }} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Paper>
-                            </ListItem>
+            {/* Historial de Políticas  */}
+            <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
+                Historial de Políticas 
+            </Typography>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Número de Política</TableCell>
+                            <TableCell>Título</TableCell>
+                            <TableCell>Versión</TableCell>
+                            <TableCell>Fecha de Creación</TableCell>
+                            <TableCell>Fecha de Actualización</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {historico.slice(page * policiesPerPage, (page + 1) * policiesPerPage).map((politica, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{politica.numero_politica}</TableCell>
+                                <TableCell>{politica.titulo}</TableCell>
+                                <TableCell>{politica.version}</TableCell>
+                                <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                            </TableRow>
                         ))}
-                    </List>
-
-                    {/* Controles de paginación */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                        <Button variant="contained" color="primary" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            Anterior
-                        </Button>
-                        <Typography variant="body1" sx={{ mx: 2 }}>
-                            Página {currentPage} de {Math.ceil(politicas.length / policiesPerPage)}
-                        </Typography>
-                        <Button variant="contained" color="primary" onClick={handleNextPage} disabled={currentPage >= Math.ceil(politicas.length / policiesPerPage)}>
-                            Siguiente
-                        </Button>
-                    </Box>
-                </Paper>
-            ) : (
-                <Typography variant="body1" align="center" sx={{ mt: 4 }}>
-                    No hay políticas disponibles.
-                </Typography>
-            )}
+                    </TableBody>
+                </Table>
+                <TablePagination
+                    component="div"
+                    count={historico.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={policiesPerPage}
+                    rowsPerPageOptions={[]}
+                />
+            </TableContainer>
 
             {/* Diálogo para visualizar el contenido de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
