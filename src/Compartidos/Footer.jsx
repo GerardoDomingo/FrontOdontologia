@@ -82,15 +82,15 @@ const Footer = () => {
   const handleCloseModal = () => setModalOpen(false);
 
   return (
-    <footer style={{ backgroundColor: '#00bcd4', color: '#ffffff', padding: '30px 0', textAlign: 'center', position: 'fixed', width: '100%', bottom: 0 }}>
+    <footer style={{ backgroundColor: '#00bcd4', color: '#ffffff', padding: '10px 0', textAlign: 'center', position: 'fixed', width: '100%', bottom: 0 }}>
       <Container>
         <Grid container spacing={4}>
           {/* Columna 1: Redes sociales y contacto */}
           <Grid item xs={12} md={6}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
               Síguenos en redes sociales
             </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 1 }}>
               {socials.map((social) => {
                 const socialIcon = availableSocials.find((s) => s.name === social.nombre_red)?.icon;
                 return (
@@ -99,7 +99,7 @@ const Footer = () => {
                       key={social.id}
                       component="a"
                       href={social.url ? `https://${social.url}` : `tel:${social.url}`} // Enlace a URL o teléfono
-                      sx={{ color: '#ffffff', fontSize: '2rem' }}
+                      sx={{ color: '#ffffff', fontSize: '1.5rem' }} // Tamaño reducido del icono
                     >
                       {socialIcon}
                     </IconButton>
@@ -107,32 +107,32 @@ const Footer = () => {
                 );
               })}
             </Box>
-            <Typography variant="body1" sx={{ fontSize: '1rem' }}>
-              Estamos aquí para ti. Contáctanos a través de nuestras redes sociales o llámanos directamente.
+            <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+              Contáctanos a través de nuestras redes sociales o llámanos directamente.
             </Typography>
           </Grid>
 
           {/* Columna 2: Enlaces legales */}
           <Grid item xs={12} md={6}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
               Información Legal
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
               <Button
                 onClick={() => handleOpenModal('Política de Privacidad', privacyPolicy[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', textAlign: 'left' }}
+                sx={{ color: '#ffffff', textAlign: 'left', fontSize: '0.9rem' }} // Tamaño reducido del texto
               >
                 Política de Privacidad
               </Button>
               <Button
                 onClick={() => handleOpenModal('Términos y Condiciones', termsConditions[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', textAlign: 'left' }}
+                sx={{ color: '#ffffff', textAlign: 'left', fontSize: '0.9rem' }}
               >
                 Términos y Condiciones
               </Button>
               <Button
                 onClick={() => handleOpenModal('Deslinde Legal', disclaimer[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', textAlign: 'left' }}
+                sx={{ color: '#ffffff', textAlign: 'left', fontSize: '0.9rem' }}
               >
                 Deslinde Legal
               </Button>
@@ -141,11 +141,11 @@ const Footer = () => {
         </Grid>
       </Container>
 
-      <Typography sx={{ mt: 2 }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
+      <Typography sx={{ mt: 1, fontSize: '0.75rem' }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
 
       {/* Modal para mostrar políticas, términos y deslinde */}
       <Modal open={modalOpen} onClose={handleCloseModal}>
-        <Box sx={{ backgroundColor: '#fff', padding: 4, margin: 'auto', marginTop: '10%', maxWidth: 600 }}>
+        <Box sx={{ backgroundColor: '#fff', padding: 2, margin: 'auto', marginTop: '10%', maxWidth: 600 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             {modalTitle}
           </Typography>
