@@ -20,8 +20,8 @@ const PoliticasPrivacidad = () => {
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
     const [page, setPage] = useState(0);
-    const policiesPerPage = 3;
-    const [historico, setHistorico] = useState([]);
+    const policiesPerPage = 1;
+    const [groupedPoliticas, setGroupedPoliticas] = useState({}); // Define groupedPoliticas
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
     const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false); // Estado para controlar si se está agregando una nueva política
 
@@ -32,12 +32,20 @@ const PoliticasPrivacidad = () => {
     const fetchPoliticas = async () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
-            const activePolicies = response.data.filter(politica => politica.estado === 'activo');
-            const inactivePolicies = response.data.filter(politica => politica.estado === 'inactivo');
-            setPoliticas(activePolicies);
-            setHistorico(inactivePolicies);
+            const data = response.data;
+
+            const grouped = data.reduce((acc, curr) => {
+                const versionMain = Math.floor(curr.version);  // Obtener la parte principal de la versión
+                if (!acc[versionMain]) {
+                    acc[versionMain] = [];
+                }
+                acc[versionMain].push(curr);  // Agrupar por la versión principal
+                return acc;
+            }, {});
+
+            setGroupedPoliticas(grouped);  // Asignar los datos agrupados al estado
         } catch (error) {
-            setNotification({ open: true, message: 'Error al cargar políticas.', type: 'error' });
+            console.error('Error al cargar políticas:', error);
         }
     };
 
@@ -49,12 +57,12 @@ const PoliticasPrivacidad = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) return;
-    
+
         // Determinar la nueva versión
         let newVersion;
         if (editingIndex !== null) {
@@ -71,27 +79,27 @@ const PoliticasPrivacidad = () => {
                 newVersion = maxVersion.toString() + ".0"; // Asegurar que sea 1.0, 2.0, etc.
             }
         }
-    
+
         const politicaData = { numero_politica: numeroPolitica, titulo, contenido, version: newVersion, estado: 'activo' };
-    
+
         try {
             if (editingIndex !== null) {
                 const oldPolitica = politicas[editingIndex];
-    
+
                 // Actualizar política existente (desactivar primero)
                 await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${oldPolitica.id}`, { estado: 'inactivo' });
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-    
+
                 setNotification({ open: true, message: `Política actualizada a versión ${newVersion} correctamente`, type: 'success' });
             } else {
                 // Desactivar todas las políticas actuales antes de insertar una nueva
                 await Promise.all(politicas.map(p => axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${p.id}`, { estado: 'inactivo' })));
-    
+
                 // Insertar nueva política
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
-    
+
             fetchPoliticas(); // Actualizar la lista de políticas
             resetForm();
             setIsAddingNewPolicy(false);
@@ -99,7 +107,7 @@ const PoliticasPrivacidad = () => {
             setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
         }
     };
-    
+
     const resetForm = () => {
         setNumeroPolitica('');
         setTitulo('');
@@ -108,7 +116,7 @@ const PoliticasPrivacidad = () => {
         setErrors({});
         setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
-    
+
     const handleEdit = (index) => {
         setNumeroPolitica(politicas[index].numero_politica); // Setear número de política en edición
         setTitulo(politicas[index].titulo);
@@ -239,9 +247,10 @@ const PoliticasPrivacidad = () => {
 
             {/* Historial de Políticas */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
-                Historial de Políticas
+                Historial de Políticas por Versión
             </Typography>
-            <TableContainer component={Paper} sx={{ maxWidth: '800px', margin: '0 auto' }}>
+
+            <TableContainer>
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -254,26 +263,20 @@ const PoliticasPrivacidad = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {historico.slice(page * policiesPerPage, (page + 1) * policiesPerPage).map((politica, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{politica.numero_politica}</TableCell>
-                                <TableCell>{politica.titulo}</TableCell>
-                                <TableCell>{politica.version}</TableCell> {/* Mostrar versión */}
-                                <TableCell>{politica.estado}</TableCell> {/* Mostrar estado */}
-                                <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
-                                <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
-                            </TableRow>
-                        ))}
+                        {
+                            Object.keys(groupedPoliticas).length > 0 && Object.values(groupedPoliticas)[page].map((politica, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{politica.numero_politica}</TableCell>
+                                    <TableCell>{politica.titulo}</TableCell>
+                                    <TableCell>{politica.version}</TableCell>
+                                    <TableCell>{politica.estado}</TableCell>
+                                    <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                </TableRow>
+                            ))
+                        }
                     </TableBody>
                 </Table>
-                <TablePagination
-                    component="div"
-                    count={historico.length}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={policiesPerPage}
-                    rowsPerPageOptions={[]}
-                />
             </TableContainer>
 
             {/* Diálogo para visualizar el contenido completo de la política */}
