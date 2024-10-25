@@ -105,18 +105,24 @@ const PoliticasPrivacidad = () => {
         setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
 
-    const handleEdit = (id) => {
-        const politica = politicas.find(p => p.id === id);
-        if (politica) {
-            setNumeroPolitica(politica.numero_politica);
-            setTitulo(politica.titulo);
-            setContenido(politica.contenido);
-            setEditingId(id); // Guarda correctamente el ID de la política a editar
-            setIsAddingNewPolicy(true); // Abrir el formulario para editar
-        } else {
-            console.error("Política no encontrada para editar.");
+    const handleEdit = async (id) => {
+        try {
+            // Cargar la política activa directamente para edición
+            const response = await axios.get(`https://backendodontologia.onrender.com/api/politicas/get/${id}`);
+            const politica = response.data;
+    
+            if (politica) {
+                setNumeroPolitica(politica.numero_politica);
+                setTitulo(politica.titulo);
+                setContenido(politica.contenido);
+                setEditingId(id); // Guarda correctamente el ID de la política a editar
+                setIsAddingNewPolicy(true); // Abrir el formulario para editar
+            }
+        } catch (error) {
+            console.error("Error al cargar la política para editar:", error);
         }
     };
+    
 
     const handleDelete = async (id) => {
         try {
