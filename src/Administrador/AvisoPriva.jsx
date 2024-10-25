@@ -185,7 +185,12 @@ const PoliticasPrivacidad = () => {
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={9}>
                                 <Typography variant="h5">Vigente: {politicas[0].titulo}</Typography>
-                                <Typography variant="body2" color="textSecondary">Número: {politicas[0].numero_politica}</Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Número: {politicas[0].numero_politica}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Versión: {politicas[0].version}
+                                </Typography>
                             </Grid>
                             <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
                                 <IconButton onClick={() => handleEdit(0)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
@@ -200,6 +205,7 @@ const PoliticasPrivacidad = () => {
                         </Grid>
                     </Paper>
                 )}
+
 
                 {/* Botón Nueva Política */}
                 <Button
@@ -271,38 +277,44 @@ const PoliticasPrivacidad = () => {
                 Historial de Políticas por Versión
             </Typography>
 
-            <TableContainer>
+            <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <Table>
                     <TableHead>
-                        <TableRow>
-                            <TableCell>Número de Política</TableCell>
-                            <TableCell>Título</TableCell>
-                            <TableCell>Versión</TableCell>
-                            <TableCell>Fecha de Creación</TableCell>
-                            <TableCell>Fecha de Actualización</TableCell>
+                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                            <TableCell><Typography fontWeight="bold">Número de Política</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Fecha de Actualización</Typography></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {
-                            politicas.length > 0 ? politicas.map((politica, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{politica.numero_politica}</TableCell>
-                                    <TableCell>{politica.titulo}</TableCell>
-                                    <TableCell>{politica.version}</TableCell>
-                                    <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
-                                    <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={5} align="center">
-                                        No hay políticas inactivas.
-                                    </TableCell>
-                                </TableRow>
-                            )
+                            politicas.length > 0
+                                ? politicas
+                                    .filter(politica => politica.estado === 'inactivo') // Solo mostrar inactivas
+                                    .sort((a, b) => parseFloat(b.version) - parseFloat(a.version)) // Ordenar por versión
+                                    .map((politica, index) => (
+                                        <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' } }}>
+                                            <TableCell>{politica.numero_politica}</TableCell>
+                                            <TableCell>{politica.titulo}</TableCell>
+                                            <TableCell>{politica.version}</TableCell>
+                                            <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
+                                            <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                        </TableRow>
+                                    ))
+                                : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} align="center">
+                                            No hay políticas inactivas.
+                                        </TableCell>
+                                    </TableRow>
+                                )
                         }
                     </TableBody>
                 </Table>
             </TableContainer>
+
 
 
 
