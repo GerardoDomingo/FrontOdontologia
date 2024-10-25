@@ -202,7 +202,7 @@ const Home = () => {
               color: '#1976d2',
               fontWeight: 'bold',
               textAlign: 'center',
-              mb: 6,
+              mb: 12,
               fontFamily: 'Montserrat, sans-serif',
             }}
           >
