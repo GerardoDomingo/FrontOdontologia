@@ -42,12 +42,9 @@ const PoliticasPrivacidad = () => {
         }
     };
 
-
-    useEffect(() => {
-        fetchPoliticas();  // Obtener las políticas al cargar el componente
-    }, []);
-
-
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
 
     const fetchPoliticaActiva = async () => {
         try {
@@ -167,10 +164,6 @@ const PoliticasPrivacidad = () => {
 
     const handleDialogClose = () => {
         setOpenDialog(false);
-    };
-
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
     };
 
     const truncateContent = (content) => {
