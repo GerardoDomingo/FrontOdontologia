@@ -1,4 +1,3 @@
-// src/components/PoliticasPrivacidad.js
 import React, { useState, useEffect } from 'react';
 import {
   TextField, Button, Typography, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, 
@@ -25,6 +24,7 @@ const PoliticasPrivacidad = () => {
   const policiesPerPage = 3;
   const [historico, setHistorico] = useState([]);
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
+  const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false); // Estado para deshabilitar el botón de nueva política
 
   useEffect(() => {
     fetchPoliticas();
@@ -77,6 +77,7 @@ const PoliticasPrivacidad = () => {
       }
       fetchPoliticas();
       resetForm();
+      setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     } catch (error) {
       setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
     }
@@ -95,6 +96,7 @@ const PoliticasPrivacidad = () => {
     setTitulo(politicas[index].titulo);
     setContenido(politicas[index].contenido);
     setEditingIndex(index);
+    setIsAddingNewPolicy(true); // Desactivar el botón "Nueva Política"
   };
 
   const handleDelete = async (id) => {
@@ -135,7 +137,7 @@ const PoliticasPrivacidad = () => {
           <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={9}>
-                <Typography variant="h5">{politicas[0].titulo}</Typography>
+                <Typography variant="h5">Vigente: {politicas[0].titulo}</Typography>
                 <Typography variant="body2" color="textSecondary">Número: {politicas[0].numero_politica}</Typography>
               </Grid>
               <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
@@ -158,32 +160,33 @@ const PoliticasPrivacidad = () => {
           color="primary"
           startIcon={<AddIcon />}
           sx={{ mt: 3 }}
-          onClick={resetForm}
+          onClick={() => setIsAddingNewPolicy(true)}
+          disabled={isAddingNewPolicy} // Deshabilitar botón cuando está activo
         >
           Nueva Política
         </Button>
 
         {/* Formulario para agregar o actualizar políticas */}
-        {editingIndex === null && (
+        {isAddingNewPolicy && (
           <form onSubmit={handleSubmit}>
+            <TextField
+              label="Título"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              fullWidth
+              sx={{ mt: 3 }}
+              error={!!errors.titulo}
+              helperText={errors.titulo}
+            />
             <TextField
               label="Número de Política"
               type="number"
               value={numeroPolitica}
               onChange={(e) => setNumeroPolitica(e.target.value)}
               fullWidth
-              sx={{ mt: 3 }}
+              sx={{ mt: 2 }}
               error={!!errors.numeroPolitica}
               helperText={errors.numeroPolitica}
-            />
-            <TextField
-              label="Título"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              fullWidth
-              sx={{ mt: 2 }}
-              error={!!errors.titulo}
-              helperText={errors.titulo}
             />
             <TextField
               label="Contenido"
