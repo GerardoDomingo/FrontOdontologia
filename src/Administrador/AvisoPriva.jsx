@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     TextField, Button, Typography, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Box, Grid,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Grid,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -14,7 +14,7 @@ const PoliticasPrivacidad = () => {
     const [numeroPolitica, setNumeroPolitica] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
-    const [editingIndex, setEditingIndex] = useState(null);
+    const [editingId, setEditingId] = useState(null); // Cambiado para almacenar el ID de edición en lugar del índice
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
@@ -67,10 +67,6 @@ const PoliticasPrivacidad = () => {
         }
     };
 
-    useEffect(() => {
-        fetchPoliticaActiva();  // Llamar a la función que obtiene la política activa
-    }, []);
-
     const validateForm = () => {
         const newErrors = {};
         if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
@@ -85,37 +81,15 @@ const PoliticasPrivacidad = () => {
     
         if (!validateForm()) return;
     
-        let newVersion;
-        if (editingIndex !== null) {
-            // Caso de actualización: tomar la versión actual y sumarle 0.1
-            const oldVersion = parseFloat(politicas[editingIndex].version);
-            newVersion = (oldVersion + 0.1).toFixed(1); // Incrementar en 0.1 y asegurar un decimal
-        } else {
-            // Caso de nueva política: calcular versión basada en el máximo
-            if (politicas.length === 0) {
-                newVersion = "1.0";
-            } else {
-                const maxVersion = Math.max(...politicas.map(p => Math.floor(p.version))) + 1;
-                newVersion = maxVersion.toString() + ".0"; // Asegurarse que sea una nueva versión mayor completa
-            }
-        }
-    
-        const politicaData = { numero_politica: numeroPolitica, titulo, contenido, version: newVersion, estado: 'activo' };
+        const politicaData = { numero_politica: numeroPolitica, titulo, contenido };
     
         try {
-            if (editingIndex !== null) {
-                const oldPolitica = politicas[editingIndex];
-    
-                // Desactivar la política anterior y luego insertar la nueva versión
-                await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${oldPolitica.id}`, { estado: 'inactivo' });
-                await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-    
-                setNotification({ open: true, message: `Política actualizada a versión ${newVersion} correctamente`, type: 'success' });
+            if (editingId !== null) {
+                // Actualización de una política existente
+                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${editingId}`, politicaData);
+                setNotification({ open: true, message: `Política actualizada correctamente`, type: 'success' });
             } else {
-                // Desactivar todas las políticas actuales antes de insertar una nueva
-                await Promise.all(politicas.map(p => axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${p.id}`, { estado: 'inactivo' })));
-    
-                // Insertar la nueva política
+                // Creación de una nueva política
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
@@ -133,16 +107,17 @@ const PoliticasPrivacidad = () => {
         setNumeroPolitica('');
         setTitulo('');
         setContenido('');
-        setEditingIndex(null); // Reseteamos el índice de edición
+        setEditingId(null); // Reseteamos el ID de edición
         setErrors({});
         setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
 
-    const handleEdit = (index) => {
-        setNumeroPolitica(politicas[index].numero_politica); // Setear número de política en edición
-        setTitulo(politicas[index].titulo);
-        setContenido(politicas[index].contenido);
-        setEditingIndex(index); // Guarda correctamente el índice de la política a editar
+    const handleEdit = (id) => {
+        const politica = politicas.find(p => p.id === id);
+        setNumeroPolitica(politica.numero_politica); // Setear número de política en edición
+        setTitulo(politica.titulo);
+        setContenido(politica.contenido);
+        setEditingId(id); // Guarda correctamente el ID de la política a editar
         setIsAddingNewPolicy(true); // Abrir el formulario para editar
     };
 
@@ -189,7 +164,7 @@ const PoliticasPrivacidad = () => {
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
-                                <IconButton onClick={() => handleEdit(0)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
+                                <IconButton onClick={() => handleEdit(politicaActiva.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
                                 <IconButton onClick={() => handleDelete(politicaActiva.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
                             </Grid>
                             <Grid item xs={12}>
@@ -248,7 +223,7 @@ const PoliticasPrivacidad = () => {
                         <Grid container spacing={2} sx={{ mt: 3 }}>
                             <Grid item xs={6}>
                                 <Button type="submit" variant="contained" color="primary" fullWidth>
-                                    {editingIndex !== null ? 'Actualizar' : 'Agregar'}
+                                    {editingId !== null ? 'Actualizar' : 'Agregar'}
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -270,7 +245,6 @@ const PoliticasPrivacidad = () => {
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
                 Historial de Políticas por Versión
             </Typography>
-
 
             <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <Table>
