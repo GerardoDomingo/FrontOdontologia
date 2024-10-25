@@ -194,8 +194,8 @@ const Home = () => {
             py: 8,
             borderRadius: '16px',
             boxShadow: 3,
-            mb:20
-          }}
+            mb: 80,     
+               }}
         >
           <Typography
             variant="h4"
