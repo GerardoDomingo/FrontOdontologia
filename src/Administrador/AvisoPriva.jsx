@@ -53,35 +53,27 @@ const PoliticasPrivacidad = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+        
         if (!validateForm()) return;
     
-        const politicaData = { numero_politica: numeroPolitica, titulo, contenido };
+        const politicaData = { titulo, contenido }; // Excluir numero_politica para inserción
     
         try {
             if (editingIndex !== null) {
-                // Si estamos en modo de edición, usamos el endpoint de actualización
                 const oldPolitica = politicas[editingIndex];
-                
-                // Actualizar la política existente usando el endpoint de actualización
-                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${oldPolitica.id}`, politicaData);
-    
+                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${oldPolitica.id}`, { ...politicaData, numero_politica: numeroPolitica });
                 setNotification({ open: true, message: `Política actualizada correctamente`, type: 'success' });
             } else {
-                // Si no estamos editando, es una nueva política. Insertamos.
                 if (politicas.length > 0) {
                     await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${politicas[0].id}`, { estado: 'inactivo' });
                 }
-    
-                // Insertar la nueva política con versión 1
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-    
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
     
             fetchPoliticas();
             resetForm();
-            setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
+            setIsAddingNewPolicy(false);
         } catch (error) {
             setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
         }
