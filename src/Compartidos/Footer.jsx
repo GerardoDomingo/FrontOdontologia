@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Typography, IconButton, Modal, Button, Grid, Container } from '@mui/material';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import axios from 'axios';
@@ -14,13 +13,13 @@ const availableSocials = [
 ];
 
 const Footer = () => {
-  const [socials, setSocials] = useState([]); // Para almacenar las redes sociales
-  const [privacyPolicy, setPrivacyPolicy] = useState([]); // Para políticas de privacidad
-  const [termsConditions, setTermsConditions] = useState([]); // Para términos y condiciones
-  const [disclaimer, setDisclaimer] = useState([]); // Para el deslinde legal
-  const [modalOpen, setModalOpen] = useState(false); // Controlar el modal
-  const [modalContent, setModalContent] = useState(''); // Contenido del modal
-  const [modalTitle, setModalTitle] = useState(''); // Título del modal
+  const [socials, setSocials] = useState([]);
+  const [privacyPolicy, setPrivacyPolicy] = useState([]);
+  const [termsConditions, setTermsConditions] = useState([]);
+  const [disclaimer, setDisclaimer] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
 
   // Obtener redes sociales
   useEffect(() => {
@@ -82,15 +81,15 @@ const Footer = () => {
   const handleCloseModal = () => setModalOpen(false);
 
   return (
-    <footer style={{ backgroundColor: '#00bcd4', color: '#ffffff', padding: '10px 0', textAlign: 'center', position: 'fixed', width: '100%', bottom: 0 }}>
+    <footer style={{ backgroundColor: '#1976d2', color: '#ffffff', padding: '10px 0', textAlign: 'center', width: '100%' }}>
       <Container>
-        <Grid container spacing={4}>
+        <Grid container spacing={4} alignItems="center">
           {/* Columna 1: Redes sociales y contacto */}
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1rem', md: '1.2rem' } }}>
               Síguenos en redes sociales
             </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, gap: 1, mb: 1 }}>
               {socials.map((social) => {
                 const socialIcon = availableSocials.find((s) => s.name === social.nombre_red)?.icon;
                 return (
@@ -99,7 +98,7 @@ const Footer = () => {
                       key={social.id}
                       component="a"
                       href={social.url ? `https://${social.url}` : `tel:${social.url}`} // Enlace a URL o teléfono
-                      sx={{ color: '#ffffff', fontSize: '1.5rem' }} // Tamaño reducido del icono
+                      sx={{ color: '#ffffff', fontSize: '1.25rem' }} // Tamaño reducido del icono
                     >
                       {socialIcon}
                     </IconButton>
@@ -107,32 +106,32 @@ const Footer = () => {
                 );
               })}
             </Box>
-            <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+            <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
               Contáctanos a través de nuestras redes sociales o llámanos directamente.
             </Typography>
           </Grid>
 
           {/* Columna 2: Enlaces legales */}
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1rem', md: '1.2rem' } }}>
               Información Legal
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: { xs: 'center', md: 'flex-start' } }}>
               <Button
                 onClick={() => handleOpenModal('Política de Privacidad', privacyPolicy[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', textAlign: 'left', fontSize: '0.9rem' }} // Tamaño reducido del texto
+                sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
               >
                 Política de Privacidad
               </Button>
               <Button
                 onClick={() => handleOpenModal('Términos y Condiciones', termsConditions[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', textAlign: 'left', fontSize: '0.9rem' }}
+                sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
               >
                 Términos y Condiciones
               </Button>
               <Button
                 onClick={() => handleOpenModal('Deslinde Legal', disclaimer[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', textAlign: 'left', fontSize: '0.9rem' }}
+                sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
               >
                 Deslinde Legal
               </Button>
@@ -141,7 +140,7 @@ const Footer = () => {
         </Grid>
       </Container>
 
-      <Typography sx={{ mt: 1, fontSize: '0.75rem' }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
+      <Typography sx={{ mt: 1, fontSize: '0.7rem' }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
 
       {/* Modal para mostrar políticas, términos y deslinde */}
       <Modal open={modalOpen} onClose={handleCloseModal}>
