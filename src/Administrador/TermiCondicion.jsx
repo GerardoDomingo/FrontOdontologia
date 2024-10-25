@@ -152,7 +152,7 @@ const TerminosCondiciones = () => {
             {/* Término de Condiciones Vigente */}
             <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" align="center" gutterBottom>
-                    Término de Condiciones Vigente
+                    Término de Condiciones
                 </Typography>
                 {terminoActivo && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
