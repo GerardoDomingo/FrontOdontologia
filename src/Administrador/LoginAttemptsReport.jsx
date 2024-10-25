@@ -8,6 +8,8 @@ const LoginAttemptsReport = () => {
   const [selectedPaciente, setSelectedPaciente] = useState(null); // Para almacenar el paciente seleccionado
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false); // Estado para controlar el modal
+  const [maxAttempts, setMaxAttempts] = useState(null); // Estado para los intentos máximos
+  const [lockTimeMinutes, setLockTimeMinutes] = useState(null); // Estado para el tiempo de bloqueo
 
   useEffect(() => {
     const fetchLoginAttempts = async () => {
@@ -24,8 +26,12 @@ const LoginAttemptsReport = () => {
         }
 
         const data = await response.json();
-        const sortedAttempts = data.sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora)); // Ordenar por más reciente
+        const sortedAttempts = data.attempts.sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora)); // Ordenar por más reciente
         setLoginAttempts(sortedAttempts);
+
+        // Establecer el valor de intentos máximos y tiempo de bloqueo
+        setMaxAttempts(data.maxAttempts);
+        setLockTimeMinutes(data.lockTimeMinutes);
       } catch (err) {
         setError(err.message);
       }
@@ -59,7 +65,18 @@ const LoginAttemptsReport = () => {
   return (
     <Box sx={{ padding: 3 }}>
       {error && <Typography color="error">{error}</Typography>}
-      <Typography variant="h5" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#1565c0' }}>Reporte de Intentos de Login</Typography>
+      <Typography variant="h5" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#1565c0' }}>
+        Reporte de Intentos de Login
+      </Typography>
+
+      {/* Mostrar intentos máximos y tiempo de bloqueo si están disponibles */}
+      {maxAttempts !== null && lockTimeMinutes !== null && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body1">Intentos máximos permitidos: {maxAttempts}</Typography>
+          <Typography variant="body1">Tiempo de bloqueo: {lockTimeMinutes} minutos</Typography>
+        </Box>
+      )}
+
       <TableContainer component={Paper} sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
         <Table>
           <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
