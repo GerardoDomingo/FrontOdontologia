@@ -21,7 +21,8 @@ const PoliticasPrivacidad = () => {
     const [errors, setErrors] = useState({});
     const [page, setPage] = useState(0);
     const policiesPerPage = 1;
-    const [groupedPoliticas, setGroupedPoliticas] = useState({}); // Define groupedPoliticas
+    const [historico, setHistorico] = useState([]);
+    const [groupedPoliticas, setGroupedPoliticas] = useState({});
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
     const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false); // Estado para controlar si se está agregando una nueva política
 
@@ -43,7 +44,7 @@ const PoliticasPrivacidad = () => {
                 return acc;
             }, {});
 
-            setGroupedPoliticas(grouped);  // Asignar los datos agrupados al estado
+            setGroupedPoliticas(grouped);
         } catch (error) {
             console.error('Error al cargar políticas:', error);
         }
@@ -57,12 +58,12 @@ const PoliticasPrivacidad = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        
         if (!validateForm()) return;
-
+    
         // Determinar la nueva versión
         let newVersion;
         if (editingIndex !== null) {
@@ -79,27 +80,27 @@ const PoliticasPrivacidad = () => {
                 newVersion = maxVersion.toString() + ".0"; // Asegurar que sea 1.0, 2.0, etc.
             }
         }
-
+    
         const politicaData = { numero_politica: numeroPolitica, titulo, contenido, version: newVersion, estado: 'activo' };
-
+    
         try {
             if (editingIndex !== null) {
                 const oldPolitica = politicas[editingIndex];
-
+    
                 // Actualizar política existente (desactivar primero)
                 await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${oldPolitica.id}`, { estado: 'inactivo' });
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-
+    
                 setNotification({ open: true, message: `Política actualizada a versión ${newVersion} correctamente`, type: 'success' });
             } else {
                 // Desactivar todas las políticas actuales antes de insertar una nueva
                 await Promise.all(politicas.map(p => axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${p.id}`, { estado: 'inactivo' })));
-
+    
                 // Insertar nueva política
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
-
+    
             fetchPoliticas(); // Actualizar la lista de políticas
             resetForm();
             setIsAddingNewPolicy(false);
@@ -107,7 +108,7 @@ const PoliticasPrivacidad = () => {
             setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
         }
     };
-
+    
     const resetForm = () => {
         setNumeroPolitica('');
         setTitulo('');
@@ -116,7 +117,7 @@ const PoliticasPrivacidad = () => {
         setErrors({});
         setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
-
+    
     const handleEdit = (index) => {
         setNumeroPolitica(politicas[index].numero_politica); // Setear número de política en edición
         setTitulo(politicas[index].titulo);
@@ -278,6 +279,7 @@ const PoliticasPrivacidad = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+
 
             {/* Diálogo para visualizar el contenido completo de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
