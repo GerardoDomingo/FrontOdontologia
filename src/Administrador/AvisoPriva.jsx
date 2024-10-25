@@ -27,6 +27,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
+import Notificaciones from '../Compartidos/Notificaciones'; // Importar notificaciones
 
 const PoliticasPrivacidad = () => {
     const [politicas, setPoliticas] = useState([]);
@@ -37,14 +38,12 @@ const PoliticasPrivacidad = () => {
     const [mensaje, setMensaje] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
-
     const [errors, setErrors] = useState({});
-
     const [currentPage, setCurrentPage] = useState(1);
     const policiesPerPage = 3;
-
-    const [historico, setHistorico] = useState([]); // Para guardar políticas inactivas
-    const [page, setPage] = useState(0); // Para paginación del historial
+    const [historico, setHistorico] = useState([]);
+    const [page, setPage] = useState(0);
+    const [notification, setNotification] = useState({ open: false, message: '', type: 'success' }); // Para notificaciones
 
     useEffect(() => {
         fetchPoliticas();
@@ -68,7 +67,6 @@ const PoliticasPrivacidad = () => {
         if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
         if (!titulo) newErrors.titulo = "El título es obligatorio.";
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
-        
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -85,19 +83,19 @@ const PoliticasPrivacidad = () => {
             if (editingIndex !== null) {
                 const updatedPolitica = {
                     ...politicaData,
-                    version: politicas[editingIndex].version + 1 // Aumentamos la versión
+                    version: politicas[editingIndex].version + 1 
                 };
                 await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${politicas[editingIndex].id}`, updatedPolitica);
-                setMensaje('Política actualizada con éxito');
+                setNotification({ open: true, message: 'Política actualizada con éxito', type: 'success' });
             } else {
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-                setMensaje('Política insertada con éxito');
+                setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
             fetchPoliticas();
             resetForm();
         } catch (error) {
             console.error('Error al enviar política:', error);
-            setMensaje('Error al enviar política.');
+            setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
         }
     };
 
@@ -119,11 +117,11 @@ const PoliticasPrivacidad = () => {
     const handleDelete = async (id) => {
         try {
             await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${id}`, { estado: 'inactivo' });
-            setMensaje('Política eliminada (lógicamente) con éxito');
+            setNotification({ open: true, message: 'Política eliminada (lógicamente) con éxito', type: 'success' });
             fetchPoliticas();
         } catch (error) {
             console.error('Error al eliminar política:', error);
-            setMensaje('Error al eliminar política.');
+            setNotification({ open: true, message: 'Error al eliminar política', type: 'error' });
         }
     };
 
@@ -144,8 +142,25 @@ const PoliticasPrivacidad = () => {
         <Box sx={{ padding: '60px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
             <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" component="h2" align="center" gutterBottom>
-                    Políticas de Privacidad Vigentes
+                    Política de Privacidad Vigente
                 </Typography>
+                {/* Mostrar política vigente (si existe) */}
+                {politicas.length > 0 && (
+                    <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
+                        <Typography variant="h6">Política Número: {politicas[0].numero_politica}</Typography>
+                        <Typography variant="subtitle1">Título: {politicas[0].titulo}</Typography>
+                        <Typography variant="body2" sx={{ mt: 2 }}>{politicas[0].contenido}</Typography>
+                        <Box sx={{ mt: 3 }}>
+                            <IconButton title="Editar" aria-label="edit" onClick={() => handleEdit(0)}>
+                                <EditIcon sx={{ color: '#1976d2' }} />
+                            </IconButton>
+                            <IconButton title="Eliminar" aria-label="delete" onClick={() => handleDelete(politicas[0].id)}>
+                                <DeleteIcon sx={{ color: 'red' }} />
+                            </IconButton>
+                        </Box>
+                    </Paper>
+                )}
+
                 <form onSubmit={handleSubmit}>
                     <TextField
                         label="Número de Política"
@@ -181,14 +196,9 @@ const PoliticasPrivacidad = () => {
                         {editingIndex !== null ? 'Actualizar' : 'Agregar'}
                     </Button>
                 </form>
-                {mensaje && (
-                    <Typography variant="body1" sx={{ mt: 2, color: mensaje.includes('Error') ? 'red' : 'green' }}>
-                        {mensaje}
-                    </Typography>
-                )}
             </Paper>
 
-            {/* Historial de Políticas  */}
+            {/* Historial de Políticas */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
                 Historial de Políticas 
             </Typography>
@@ -239,6 +249,14 @@ const PoliticasPrivacidad = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Componente de Notificaciones */}
+            <Notificaciones
+                open={notification.open}
+                message={notification.message}
+                type={notification.type}
+                handleClose={() => setNotification({ ...notification, open: false })}
+            />
         </Box>
     );
 };
