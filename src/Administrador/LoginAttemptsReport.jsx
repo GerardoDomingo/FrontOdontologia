@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent, Grid, IconButton, Card, CardContent, Avatar, TextField } from '@mui/material';
 import { FaInfoCircle, FaTimes, FaIdCard, FaCalendarAlt, FaPhone, FaEnvelope } from 'react-icons/fa'; // Íconos
 import { format } from 'date-fns';
+import Notificaciones from '../Compartidos/Notificaciones'; // Importar Notificaciones
 
 const LoginAttemptsReport = () => {
   const [loginAttempts, setLoginAttempts] = useState([]);
@@ -11,7 +12,9 @@ const LoginAttemptsReport = () => {
   const [maxAttempts, setMaxAttempts] = useState(''); // Estado para los intentos máximos
   const [lockTimeMinutes, setLockTimeMinutes] = useState(''); // Estado para el tiempo de bloqueo
   const [isEditing, setIsEditing] = useState(false); // Estado para controlar si se está en modo edición
-  const [message, setMessage] = useState(''); // Estado para mostrar mensajes
+  const [notificationOpen, setNotificationOpen] = useState(false); // Controlar notificación
+  const [notificationMessage, setNotificationMessage] = useState(''); // Mensaje de notificación
+  const [notificationType, setNotificationType] = useState('success'); // Tipo de notificación
 
   // Obtener los intentos de login y la configuración
   useEffect(() => {
@@ -90,20 +93,30 @@ const LoginAttemptsReport = () => {
       });
 
       if (response1.ok && response2.ok) {
-        setMessage('Configuración actualizada exitosamente');
+        setNotificationMessage('Configuración actualizada exitosamente');
+        setNotificationType('success');
         setIsEditing(false);
       } else {
-        setMessage('Error al actualizar la configuración');
+        setNotificationMessage('Error al actualizar la configuración');
+        setNotificationType('error');
       }
+      setNotificationOpen(true); // Mostrar notificación
     } catch (err) {
-      setMessage('Error al actualizar la configuración');
+      setNotificationMessage('Error al actualizar la configuración');
+      setNotificationType('error');
+      setNotificationOpen(true); // Mostrar notificación
     }
   };
 
   // Función para cancelar la edición
   const handleCancelEdit = () => {
     setIsEditing(false);
-    setMessage('');
+    setNotificationMessage('');
+  };
+
+  // Función para cerrar notificación
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
   };
 
   // Validación para permitir solo números positivos
@@ -120,7 +133,7 @@ const LoginAttemptsReport = () => {
       <Typography variant="h5" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#1565c0' }}>
         Reporte de Intentos de Login
       </Typography>
-  
+
       {/* Campos para intentos máximos y tiempo de bloqueo */}
       <Box sx={{ mb: 3 }}>
         <TextField
@@ -139,7 +152,7 @@ const LoginAttemptsReport = () => {
           sx={{ mb: 2 }}
           disabled={!isEditing}
         />
-  
+
         {/* Botones para editar, guardar y cancelar */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
           {!isEditing ? (
@@ -158,9 +171,15 @@ const LoginAttemptsReport = () => {
           )}
         </Box>
       </Box>
-  
-      {message && <Typography color="success" sx={{ mt: 2 }}>{message}</Typography>}
-  
+
+      {/* Mostrar notificación */}
+      <Notificaciones
+        open={notificationOpen}
+        message={notificationMessage}
+        type={notificationType}
+        handleClose={handleCloseNotification}
+      />
+
       {/* Tabla de intentos de login */}
       <TableContainer component={Paper} sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
         <Table>
@@ -192,7 +211,7 @@ const LoginAttemptsReport = () => {
           </TableBody>
         </Table>
       </TableContainer>
-  
+
       {/* Modal para mostrar la información del paciente */}
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -240,7 +259,6 @@ const LoginAttemptsReport = () => {
       </Dialog>
     </Box>
   );
-  
 };
 
 export default LoginAttemptsReport;
