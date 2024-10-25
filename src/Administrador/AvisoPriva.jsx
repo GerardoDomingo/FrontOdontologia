@@ -6,13 +6,12 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 
 const PoliticasPrivacidad = () => {
     const [politicas, setPoliticas] = useState([]);
+    const [numeroPolitica, setNumeroPolitica] = useState(''); // Campo para número de política
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingIndex, setEditingIndex] = useState(null); // Estado para identificar si estamos editando
@@ -43,6 +42,7 @@ const PoliticasPrivacidad = () => {
 
     const validateForm = () => {
         const newErrors = {};
+        if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
         if (!titulo) newErrors.titulo = "El título es obligatorio.";
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
@@ -54,19 +54,19 @@ const PoliticasPrivacidad = () => {
         
         if (!validateForm()) return;
     
-        const politicaData = { titulo, contenido };
+        const politicaData = { numero_politica: numeroPolitica, titulo, contenido };
     
         try {
             if (editingIndex !== null) {
                 // Estamos actualizando una política existente
                 const oldPolitica = politicas[editingIndex];
                 
-                // Aquí se hace la petición para actualizar (sin cambiar numero_politica)
+                // Aquí se hace la petición para actualizar
                 await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${oldPolitica.id}`, politicaData);
     
                 setNotification({ open: true, message: `Política actualizada correctamente`, type: 'success' });
             } else {
-                // Se inserta una nueva política; no hace falta desactivar manualmente
+                // Se inserta una nueva política
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
     
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
@@ -82,6 +82,7 @@ const PoliticasPrivacidad = () => {
     };
     
     const resetForm = () => {
+        setNumeroPolitica('');
         setTitulo('');
         setContenido('');
         setEditingIndex(null); // Reseteamos el índice de edición
@@ -90,6 +91,7 @@ const PoliticasPrivacidad = () => {
     };
     
     const handleEdit = (index) => {
+        setNumeroPolitica(politicas[index].numero_politica); // Setear número de política en edición
         setTitulo(politicas[index].titulo);
         setContenido(politicas[index].contenido);
         setEditingIndex(index); // Guarda correctamente el índice de la política a editar
@@ -166,6 +168,15 @@ const PoliticasPrivacidad = () => {
                 {/* Formulario para agregar o actualizar políticas */}
                 {isAddingNewPolicy && (
                     <form onSubmit={handleSubmit}>
+                        <TextField
+                            label="Número de Política"
+                            value={numeroPolitica}
+                            onChange={(e) => setNumeroPolitica(e.target.value)}
+                            fullWidth
+                            sx={{ mt: 3 }}
+                            error={!!errors.numeroPolitica}
+                            helperText={errors.numeroPolitica}
+                        />
                         <TextField
                             label="Título"
                             value={titulo}
