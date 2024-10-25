@@ -73,7 +73,7 @@ const PoliticasPrivacidad = () => {
                     await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${politicas[0].id}`, { estado: 'inactivo' });
                 }
     
-                // Insertar la nueva política con versión 1 (esto también lo maneja el backend si es necesario)
+                // Insertar la nueva política con versión 1
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
     
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
