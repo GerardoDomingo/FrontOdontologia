@@ -11,7 +11,6 @@ import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 
 const PoliticasPrivacidad = () => {
-    const [politicas, setPoliticas] = useState([]);
     const [numeroPolitica, setNumeroPolitica] = useState(''); // Campo para número de política
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
@@ -21,6 +20,7 @@ const PoliticasPrivacidad = () => {
     const [errors, setErrors] = useState({});
     const [page, setPage] = useState(0);
     const policiesPerPage = 1;
+    const [politicas, setPoliticas] = useState([]);  // Asegurarse de que sea un arreglo vacío inicialmente
     const [historico, setHistorico] = useState([]);
     const [groupedPoliticas, setGroupedPoliticas] = useState({});
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
@@ -53,13 +53,17 @@ const PoliticasPrivacidad = () => {
     const fetchPoliticaActiva = async () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
-            const data = response.data;
-
-            setPoliticas([data]);  // Asume que data contiene solo la política activa
+            if (response.data) {
+                setPoliticas([response.data]);  // Asegúrate de que response.data tenga un valor
+            } else {
+                setPoliticas([]);  // En caso de que no haya una política activa
+            }
         } catch (error) {
             console.error('Error al cargar política activa:', error);
+            setPoliticas([]);  // Manejar el error correctamente
         }
     };
+    
 
     useEffect(() => {
         fetchPoliticaActiva();  // Llamar a la función que obtiene la política activa
@@ -175,26 +179,27 @@ const PoliticasPrivacidad = () => {
                 <Typography variant="h4" align="center" gutterBottom>
                     Política de Privacidad Vigente
                 </Typography>
-                {politicas.length > 0 && (
-                    <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={9}>
-                                <Typography variant="h5">Vigente: {politicas[0].titulo}</Typography>
-                                <Typography variant="body2" color="textSecondary">Número: {politicas[0].numero_politica}</Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
-                                <IconButton onClick={() => handleEdit(0)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
-                                <IconButton onClick={() => handleDelete(politicas[0].id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Typography variant="body2">
-                                    {truncateContent(politicas[0].contenido)}{' '}
-                                    <Button variant="outlined" onClick={() => handleDialogOpen(politicas[0])}>Ver más</Button>
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </Paper>
-                )}
+                {politicas.length > 0 && politicas[0] && (
+    <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
+        <Grid container spacing={2}>
+            <Grid item xs={12} sm={9}>
+                <Typography variant="h5">Vigente: {politicas[0].titulo}</Typography>
+                <Typography variant="body2" color="textSecondary">Número: {politicas[0].numero_politica}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
+                <IconButton onClick={() => handleEdit(0)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
+                <IconButton onClick={() => handleDelete(politicas[0].id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
+            </Grid>
+            <Grid item xs={12}>
+                <Typography variant="body2">
+                    {truncateContent(politicas[0].contenido)}{' '}
+                    <Button variant="outlined" onClick={() => handleDialogOpen(politicas[0])}>Ver más</Button>
+                </Typography>
+            </Grid>
+        </Grid>
+    </Paper>
+)}
+
 
                 {/* Botón Nueva Política */}
                 <Button
