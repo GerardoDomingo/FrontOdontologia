@@ -5,12 +5,15 @@ import {
   Typography,
   Box,
   Button,
-  IconButton,
   MenuItem,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import axios from 'axios';
@@ -230,24 +233,33 @@ const RedesSociales = () => {
         </Grid>
       </Grid>
 
-      <List>
-        {Object.keys(socialData).map((social) => (
-          <ListItem key={social}>
-            <ListItemText
-              primary={availableSocials.find((s) => s.name === social)?.label || social}
-              secondary={socialData[social]?.url}
-            />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(social)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(social)}>
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
+      <TableContainer component={Paper} sx={{ backgroundColor: '#e3f2fd' }}>
+        <Table aria-label="tabla de redes sociales">
+          <TableHead>
+            <TableRow>
+              <TableCell>Red Social</TableCell>
+              <TableCell>Enlace / Número</TableCell>
+              <TableCell align="right">Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Object.keys(socialData).map((social) => (
+              <TableRow key={social}>
+                <TableCell>{availableSocials.find((s) => s.name === social)?.label || social}</TableCell>
+                <TableCell>{socialData[social]?.url}</TableCell>
+                <TableCell align="right">
+                  <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(social)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(social)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       <Notificaciones
         open={notification.open}
