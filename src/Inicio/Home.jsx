@@ -194,7 +194,7 @@ const Home = () => {
             py: 8,
             borderRadius: '16px',
             boxShadow: 3,
-            mb: 80,     
+            mb: 20,     
                }}
         >
           <Typography
