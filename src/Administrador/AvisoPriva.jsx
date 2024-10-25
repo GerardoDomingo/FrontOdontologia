@@ -11,20 +11,18 @@ import axios from 'axios';
 import Notificaciones from '../Compartidos/Notificaciones';
 
 const PoliticasPrivacidad = () => {
-    const [numeroPolitica, setNumeroPolitica] = useState(''); // Campo para número de política
+    const [numeroPolitica, setNumeroPolitica] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
-    const [editingIndex, setEditingIndex] = useState(null); // Estado para identificar si estamos editando
+    const [editingIndex, setEditingIndex] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
     const [page, setPage] = useState(0);
     const policiesPerPage = 1;
-    const [politicas, setPoliticas] = useState([]);  // Asegurarse de que sea un arreglo vacío inicialmente
-    const [historico, setHistorico] = useState([]);
-    const [groupedPoliticas, setGroupedPoliticas] = useState({});
+    const [politicas, setPoliticas] = useState([]);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
-    const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false); // Estado para controlar si se está agregando una nueva política
+    const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false);
 
     useEffect(() => {
         fetchPoliticas();
@@ -36,14 +34,14 @@ const PoliticasPrivacidad = () => {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
             const data = response.data;
 
-            // Filtrar solo las políticas que estén inactivas
+            // Filtrar solo las políticas inactivas
             const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
-
-            setPoliticas(politicasInactivas);  // Guardar las políticas inactivas en el estado
+            setPoliticas(politicasInactivas);
         } catch (error) {
             console.error('Error al cargar políticas:', error);
         }
     };
+
 
     useEffect(() => {
         fetchPoliticas();  // Obtener las políticas al cargar el componente
