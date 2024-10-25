@@ -194,6 +194,7 @@ const Home = () => {
             py: 8,
             borderRadius: '16px',
             boxShadow: 3,
+            mb:20
           }}
         >
           <Typography
@@ -202,7 +203,7 @@ const Home = () => {
               color: '#1976d2',
               fontWeight: 'bold',
               textAlign: 'center',
-              mb: 12,
+              mb: 6,
               fontFamily: 'Montserrat, sans-serif',
             }}
           >
