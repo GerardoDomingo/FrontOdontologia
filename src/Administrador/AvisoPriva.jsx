@@ -18,8 +18,6 @@ const PoliticasPrivacidad = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
-    const [page, setPage] = useState(0);
-    const policiesPerPage = 1;
     const [politicas, setPoliticas] = useState([]);
     const [politicaActiva, setPoliticaActiva] = useState(null);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
@@ -35,17 +33,11 @@ const PoliticasPrivacidad = () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
             const data = response.data;
-
-            // Filtrar solo las políticas inactivas
             const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
             setPoliticas(politicasInactivas);
         } catch (error) {
             console.error('Error al cargar políticas:', error);
         }
-    };
-
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
     };
 
     const fetchPoliticaActiva = async () => {
@@ -95,8 +87,8 @@ const PoliticasPrivacidad = () => {
             }
     
             // Actualizar las políticas y la activa después de la operación
-            fetchPoliticas(); // Actualizar la lista de políticas inactivas
-            fetchPoliticaActiva(); // Actualizar la política activa
+            await fetchPoliticas(); // Actualizar la lista de políticas inactivas
+            await fetchPoliticaActiva(); // Actualizar la política activa
             resetForm();
             setIsAddingNewPolicy(false);
         } catch (error) {
@@ -116,7 +108,7 @@ const PoliticasPrivacidad = () => {
     const handleEdit = (id) => {
         const politica = politicas.find(p => p.id === id);
         if (politica) {
-            setNumeroPolitica(politica.numero_politica); // Setear número de política en edición
+            setNumeroPolitica(politica.numero_politica);
             setTitulo(politica.titulo);
             setContenido(politica.contenido);
             setEditingId(id); // Guarda correctamente el ID de la política a editar
@@ -130,7 +122,8 @@ const PoliticasPrivacidad = () => {
         try {
             await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${id}`, { estado: 'inactivo' });
             setNotification({ open: true, message: 'Política eliminada con éxito', type: 'success' });
-            fetchPoliticas();
+            await fetchPoliticas();
+            await fetchPoliticaActiva(); // Refresca la política activa tras eliminar
         } catch (error) {
             setNotification({ open: true, message: 'Error al eliminar política', type: 'error' });
         }
