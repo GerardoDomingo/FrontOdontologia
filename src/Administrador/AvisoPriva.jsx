@@ -21,11 +21,13 @@ const PoliticasPrivacidad = () => {
     const [page, setPage] = useState(0);
     const policiesPerPage = 1;
     const [politicas, setPoliticas] = useState([]);
+    const [politicaActiva, setPoliticaActiva] = useState(null);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
     const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false);
 
     useEffect(() => {
         fetchPoliticas();
+        fetchPoliticaActiva(); // Cargar política activa
     }, []);
 
     // Función para obtener todas las políticas inactivas
@@ -50,22 +52,20 @@ const PoliticasPrivacidad = () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
             if (response.data) {
-                setPoliticas([response.data]);  // Asegúrate de que response.data tenga un valor
+                setPoliticaActiva(response.data); // Guardar la política activa
             } else {
-                setPoliticas([]);  // En caso de que no haya una política activa
+                setPoliticaActiva(null); // En caso de que no haya una política activa
             }
         } catch (error) {
             if (error.response && error.response.status === 404) {
-                setPoliticas([]);  // Establecer políticas vacías
+                setPoliticaActiva(null); // Establecer política activa a null si no existe
                 console.error('No hay políticas activas.');
             } else {
-                // Manejar otros errores
                 console.error('Error al cargar política activa:', error);
-                setPoliticas([]);  // Manejar el error correctamente
+                setPoliticaActiva(null);
             }
         }
     };
-
 
     useEffect(() => {
         fetchPoliticaActiva();  // Llamar a la función que obtiene la política activa
@@ -177,33 +177,31 @@ const PoliticasPrivacidad = () => {
                 <Typography variant="h4" align="center" gutterBottom>
                     Política de Privacidad Vigente
                 </Typography>
-                {politicas.length > 0 && politicas[0] && (
+                {politicaActiva && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={9}>
-                                <Typography variant="h5">Vigente: {politicas[0].titulo}</Typography>
+                                <Typography variant="h5">Vigente: {politicaActiva.titulo}</Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Número: {politicas[0].numero_politica}
+                                    Número: {politicaActiva.numero_politica}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Versión: {politicas[0].version}
+                                    Versión: {politicaActiva.version}
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
                                 <IconButton onClick={() => handleEdit(0)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
-                                <IconButton onClick={() => handleDelete(politicas[0].id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
+                                <IconButton onClick={() => handleDelete(politicaActiva.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
                             </Grid>
                             <Grid item xs={12}>
                                 <Typography variant="body2">
-                                    {truncateContent(politicas[0].contenido)}{' '}
-                                    <Button variant="outlined" onClick={() => handleDialogOpen(politicas[0])}>Ver más</Button>
+                                    {truncateContent(politicaActiva.contenido)}{' '}
+                                    <Button variant="outlined" onClick={() => handleDialogOpen(politicaActiva)}>Ver más</Button>
                                 </Typography>
                             </Grid>
                         </Grid>
                     </Paper>
                 )}
-
-
                 {/* Botón Nueva Política */}
                 <Button
                     variant="contained"
@@ -274,7 +272,7 @@ const PoliticasPrivacidad = () => {
                 Historial de Políticas por Versión
             </Typography>
 
-            
+
             <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <Table>
                     <TableHead>
