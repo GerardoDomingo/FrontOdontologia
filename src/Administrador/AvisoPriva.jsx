@@ -13,7 +13,6 @@ import Notificaciones from '../Compartidos/Notificaciones';
 
 const PoliticasPrivacidad = () => {
     const [politicas, setPoliticas] = useState([]);
-    const [numeroPolitica, setNumeroPolitica] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingIndex, setEditingIndex] = useState(null); // Estado para identificar si estamos editando
@@ -44,7 +43,6 @@ const PoliticasPrivacidad = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
         if (!titulo) newErrors.titulo = "El título es obligatorio.";
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
@@ -84,7 +82,6 @@ const PoliticasPrivacidad = () => {
     };
     
     const resetForm = () => {
-        setNumeroPolitica('');
         setTitulo('');
         setContenido('');
         setEditingIndex(null); // Reseteamos el índice de edición
@@ -93,13 +90,11 @@ const PoliticasPrivacidad = () => {
     };
     
     const handleEdit = (index) => {
-        setNumeroPolitica(politicas[index].numero_politica);
         setTitulo(politicas[index].titulo);
         setContenido(politicas[index].contenido);
         setEditingIndex(index); // Guarda correctamente el índice de la política a editar
         setIsAddingNewPolicy(true); // Abrir el formulario para editar
     };
-    
 
     const handleDelete = async (id) => {
         try {
@@ -181,16 +176,6 @@ const PoliticasPrivacidad = () => {
                             helperText={errors.titulo}
                         />
                         <TextField
-                            label="Número de Política"
-                            type="number"
-                            value={numeroPolitica}
-                            onChange={(e) => setNumeroPolitica(e.target.value)}
-                            fullWidth
-                            sx={{ mt: 2 }}
-                            error={!!errors.numeroPolitica}
-                            helperText={errors.numeroPolitica}
-                        />
-                        <TextField
                             label="Contenido"
                             value={contenido}
                             onChange={(e) => setContenido(e.target.value)}
@@ -261,7 +246,6 @@ const PoliticasPrivacidad = () => {
                 />
             </TableContainer>
 
-
             {/* Diálogo para visualizar el contenido completo de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
                 <DialogTitle>Detalles de la Política de Privacidad</DialogTitle>
@@ -294,8 +278,6 @@ const PoliticasPrivacidad = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-
-
 
             {/* Componente de Notificaciones */}
             <Notificaciones
