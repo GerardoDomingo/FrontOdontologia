@@ -38,11 +38,18 @@ const PoliticasPrivacidad = () => {
             // Filtrar solo las políticas que estén inactivas
             const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
 
+            console.log("Políticas inactivas:", politicasInactivas);  // Verificar las políticas después del filtro
+
             setPoliticas(politicasInactivas);
         } catch (error) {
             console.error('Error al cargar políticas:', error);
         }
     };
+
+    useEffect(() => {
+        fetchPoliticas();  // Obtener las políticas al cargar el componente
+    }, []);
+
 
 
     const fetchPoliticaActiva = async () => {
@@ -292,8 +299,6 @@ const PoliticasPrivacidad = () => {
                         {
                             politicas.length > 0
                                 ? politicas
-                                    .filter(politica => politica.estado === 'inactivo') // Solo mostrar inactivas
-                                    .sort((a, b) => parseFloat(b.version) - parseFloat(a.version)) // Ordenar por versión
                                     .map((politica, index) => (
                                         <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' } }}>
                                             <TableCell>{politica.numero_politica}</TableCell>
@@ -314,9 +319,6 @@ const PoliticasPrivacidad = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-
-
-
 
             {/* Diálogo para visualizar el contenido completo de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
