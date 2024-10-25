@@ -277,33 +277,34 @@ const PoliticasPrivacidad = () => {
             </Typography>
 
             <TableContainer>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Número de Política</TableCell>
-                            <TableCell>Título</TableCell>
-                            <TableCell>Versión</TableCell>
-                            <TableCell>Estado</TableCell>
-                            <TableCell>Fecha de Creación</TableCell>
-                            <TableCell>Fecha de Actualización</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {
-                            Object.keys(groupedPoliticas).length > 0 && Object.values(groupedPoliticas)[page].map((politica, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{politica.numero_politica}</TableCell>
-                                    <TableCell>{politica.titulo}</TableCell>
-                                    <TableCell>{politica.version}</TableCell>
-                                    <TableCell>{politica.estado}</TableCell>
-                                    <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
-                                    <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
-                                </TableRow>
-                            ))
-                        }
-                    </TableBody>
-                </Table>
-            </TableContainer>
+    <Table>
+        <TableHead>
+            <TableRow>
+                <TableCell>Número de Política</TableCell>
+                <TableCell>Título</TableCell>
+                <TableCell>Versión</TableCell>
+                <TableCell>Estado</TableCell>
+                <TableCell>Fecha de Creación</TableCell>
+                <TableCell>Fecha de Actualización</TableCell>
+            </TableRow>
+        </TableHead>
+        <TableBody>
+            {
+                politicas.length > 0 && politicas.map((politica, index) => (
+                    <TableRow key={index}>
+                        <TableCell>{politica.numero_politica}</TableCell>
+                        <TableCell>{politica.titulo}</TableCell>
+                        <TableCell>{politica.version}</TableCell>
+                        <TableCell>{politica.estado}</TableCell>
+                        <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
+                        <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                ))
+            }
+        </TableBody>
+    </Table>
+</TableContainer>
+
 
 
             {/* Diálogo para visualizar el contenido completo de la política */}
