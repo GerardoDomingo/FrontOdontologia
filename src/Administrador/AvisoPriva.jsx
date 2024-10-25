@@ -61,20 +61,34 @@ const PoliticasPrivacidad = () => {
         try {
             if (editingIndex !== null) {
                 // Si estamos en modo de edición, actualizamos la política
+                const oldPolitica = politicas[editingIndex];
+                const newVersion = `${parseFloat(oldPolitica.version) + 0.1}`; // Incrementar la versión en 0.1
+
                 const updatedPolitica = {
                     ...politicaData,
-                    version: politicas[editingIndex].version + 1
+                    version: newVersion
                 };
-                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${politicas[editingIndex].id}`, updatedPolitica);
-                setNotification({ open: true, message: 'Política actualizada con éxito', type: 'success' });
+
+                // Desactivar la política anterior
+                await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${oldPolitica.id}`, { estado: 'inactivo' });
+
+                // Insertar la nueva política con la versión incrementada
+                await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', updatedPolitica);
+
+                setNotification({ open: true, message: `Política actualizada a la versión ${newVersion}`, type: 'success' });
             } else {
                 // Desactivar la política vigente actual
                 if (politicas.length > 0) {
                     await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${politicas[0].id}`, { estado: 'inactivo' });
                 }
-                // Insertar la nueva política
-                await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-                setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
+
+                // Insertar la nueva política con versión 1
+                await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', {
+                    ...politicaData,
+                    version: '1' // Nueva política siempre comienza con la versión 1
+                });
+
+                setNotification({ open: true, message: 'Política insertada con éxito, versión 1', type: 'success' });
             }
             fetchPoliticas();
             resetForm();
@@ -90,6 +104,7 @@ const PoliticasPrivacidad = () => {
         setContenido('');
         setEditingIndex(null); // Reseteamos el índice de edición
         setErrors({});
+        setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
 
     const handleEdit = (index) => {
@@ -200,9 +215,23 @@ const PoliticasPrivacidad = () => {
                             error={!!errors.contenido}
                             helperText={errors.contenido}
                         />
-                        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 3 }}>
-                            {editingIndex !== null ? 'Actualizar' : 'Agregar'}
-                        </Button>
+                        <Grid container spacing={2} sx={{ mt: 3 }}>
+                            <Grid item xs={6}>
+                                <Button type="submit" variant="contained" color="primary" fullWidth>
+                                    {editingIndex !== null ? 'Actualizar' : 'Agregar'}
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    fullWidth
+                                    onClick={resetForm}
+                                >
+                                    Cancelar
+                                </Button>
+                            </Grid>
+                        </Grid>
                     </form>
                 )}
             </Paper>
