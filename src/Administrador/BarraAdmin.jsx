@@ -120,40 +120,6 @@ const BarraPaciente = () => {
 
                     <MenuItem
                         component={Link}
-                        to="/Administrador/perfil"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
-                        }}
-                    >
-                        <FaUserCircle style={{ marginRight: 8 }} />
-                        Perfil
-                    </MenuItem>
-
-                    <MenuItem
-                        component={Link}
-                        to="/Administrador/citas"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
-                        }}
-                    >
-                        <FaCalendarAlt style={{ marginRight: 8 }} />
-                        Pacientes
-                    </MenuItem>
-                    <MenuItem
-                        component={Link}
-                        to="/Administrador/recordatorios"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
-                        }}
-                    >
-                        <FaCalendarAlt style={{ marginRight: 8 }} />
-                        Recordatorios
-                    </MenuItem>
-                    <MenuItem
-                        component={Link}
                         to="/Administrador/reportes"
                         onClick={handleMenuClose}
                         sx={{
@@ -162,19 +128,6 @@ const BarraPaciente = () => {
                     >
                         <FaCalendarAlt style={{ marginRight: 8 }} />
                         Reportes
-                    </MenuItem>
-
-
-                    <MenuItem
-                        component={Link}
-                        to="/Administrador/notificaciones"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
-                        }}
-                    >
-                        <FaBell style={{ marginRight: 8 }} />
-                        Notificaciones
                     </MenuItem>
 
                     <Divider />
