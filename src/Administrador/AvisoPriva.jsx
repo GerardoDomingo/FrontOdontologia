@@ -247,6 +247,7 @@ const PoliticasPrivacidad = () => {
                             <TableCell>Número de Política</TableCell>
                             <TableCell>Título</TableCell>
                             <TableCell>Versión</TableCell>
+                            <TableCell>Estado</TableCell>
                             <TableCell>Fecha de Creación</TableCell>
                             <TableCell>Fecha de Actualización</TableCell>
                         </TableRow>
@@ -257,6 +258,7 @@ const PoliticasPrivacidad = () => {
                                 <TableCell>{politica.numero_politica}</TableCell>
                                 <TableCell>{politica.titulo}</TableCell>
                                 <TableCell>{politica.version}</TableCell> {/* Mostrar versión */}
+                                <TableCell>{politica.estado}</TableCell> {/* Mostrar estado */}
                                 <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
                                 <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
                             </TableRow>
