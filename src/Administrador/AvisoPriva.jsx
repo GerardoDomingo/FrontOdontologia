@@ -21,10 +21,10 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
-import Notificaciones from '../Compartidos/Notificaciones'; // Importar notificaciones
+import Notificaciones from '../Compartidos/Notificaciones';
 
 const PoliticasPrivacidad = () => {
     const [politicas, setPoliticas] = useState([]);
@@ -32,7 +32,6 @@ const PoliticasPrivacidad = () => {
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingIndex, setEditingIndex] = useState(null);
-    const [mensaje, setMensaje] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
@@ -48,18 +47,17 @@ const PoliticasPrivacidad = () => {
     
     const fetchPoliticas = async () => {
         try {
-            // Obtenemos todas las políticas (activas e inactivas)
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
             const activePolicies = response.data.filter(politica => politica.estado === 'activo');
             const inactivePolicies = response.data.filter(politica => politica.estado === 'inactivo');
-            setPoliticas(activePolicies); // Guardamos las políticas activas
-            setHistorico(inactivePolicies); // Guardamos las políticas inactivas para el historial
+            setPoliticas(activePolicies);
+            setHistorico(inactivePolicies);
         } catch (error) {
             console.error('Error al obtener políticas:', error);
-            setMensaje('Error al cargar políticas.');
+            setNotification({ open: true, message: 'Error al cargar políticas.', type: 'error' });
         }
     };
-    
+
     const validateForm = () => {
         const newErrors = {};
         if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
@@ -71,7 +69,6 @@ const PoliticasPrivacidad = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMensaje('');
 
         if (!validateForm()) return;
 
@@ -136,7 +133,7 @@ const PoliticasPrivacidad = () => {
         setPage(newPage);
     };
 
-    // Función para mostrar solo una parte del contenido
+    // Función para truncar contenido largo
     const truncateContent = (content) => {
         return content.length > 100 ? content.substring(0, 100) + '...' : content;
     };
@@ -144,21 +141,21 @@ const PoliticasPrivacidad = () => {
     return (
         <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
             {/* Política de Privacidad Vigente */}
-            <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
+            <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)', position: 'relative' }}>
                 <Typography variant="h4" component="h2" align="center" gutterBottom>
                     Política de Privacidad Vigente
                 </Typography>
                 {politicas.length > 0 && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
-                        <Typography variant="h6">Política Número: {politicas[0].numero_politica}</Typography>
-                        <Typography variant="subtitle1">Título: {politicas[0].titulo}</Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Título: {politicas[0].titulo}</Typography>
+                        <Typography variant="body2" sx={{ mt: 1, color: 'gray' }}>Número: {politicas[0].numero_politica}</Typography>
                         <Typography variant="body2" sx={{ mt: 2 }}>
                             {truncateContent(politicas[0].contenido)}{' '}
                             <IconButton aria-label="ver más" onClick={() => handleDialogOpen(politicas[0].contenido)}>
                                 <VisibilityIcon />
                             </IconButton>
                         </Typography>
-                        <Box sx={{ mt: 3 }}>
+                        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
                             <IconButton title="Editar" aria-label="edit" onClick={() => handleEdit(0)}>
                                 <EditIcon sx={{ color: '#1976d2' }} />
                             </IconButton>
@@ -169,42 +166,55 @@ const PoliticasPrivacidad = () => {
                     </Paper>
                 )}
 
+                {/* Botón Nuevo */}
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    sx={{ position: 'absolute', top: 20, right: 20 }}
+                    onClick={() => resetForm()}
+                >
+                    Nueva Política
+                </Button>
+
                 {/* Formulario para agregar/actualizar políticas */}
-                <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="Número de Política"
-                        type="number"
-                        value={numeroPolitica}
-                        onChange={(e) => setNumeroPolitica(e.target.value)}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                        error={!!errors.numeroPolitica}
-                        helperText={errors.numeroPolitica}
-                    />
-                    <TextField
-                        label="Título"
-                        value={titulo}
-                        onChange={(e) => setTitulo(e.target.value)}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                        error={!!errors.titulo}
-                        helperText={errors.titulo}
-                    />
-                    <TextField
-                        label="Contenido"
-                        value={contenido}
-                        onChange={(e) => setContenido(e.target.value)}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        sx={{ mb: 3 }}
-                        error={!!errors.contenido}
-                        helperText={errors.contenido}
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                        {editingIndex !== null ? 'Actualizar' : 'Agregar'}
-                    </Button>
-                </form>
+                {editingIndex === null && (
+                    <form onSubmit={handleSubmit}>
+                        <TextField
+                            label="Número de Política"
+                            type="number"
+                            value={numeroPolitica}
+                            onChange={(e) => setNumeroPolitica(e.target.value)}
+                            fullWidth
+                            sx={{ mb: 2 }}
+                            error={!!errors.numeroPolitica}
+                            helperText={errors.numeroPolitica}
+                        />
+                        <TextField
+                            label="Título"
+                            value={titulo}
+                            onChange={(e) => setTitulo(e.target.value)}
+                            fullWidth
+                            sx={{ mb: 2 }}
+                            error={!!errors.titulo}
+                            helperText={errors.titulo}
+                        />
+                        <TextField
+                            label="Contenido"
+                            value={contenido}
+                            onChange={(e) => setContenido(e.target.value)}
+                            fullWidth
+                            multiline
+                            rows={4}
+                            sx={{ mb: 3 }}
+                            error={!!errors.contenido}
+                            helperText={errors.contenido}
+                        />
+                        <Button type="submit" variant="contained" color="primary" fullWidth>
+                            {editingIndex !== null ? 'Actualizar' : 'Agregar'}
+                        </Button>
+                    </form>
+                )}
             </Paper>
 
             {/* Historial de Políticas */}
