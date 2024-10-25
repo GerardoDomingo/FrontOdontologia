@@ -16,7 +16,7 @@ const PoliticasPrivacidad = () => {
   const [numeroPolitica, setNumeroPolitica] = useState('');
   const [titulo, setTitulo] = useState('');
   const [contenido, setContenido] = useState('');
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null); // Estado para identificar si estamos editando
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogContent, setDialogContent] = useState('');
   const [errors, setErrors] = useState({});
@@ -24,7 +24,7 @@ const PoliticasPrivacidad = () => {
   const policiesPerPage = 3;
   const [historico, setHistorico] = useState([]);
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
-  const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false); // Estado para deshabilitar el botón de nueva política
+  const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false); // Estado para controlar si se está agregando una nueva política
 
   useEffect(() => {
     fetchPoliticas();
@@ -60,6 +60,7 @@ const PoliticasPrivacidad = () => {
 
     try {
       if (editingIndex !== null) {
+        // Si estamos en modo de edición, actualizamos la política
         const updatedPolitica = {
           ...politicaData,
           version: politicas[editingIndex].version + 1 
@@ -87,7 +88,7 @@ const PoliticasPrivacidad = () => {
     setNumeroPolitica('');
     setTitulo('');
     setContenido('');
-    setEditingIndex(null);
+    setEditingIndex(null); // Reseteamos el índice de edición
     setErrors({});
   };
 
@@ -95,8 +96,8 @@ const PoliticasPrivacidad = () => {
     setNumeroPolitica(politicas[index].numero_politica);
     setTitulo(politicas[index].titulo);
     setContenido(politicas[index].contenido);
-    setEditingIndex(index);
-    setIsAddingNewPolicy(true); // Desactivar el botón "Nueva Política"
+    setEditingIndex(index); // Guardamos el índice de la política que se está editando
+    setIsAddingNewPolicy(true); // Abrimos el formulario de nueva política para editar
   };
 
   const handleDelete = async (id) => {
