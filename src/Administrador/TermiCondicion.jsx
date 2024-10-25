@@ -1,136 +1,141 @@
 import React, { useState, useEffect } from 'react';
 import {
-    TextField,
-    Button,
-    Typography,
-    Paper,
-    List,
-    ListItem,
-    ListItemText,
-    IconButton,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Box
+    TextField, Button, Typography, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Grid,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
+import Notificaciones from '../Compartidos/Notificaciones';
 
 const TerminosCondiciones = () => {
-    const [terminos, setTerminos] = useState([]);
     const [numeroTermino, setNumeroTermino] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
-    const [editingIndex, setEditingIndex] = useState(null);
-    const [mensaje, setMensaje] = useState('');
+    const [editingId, setEditingId] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
-
-    const [errors, setErrors] = useState({
-        numeroTermino: '',
-        titulo: '',
-        contenido: ''
-    });
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const terminosPerPage = 3;
+    const [errors, setErrors] = useState({});
+    const [terminos, setTerminos] = useState([]);
+    const [terminoActivo, setTerminoActivo] = useState(null);
+    const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
+    const [isAddingNewTermino, setIsAddingNewTermino] = useState(false);
 
     useEffect(() => {
         fetchTerminos();
+        fetchTerminoActivo(); // Cargar término activo
     }, []);
 
+    // Función para obtener todos los términos inactivos
     const fetchTerminos = async () => {
         try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/getterminos');
-            setTerminos(response.data);
+            const response = await axios.get('https://backendodontologia.onrender.com/api/terminos/getAllTerminos');
+            const data = response.data;
+            const terminosInactivos = data.filter(termino => termino.estado === 'inactivo');
+            setTerminos(terminosInactivos);
         } catch (error) {
-            console.error('Error al obtener términos:', error);
-            setMensaje('Error al cargar términos.');
+            console.error('Error al cargar términos:', error);
+        }
+    };
+
+    const fetchTerminoActivo = async () => {
+        try {
+            const response = await axios.get('https://backendodontologia.onrender.com/api/terminos/gettermino');
+            if (response.data) {
+                setTerminoActivo(response.data); // Guardar el término activo
+            } else {
+                setTerminoActivo(null); // En caso de que no haya un término activo
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                setTerminoActivo(null); // Establecer término activo a null si no existe
+                console.error('No hay términos activos.');
+            } else {
+                console.error('Error al cargar término activo:', error);
+                setTerminoActivo(null);
+            }
         }
     };
 
     const validateForm = () => {
-        let valid = true;
-        const newErrors = {
-            numeroTermino: '',
-            titulo: '',
-            contenido: ''
-        };
-
-        if (!numeroTermino) {
-            newErrors.numeroTermino = 'El número de término es obligatorio.';
-            valid = false;
-        }
-        if (!titulo) {
-            newErrors.titulo = 'El título es obligatorio.';
-            valid = false;
-        }
-        if (!contenido) {
-            newErrors.contenido = 'El contenido es obligatorio.';
-            valid = false;
-        }
-
+        const newErrors = {};
+        if (!numeroTermino) newErrors.numeroTermino = "El número de término es obligatorio.";
+        if (!titulo) newErrors.titulo = "El título es obligatorio.";
+        if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
-        return valid;
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMensaje('');
-
+    
         if (!validateForm()) return;
-
+    
         const terminoData = { numero_termino: numeroTermino, titulo, contenido };
-
+    
         try {
-            if (editingIndex !== null) {
-                await axios.put(`https://backendodontologia.onrender.com/api/termiCondicion/update/${terminos[editingIndex].id}`, terminoData);
-                setMensaje('Término actualizado con éxito');
+            if (editingId !== null) {
+                // Actualización de un término existente
+                await axios.put(`https://backendodontologia.onrender.com/api/terminos/update/${editingId}`, terminoData);
+                setNotification({ open: true, message: `Término actualizado correctamente`, type: 'success' });
             } else {
-                await axios.post('https://backendodontologia.onrender.com/api/termiCondicion/insert', terminoData);
-                setMensaje('Término insertado con éxito');
+                // Creación de un nuevo término
+                await axios.post('https://backendodontologia.onrender.com/api/terminos/insert', terminoData);
+                setNotification({ open: true, message: 'Término insertado con éxito', type: 'success' });
             }
-            fetchTerminos();
+    
+            // Actualizar los términos y el activo después de la operación
+            await fetchTerminos(); // Actualizar la lista de términos inactivos
+            await fetchTerminoActivo(); // Actualizar el término activo
             resetForm();
+            setIsAddingNewTermino(false);
         } catch (error) {
-            console.error('Error al enviar término:', error);
-            setMensaje('Error al enviar término.');
+            setNotification({ open: true, message: 'Error al enviar término', type: 'error' });
         }
     };
-
+    
     const resetForm = () => {
         setNumeroTermino('');
         setTitulo('');
         setContenido('');
-        setEditingIndex(null);
-        setErrors({ numeroTermino: '', titulo: '', contenido: '' });
+        setEditingId(null); // Reseteamos el ID de edición
+        setErrors({});
+        setIsAddingNewTermino(false); // Reactivar el botón "Nuevo Término"
     };
 
-    const handleEdit = (index) => {
-        setNumeroTermino(terminos[index].numero_termino);
-        setTitulo(terminos[index].titulo);
-        setContenido(terminos[index].contenido);
-        setEditingIndex(index);
+    const handleEdit = async (id) => {
+        try {
+            // Cargar el término activo directamente para edición
+            const response = await axios.get(`https://backendodontologia.onrender.com/api/terminos/get/${id}`);
+            const termino = response.data;
+    
+            if (termino) {
+                setNumeroTermino(termino.numero_termino);
+                setTitulo(termino.titulo);
+                setContenido(termino.contenido);
+                setEditingId(id); // Guarda correctamente el ID del término a editar
+                setIsAddingNewTermino(true); // Abrir el formulario para editar
+            }
+        } catch (error) {
+            console.error("Error al cargar el término para editar:", error);
+        }
     };
-
+    
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://backendodontologia.onrender.com/api/termiCondicion/delete/${id}`);
-            setMensaje('Término eliminado con éxito');
-            fetchTerminos();
+            await axios.put(`https://backendodontologia.onrender.com/api/terminos/deactivate/${id}`, { estado: 'inactivo' });
+            setNotification({ open: true, message: 'Término eliminado con éxito', type: 'success' });
+            await fetchTerminos();
+            await fetchTerminoActivo(); // Refresca el término activo tras eliminar
         } catch (error) {
-            console.error('Error al eliminar término:', error);
-            setMensaje('Error al eliminar término.');
+            setNotification({ open: true, message: 'Error al eliminar término', type: 'error' });
         }
     };
 
-    const handleDialogOpen = (contenido) => {
-        setDialogContent(contenido);
+    const handleDialogOpen = (termino) => {
+        setDialogContent(termino); // Guardamos todo el objeto del término en lugar de solo el contenido
         setOpenDialog(true);
     };
 
@@ -138,145 +143,188 @@ const TerminosCondiciones = () => {
         setOpenDialog(false);
     };
 
-    const indexOfLastTermino = currentPage * terminosPerPage;
-    const indexOfFirstTermino = indexOfLastTermino - terminosPerPage;
-    const currentTerminos = terminos.slice(indexOfFirstTermino, indexOfLastTermino);
-
-    const handleNextPage = () => {
-        if (currentPage < Math.ceil(terminos.length / terminosPerPage)) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
+    const truncateContent = (content) => {
+        return content.length > 100 ? content.substring(0, 100) + '...' : content;
     };
 
     return (
-        <Box sx={{ padding: '60px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
-            <Paper sx={{ padding: '30px', maxWidth: '650px', margin: '20px auto', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)' }}>
-                <Typography variant="h4" component="h2" align="center" gutterBottom>
-                    Términos y Condiciones
+        <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
+            {/* Término de Condiciones Vigente */}
+            <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
+                <Typography variant="h4" align="center" gutterBottom>
+                    Término de Condiciones Vigente
                 </Typography>
-                <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="Número de Término"
-                        type="number"
-                        value={numeroTermino}
-                        onChange={(e) => setNumeroTermino(e.target.value)}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                        error={!!errors.numeroTermino}
-                        helperText={errors.numeroTermino}
-                    />
-                    <TextField
-                        label="Título"
-                        value={titulo}
-                        onChange={(e) => setTitulo(e.target.value)}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                        error={!!errors.titulo}
-                        helperText={errors.titulo}
-                    />
-                    <TextField
-                        label="Contenido"
-                        value={contenido}
-                        onChange={(e) => setContenido(e.target.value)}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        sx={{ mb: 3 }}
-                        error={!!errors.contenido}
-                        helperText={errors.contenido}
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                        {editingIndex !== null ? 'Actualizar' : 'Agregar'}
-                    </Button>
-                </form>
-                {mensaje && (
-                    <Typography variant="body1" sx={{ mt: 2, color: mensaje.includes('Error') ? 'red' : 'green' }}>
-                        {mensaje}
-                    </Typography>
+                {terminoActivo && (
+                    <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={9}>
+                                <Typography variant="h5">Vigente: {terminoActivo.titulo}</Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Número: {terminoActivo.numero_termino}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Versión: {terminoActivo.version}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
+                                <IconButton onClick={() => handleEdit(terminoActivo.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
+                                <IconButton onClick={() => handleDelete(terminoActivo.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body2">
+                                    {truncateContent(terminoActivo.contenido)}{' '}
+                                    <Button variant="outlined" onClick={() => handleDialogOpen(terminoActivo)}>Ver más</Button>
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </Paper>
+                )}
+                {/* Botón Nuevo Término */}
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    sx={{ mt: 3 }}
+                    onClick={() => {
+                        resetForm(); // Reiniciar el formulario para nuevo término
+                        setIsAddingNewTermino(true);
+                    }}
+                    disabled={isAddingNewTermino} // Deshabilitar botón cuando está activo
+                >
+                    Nuevo Término
+                </Button>
+
+                {/* Formulario para agregar o actualizar términos */}
+                {isAddingNewTermino && (
+                    <form onSubmit={handleSubmit}>
+                        <TextField
+                            label="Número de Término"
+                            value={numeroTermino}
+                            onChange={(e) => setNumeroTermino(e.target.value)}
+                            fullWidth
+                            sx={{ mt: 3 }}
+                            error={!!errors.numeroTermino}
+                            helperText={errors.numeroTermino}
+                        />
+                        <TextField
+                            label="Título"
+                            value={titulo}
+                            onChange={(e) => setTitulo(e.target.value)}
+                            fullWidth
+                            sx={{ mt: 3 }}
+                            error={!!errors.titulo}
+                            helperText={errors.titulo}
+                        />
+                        <TextField
+                            label="Contenido"
+                            value={contenido}
+                            onChange={(e) => setContenido(e.target.value)}
+                            fullWidth
+                            multiline
+                            rows={4}
+                            sx={{ mt: 2 }}
+                            error={!!errors.contenido}
+                            helperText={errors.contenido}
+                        />
+                        <Grid container spacing={2} sx={{ mt: 3 }}>
+                            <Grid item xs={6}>
+                                <Button type="submit" variant="contained" color="primary" fullWidth>
+                                    {editingId !== null ? 'Actualizar' : 'Agregar'}
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    fullWidth
+                                    onClick={resetForm}
+                                >
+                                    Cancelar
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
                 )}
             </Paper>
 
-            {/* Tarjeta que encierra las políticas y paginación */}
-            {terminos.length > 0 ? (
-                <Paper sx={{ padding: '20px', maxWidth: '650px', margin: '20px auto', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)' }}>
-                    <List sx={{ mt: 3 }}>
-                        {currentTerminos.map((termino, index) => (
-                            <ListItem key={termino.id} sx={{ mb: 2 }}>
-                                <Paper sx={{ padding: '10px', width: '100%', boxShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={8}>
-                                            <ListItemText
-                                                primary={`Término ${termino.numero_termino}:`}
-                                                secondary={`Título: ${termino.titulo}`}
-                                                sx={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}
-                                            />
-                                            <Typography variant="body2" color="textSecondary">
-                                                {`Última actualización: ${new Date(termino.fecha_actualizacion).toLocaleDateString()}`}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                                    Acciones
-                                                </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%' }}>
-                                                    <IconButton title="Ver contenido" aria-label="view" onClick={() => handleDialogOpen(termino.contenido)}>
-                                                        <VisibilityIcon sx={{ color: 'blue' }} />
-                                                    </IconButton>
-                                                    <IconButton title="Editar" aria-label="edit" onClick={() => handleEdit(index)}>
-                                                        <EditIcon sx={{ color: '#1976d2' }} />
-                                                    </IconButton>
-                                                    <IconButton title="Eliminar" aria-label="delete" onClick={() => handleDelete(termino.id)}>
-                                                        <DeleteIcon sx={{ color: 'red' }} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Paper>
-                            </ListItem>
-                        ))}
-                    </List>
+            {/* Historial de Términos */}
+            <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
+                Historial de Términos por Versión
+            </Typography>
 
-                    {/* Controles de paginación */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                        <Button variant="contained" color="primary" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            Anterior
-                        </Button>
-                        <Typography variant="body1" sx={{ mx: 2 }}>
-                            Página {currentPage} de {Math.ceil(terminos.length / terminosPerPage)}
-                        </Typography>
-                        <Button variant="contained" color="primary" onClick={handleNextPage} disabled={currentPage >= Math.ceil(terminos.length / terminosPerPage)}>
-                            Siguiente
-                        </Button>
-                    </Box>
-                </Paper>
-            ) : (
-                <Typography variant="body1" align="center" sx={{ mt: 4 }}>
-                    No hay términos disponibles.
-                </Typography>
-            )}
+            <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                            <TableCell><Typography fontWeight="bold">Número de Término</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Fecha de Actualización</Typography></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {terminos.length > 0 ? (
+                            terminos.map((termino, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{termino.numero_termino}</TableCell>
+                                    <TableCell>{termino.titulo}</TableCell>
+                                    <TableCell>{termino.version}</TableCell>
+                                    <TableCell>{new Date(termino.fecha_creacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(termino.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center">
+                                    No hay términos inactivos.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
-            {/* Diálogo para visualizar el contenido de la política */}
+            {/* Diálogo para visualizar el contenido completo del término */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Contenido del Término</DialogTitle>
+                <DialogTitle>Detalles del Término de Condiciones</DialogTitle>
                 <DialogContent>
-                    <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
-                        {dialogContent}
+                    {/* Título del término */}
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                        Título: {dialogContent?.titulo}
                     </Typography>
+
+                    {/* Número del término */}
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        Número de Término: {dialogContent?.numero_termino}
+                    </Typography>
+
+                    {/* Contenido del término */}
+                    <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
+                        {dialogContent?.contenido}
+                    </Typography>
+
+                    {/* Fecha de creación o de vigencia */}
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        Fecha de Creación: {new Date(dialogContent?.fecha_creacion).toLocaleDateString()}
+                    </Typography>
+
                 </DialogContent>
+
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="primary" startIcon={<CloseIcon />}>
                         Cerrar
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Componente de Notificaciones */}
+            <Notificaciones
+                open={notification.open}
+                message={notification.message}
+                type={notification.type}
+                handleClose={() => setNotification({ ...notification, open: false })}
+            />
         </Box>
     );
 };
