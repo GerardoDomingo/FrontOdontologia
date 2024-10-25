@@ -43,12 +43,7 @@ const PoliticasPrivacidad = () => {
                 return acc;
             }, {});
 
-            // Ordenar las políticas dentro de cada grupo por la versión (puedes cambiar de ascendente a descendente)
-            Object.keys(grouped).forEach(key => {
-                grouped[key].sort((a, b) => parseFloat(a.version) - parseFloat(b.version));  // Orden ascendente
-            });
-
-            setGroupedPoliticas(grouped);  // Asignar los datos agrupados y ordenados al estado
+            setGroupedPoliticas(grouped);  // Asignar los datos agrupados al estado
         } catch (error) {
             console.error('Error al cargar políticas:', error);
         }
