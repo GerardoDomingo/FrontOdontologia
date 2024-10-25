@@ -4,9 +4,6 @@ import {
     Button,
     Typography,
     Paper,
-    List,
-    ListItem,
-    ListItemText,
     IconButton,
     Dialog,
     DialogActions,
@@ -43,25 +40,26 @@ const PoliticasPrivacidad = () => {
     const policiesPerPage = 3;
     const [historico, setHistorico] = useState([]);
     const [page, setPage] = useState(0);
-    const [notification, setNotification] = useState({ open: false, message: '', type: 'success' }); // Para notificaciones
+    const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
 
     useEffect(() => {
         fetchPoliticas();
     }, []);
-
+    
     const fetchPoliticas = async () => {
         try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
+            // Obtenemos todas las políticas (activas e inactivas)
+            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
             const activePolicies = response.data.filter(politica => politica.estado === 'activo');
             const inactivePolicies = response.data.filter(politica => politica.estado === 'inactivo');
-            setPoliticas(activePolicies);
-            setHistorico(inactivePolicies);
+            setPoliticas(activePolicies); // Guardamos las políticas activas
+            setHistorico(inactivePolicies); // Guardamos las políticas inactivas para el historial
         } catch (error) {
             console.error('Error al obtener políticas:', error);
             setMensaje('Error al cargar políticas.');
         }
     };
-
+    
     const validateForm = () => {
         const newErrors = {};
         if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
@@ -138,18 +136,28 @@ const PoliticasPrivacidad = () => {
         setPage(newPage);
     };
 
+    // Función para mostrar solo una parte del contenido
+    const truncateContent = (content) => {
+        return content.length > 100 ? content.substring(0, 100) + '...' : content;
+    };
+
     return (
-        <Box sx={{ padding: '60px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
-            <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
+        <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
+            {/* Política de Privacidad Vigente */}
+            <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" component="h2" align="center" gutterBottom>
                     Política de Privacidad Vigente
                 </Typography>
-                {/* Mostrar política vigente (si existe) */}
                 {politicas.length > 0 && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
                         <Typography variant="h6">Política Número: {politicas[0].numero_politica}</Typography>
                         <Typography variant="subtitle1">Título: {politicas[0].titulo}</Typography>
-                        <Typography variant="body2" sx={{ mt: 2 }}>{politicas[0].contenido}</Typography>
+                        <Typography variant="body2" sx={{ mt: 2 }}>
+                            {truncateContent(politicas[0].contenido)}{' '}
+                            <IconButton aria-label="ver más" onClick={() => handleDialogOpen(politicas[0].contenido)}>
+                                <VisibilityIcon />
+                            </IconButton>
+                        </Typography>
                         <Box sx={{ mt: 3 }}>
                             <IconButton title="Editar" aria-label="edit" onClick={() => handleEdit(0)}>
                                 <EditIcon sx={{ color: '#1976d2' }} />
@@ -161,6 +169,7 @@ const PoliticasPrivacidad = () => {
                     </Paper>
                 )}
 
+                {/* Formulario para agregar/actualizar políticas */}
                 <form onSubmit={handleSubmit}>
                     <TextField
                         label="Número de Política"
@@ -200,9 +209,9 @@ const PoliticasPrivacidad = () => {
 
             {/* Historial de Políticas */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
-                Historial de Políticas 
+                Historial de Políticas
             </Typography>
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{ maxWidth: '800px', margin: '0 auto' }}>
                 <Table>
                     <TableHead>
                         <TableRow>
