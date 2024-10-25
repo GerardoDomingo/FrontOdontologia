@@ -144,16 +144,34 @@ const Footer = () => {
 
       {/* Modal para mostrar políticas, términos y deslinde */}
       <Modal open={modalOpen} onClose={handleCloseModal}>
-        <Box sx={{ backgroundColor: '#fff', padding: 2, margin: 'auto', marginTop: '10%', maxWidth: 600 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
+        <Box
+          sx={{
+            backgroundColor: '#fff',
+            padding: 3,
+            margin: 'auto',
+            marginTop: '10%',
+            maxWidth: 600,
+            maxHeight: '80vh', // Limitar la altura del modal
+            overflowY: 'auto', // Agregar scroll vertical
+            borderRadius: 2,
+            boxShadow: 24,
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
             {modalTitle}
           </Typography>
-          <Typography>{modalContent}</Typography>
-          <Button onClick={handleCloseModal} sx={{ mt: 2 }}>
+          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+            {modalContent}
+          </Typography>
+          <Button
+            onClick={handleCloseModal}
+            sx={{ mt: 3, backgroundColor: '#00BCD4', color: '#ffffff', '&:hover': { backgroundColor: '#0097a7' } }}
+          >
             Cerrar
           </Button>
         </Box>
       </Modal>
+
     </footer>
   );
 };
