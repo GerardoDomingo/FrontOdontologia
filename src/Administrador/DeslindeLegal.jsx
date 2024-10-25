@@ -1,141 +1,141 @@
 import React, { useState, useEffect } from 'react';
 import {
-    TextField,
-    Button,
-    Typography,
-    Paper,
-    List,
-    ListItem,
-    ListItemText,
-    IconButton,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Box
+    TextField, Button, Typography, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Grid,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
+import Notificaciones from '../Compartidos/Notificaciones';
 
 const DeslindeLegal = () => {
-    const [deslindes, setDeslindes] = useState([]);
     const [numeroDeslinde, setNumeroDeslinde] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
-    const [editingIndex, setEditingIndex] = useState(null);
-    const [mensaje, setMensaje] = useState('');
+    const [editingId, setEditingId] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
-
-    // Estado para errores de validación
-    const [errors, setErrors] = useState({
-        numeroDeslinde: '',
-        titulo: '',
-        contenido: ''
-    });
-
-    // Estado para la paginación
-    const [currentPage, setCurrentPage] = useState(1);
-    const deslindesPerPage = 3; // Número de deslindes por página
+    const [errors, setErrors] = useState({});
+    const [deslindes, setDeslindes] = useState([]);
+    const [deslindeActivo, setDeslindeActivo] = useState(null);
+    const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
+    const [isAddingNewDeslinde, setIsAddingNewDeslinde] = useState(false);
 
     useEffect(() => {
         fetchDeslindes();
+        fetchDeslindeActivo(); // Cargar deslinde activo
     }, []);
 
+    // Función para obtener todos los deslindes inactivos
     const fetchDeslindes = async () => {
         try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getdeslinde');
-            setDeslindes(response.data);
+            const response = await axios.get('/api/deslinde/getAllDeslindes');
+            const data = response.data;
+            const deslindesInactivos = data.filter(deslinde => deslinde.estado === 'inactivo');
+            setDeslindes(deslindesInactivos);
         } catch (error) {
-            console.error('Error al obtener deslindes:', error);
-            setMensaje('No hay deslindes en la base de datos.');
+            console.error('Error al cargar deslindes:', error);
+        }
+    };
+
+    const fetchDeslindeActivo = async () => {
+        try {
+            const response = await axios.get('/api/deslinde/getdeslinde');
+            if (response.data) {
+                setDeslindeActivo(response.data); // Guardar el deslinde activo
+            } else {
+                setDeslindeActivo(null); // En caso de que no haya un deslinde activo
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                setDeslindeActivo(null); // Establecer deslinde activo a null si no existe
+                console.error('No hay deslindes activos.');
+            } else {
+                console.error('Error al cargar deslinde activo:', error);
+                setDeslindeActivo(null);
+            }
         }
     };
 
     const validateForm = () => {
-        let valid = true;
-        const newErrors = {
-            numeroDeslinde: '',
-            titulo: '',
-            contenido: ''
-        };
-
-        if (!numeroDeslinde) {
-            newErrors.numeroDeslinde = 'El número de deslinde es obligatorio.';
-            valid = false;
-        }
-        if (!titulo) {
-            newErrors.titulo = 'El título es obligatorio.';
-            valid = false;
-        }
-        if (!contenido) {
-            newErrors.contenido = 'El contenido es obligatorio.';
-            valid = false;
-        }
-
+        const newErrors = {};
+        if (!numeroDeslinde) newErrors.numeroDeslinde = "El número de deslinde es obligatorio.";
+        if (!titulo) newErrors.titulo = "El título es obligatorio.";
+        if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
-        return valid;
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMensaje('');
-
-        if (!validateForm()) return; // Validar antes de enviar
-
+    
+        if (!validateForm()) return;
+    
         const deslindeData = { numero_deslinde: numeroDeslinde, titulo, contenido };
-
+    
         try {
-            if (editingIndex !== null) {
-                // Actualizar deslinde
-                await axios.put(`https://backendodontologia.onrender.com/api/deslinde/update/${deslindes[editingIndex].id}`, deslindeData);
-                setMensaje('Deslinde actualizado con éxito');
+            if (editingId !== null) {
+                // Actualización de un deslinde existente
+                await axios.put(`https://backendodontologia.onrender.com/api/deslinde/update/${editingId}`, deslindeData);
+                setNotification({ open: true, message: `Deslinde actualizado correctamente`, type: 'success' });
             } else {
-                // Insertar nuevo deslinde 
+                // Creación de un nuevo deslinde
                 await axios.post('https://backendodontologia.onrender.com/api/deslinde/insert', deslindeData);
-                setMensaje('Deslinde insertado con éxito');
+                setNotification({ open: true, message: 'Deslinde insertado con éxito', type: 'success' });
             }
-            fetchDeslindes(); // Refrescar la lista de deslindes
+    
+            // Actualizar los deslindes y el activo después de la operación
+            await fetchDeslindes(); // Actualizar la lista de deslindes inactivos
+            await fetchDeslindeActivo(); // Actualizar el deslinde activo
             resetForm();
+            setIsAddingNewDeslinde(false);
         } catch (error) {
-            console.error('Error al enviar deslinde:', error);
-            setMensaje('Error al enviar deslinde.');
+            setNotification({ open: true, message: 'Error al enviar deslinde', type: 'error' });
         }
     };
-
+    
     const resetForm = () => {
         setNumeroDeslinde('');
         setTitulo('');
         setContenido('');
-        setEditingIndex(null);
-        setErrors({ numeroDeslinde: '', titulo: '', contenido: '' }); // Reiniciar errores
+        setEditingId(null); // Reseteamos el ID de edición
+        setErrors({});
+        setIsAddingNewDeslinde(false); // Reactivar el botón "Nuevo Deslinde"
     };
 
-    const handleEdit = (index) => {
-        setNumeroDeslinde(deslindes[index].numero_deslinde);
-        setTitulo(deslindes[index].titulo);
-        setContenido(deslindes[index].contenido);
-        setEditingIndex(index);
+    const handleEdit = async (id) => {
+        try {
+            // Cargar el deslinde activo directamente para edición
+            const response = await axios.get(`https://backendodontologia.onrender.com/api/deslinde/get/${id}`);
+            const deslinde = response.data;
+    
+            if (deslinde) {
+                setNumeroDeslinde(deslinde.numero_deslinde);
+                setTitulo(deslinde.titulo);
+                setContenido(deslinde.contenido);
+                setEditingId(id); // Guarda correctamente el ID del deslinde a editar
+                setIsAddingNewDeslinde(true); // Abrir el formulario para editar
+            }
+        } catch (error) {
+            console.error("Error al cargar el deslinde para editar:", error);
+        }
     };
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`https://backendodontologia.onrender.com/api/deslinde/delete/${id}`);
-            setMensaje('Deslinde eliminado con éxito');
-            fetchDeslindes(); // Refrescar la lista de deslindes
+            await axios.put(`https://backendodontologia.onrender.com/api/deslinde/deactivate/${id}`, { estado: 'inactivo' });
+            setNotification({ open: true, message: 'Deslinde eliminado con éxito', type: 'success' });
+            await fetchDeslindes();
+            await fetchDeslindeActivo(); // Refresca el deslinde activo tras eliminar
         } catch (error) {
-            console.error('Error al eliminar deslinde:', error);
-            setMensaje('Error al eliminar deslinde.');
+            setNotification({ open: true, message: 'Error al eliminar deslinde', type: 'error' });
         }
     };
 
-    const handleDialogOpen = (contenido) => {
-        setDialogContent(contenido);
+    const handleDialogOpen = (deslinde) => {
+        setDialogContent(deslinde); // Guardamos todo el objeto del deslinde en lugar de solo el contenido
         setOpenDialog(true);
     };
 
@@ -143,152 +143,188 @@ const DeslindeLegal = () => {
         setOpenDialog(false);
     };
 
-    // Funciones de paginación
-    const indexOfLastDeslinde = currentPage * deslindesPerPage;
-    const indexOfFirstDeslinde = indexOfLastDeslinde - deslindesPerPage;
-    const currentDeslindes = deslindes.slice(indexOfFirstDeslinde, indexOfLastDeslinde);
-
-    const handleNextPage = () => {
-        if (currentPage < Math.ceil(deslindes.length / deslindesPerPage)) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
+    const truncateContent = (content) => {
+        return content.length > 100 ? content.substring(0, 100) + '...' : content;
     };
 
     return (
-        <Box sx={{ padding: '60px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
-            <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
-                <Typography variant="h4" component="h2" align="center" gutterBottom>
-                    Deslinde Legal
+        <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
+            {/* Deslinde Vigente */}
+            <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
+                <Typography variant="h4" align="center" gutterBottom>
+                    Deslinde Vigente
                 </Typography>
-                <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="Número de Deslinde"
-                        type="number"
-                        value={numeroDeslinde}
-                        onChange={(e) => setNumeroDeslinde(e.target.value)}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                        error={!!errors.numeroDeslinde} // Mostrar error si existe
-                        helperText={errors.numeroDeslinde} // Mensaje de error
-                    />
-                    <TextField
-                        label="Título"
-                        value={titulo}
-                        onChange={(e) => setTitulo(e.target.value)}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                        error={!!errors.titulo} // Mostrar error si existe
-                        helperText={errors.titulo} // Mensaje de error
-                    />
-                    <TextField
-                        label="Contenido"
-                        value={contenido}
-                        onChange={(e) => setContenido(e.target.value)}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        sx={{ mb: 3 }}
-                        error={!!errors.contenido} // Mostrar error si existe
-                        helperText={errors.contenido} // Mensaje de error
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                        {editingIndex !== null ? 'Actualizar' : 'Agregar'}
-                    </Button>
-                </form>
-                {mensaje && (
-                    <Typography variant="body1" sx={{ mt: 2, color: mensaje.includes('Error') ? 'red' : 'green' }}>
-                        {mensaje}
-                    </Typography>
+                {deslindeActivo && (
+                    <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={9}>
+                                <Typography variant="h5">Vigente: {deslindeActivo.titulo}</Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Número: {deslindeActivo.numero_deslinde}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Versión: {deslindeActivo.version}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
+                                <IconButton onClick={() => handleEdit(deslindeActivo.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
+                                <IconButton onClick={() => handleDelete(deslindeActivo.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body2">
+                                    {truncateContent(deslindeActivo.contenido)}{' '}
+                                    <Button variant="outlined" onClick={() => handleDialogOpen(deslindeActivo)}>Ver más</Button>
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </Paper>
+                )}
+                {/* Botón Nuevo Deslinde */}
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    sx={{ mt: 3 }}
+                    onClick={() => {
+                        resetForm(); // Reiniciar el formulario para nuevo deslinde
+                        setIsAddingNewDeslinde(true);
+                    }}
+                    disabled={isAddingNewDeslinde} // Deshabilitar botón cuando está activo
+                >
+                    Nuevo Deslinde
+                </Button>
+
+                {/* Formulario para agregar o actualizar deslindes */}
+                {isAddingNewDeslinde && (
+                    <form onSubmit={handleSubmit}>
+                        <TextField
+                            label="Número de Deslinde"
+                            value={numeroDeslinde}
+                            onChange={(e) => setNumeroDeslinde(e.target.value)}
+                            fullWidth
+                            sx={{ mt: 3 }}
+                            error={!!errors.numeroDeslinde}
+                            helperText={errors.numeroDeslinde}
+                        />
+                        <TextField
+                            label="Título"
+                            value={titulo}
+                            onChange={(e) => setTitulo(e.target.value)}
+                            fullWidth
+                            sx={{ mt: 3 }}
+                            error={!!errors.titulo}
+                            helperText={errors.titulo}
+                        />
+                        <TextField
+                            label="Contenido"
+                            value={contenido}
+                            onChange={(e) => setContenido(e.target.value)}
+                            fullWidth
+                            multiline
+                            rows={4}
+                            sx={{ mt: 2 }}
+                            error={!!errors.contenido}
+                            helperText={errors.contenido}
+                        />
+                        <Grid container spacing={2} sx={{ mt: 3 }}>
+                            <Grid item xs={6}>
+                                <Button type="submit" variant="contained" color="primary" fullWidth>
+                                    {editingId !== null ? 'Actualizar' : 'Agregar'}
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    fullWidth
+                                    onClick={resetForm}
+                                >
+                                    Cancelar
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
                 )}
             </Paper>
 
-            {/* Mensaje si no hay deslindes */}
-            {deslindes.length === 0 && (
-                <Box sx={{ textAlign: 'center', mt: 3 }}>
-                    <ErrorOutlineIcon color="error" sx={{ fontSize: 50 }} />
-                    <Typography variant="h6" sx={{ mt: 1 }}>
-                        No hay deslindes disponibles en la base de datos.
-                    </Typography>
-                </Box>
-            )}
+            {/* Historial de Deslindes */}
+            <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
+                Historial de Deslindes por Versión
+            </Typography>
 
-            {/* Tarjeta que encierra los deslindes y paginación */}
-            {deslindes.length > 0 && (
-                <Paper sx={{ padding: '20px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.5)' }}>
-                    <List sx={{ mt: 3 }}>
-                        {currentDeslindes.map((deslinde, index) => (
-                            <ListItem key={deslinde.id} sx={{ mb: 2 }}>
-                                <Paper sx={{ padding: '10px', width: '100%', boxShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={8}>
-                                            <ListItemText
-                                                primary={`Deslinde ${deslinde.numero_deslinde}:`}
-                                                secondary={`Título: ${deslinde.titulo}`}
-                                                sx={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                                    Acciones
-                                                </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%' }}>
-                                                    <IconButton title="Ver contenido" aria-label="view" onClick={() => handleDialogOpen(deslinde.contenido)}>
-                                                        <VisibilityIcon sx={{ color: 'blue' }} />
-                                                    </IconButton>
-                                                    <IconButton title="Actualizar" aria-label="edit" onClick={() => handleEdit(index)}>
-                                                        <EditIcon sx={{ color: '#1976d2' }} />
-                                                    </IconButton>
-                                                    <IconButton title="Eliminar" aria-label="delete" onClick={() => handleDelete(deslinde.id)}>
-                                                        <DeleteIcon sx={{ color: 'red' }} />
-                                                    </IconButton>
-                                                </Box>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                                        {`Última fecha de modificación: ${new Date(deslinde.updated_at).toLocaleDateString()}`}
-                                    </Typography>
-                                </Paper>
-                            </ListItem>
-                        ))}
-                    </List>
+            <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                            <TableCell><Typography fontWeight="bold">Número de Deslinde</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Fecha de Actualización</Typography></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {deslindes.length > 0 ? (
+                            deslindes.map((deslinde, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{deslinde.numero_deslinde}</TableCell>
+                                    <TableCell>{deslinde.titulo}</TableCell>
+                                    <TableCell>{deslinde.version}</TableCell>
+                                    <TableCell>{new Date(deslinde.fecha_creacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(deslinde.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center">
+                                    No hay deslindes inactivos.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
-                    {/* Controles de paginación */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                        <Button variant="contained" color="primary" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            Anterior
-                        </Button>
-                        <Typography variant="body1" sx={{ mx: 2 }}>
-                            Página {currentPage}
-                        </Typography>
-                        <Button variant="contained" color="primary" onClick={handleNextPage} disabled={currentPage >= Math.ceil(deslindes.length / deslindesPerPage)}>
-                            Siguiente
-                        </Button>
-                    </Box>
-                </Paper>
-            )}
-
-            {/* Diálogo para ver el contenido completo */}
-            <Dialog open={openDialog} onClose={handleDialogClose}>
-                <DialogTitle>Contenido Completo</DialogTitle>
+            {/* Diálogo para visualizar el contenido completo del deslinde */}
+            <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+                <DialogTitle>Detalles del Deslinde</DialogTitle>
                 <DialogContent>
-                    <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
-                        {dialogContent}
+                    {/* Título del deslinde */}
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                        Título: {dialogContent?.titulo}
                     </Typography>
+
+                    {/* Número del deslinde */}
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        Número de Deslinde: {dialogContent?.numero_deslinde}
+                    </Typography>
+
+                    {/* Contenido del deslinde */}
+                    <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
+                        {dialogContent?.contenido}
+                    </Typography>
+
+                    {/* Fecha de creación o de vigencia */}
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        Fecha de Creación: {new Date(dialogContent?.fecha_creacion).toLocaleDateString()}
+                    </Typography>
+
                 </DialogContent>
+
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="primary" startIcon={<CloseIcon />}>
                         Cerrar
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Componente de Notificaciones */}
+            <Notificaciones
+                open={notification.open}
+                message={notification.message}
+                type={notification.type}
+                handleClose={() => setNotification({ ...notification, open: false })}
+            />
         </Box>
     );
 };
