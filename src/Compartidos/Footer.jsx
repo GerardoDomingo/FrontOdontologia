@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Typography, IconButton, Modal, Button } from '@mui/material';
+import { Box, Typography, IconButton, Modal, Button, Grid, Container } from '@mui/material';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import axios from 'axios';
 
@@ -26,7 +26,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchSocials = async () => {
       try {
-        const response = await axios.get('https://backendodontologia.onrender.com/api/redesSociales/sociales'); // Endpoint de redes sociales
+        const response = await axios.get('https://backendodontologia.onrender.com/api/redesSociales/sociales');
         setSocials(response.data);
       } catch (error) {
         console.error('Error al obtener las redes sociales', error);
@@ -36,7 +36,7 @@ const Footer = () => {
     // Obtener políticas de privacidad activas
     const fetchPrivacyPolicy = async () => {
       try {
-        const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/politicas_privacidad'); // Endpoint para políticas
+        const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/politicas_privacidad');
         const activePolicy = response.data.filter(policy => policy.estado === 'activo');
         setPrivacyPolicy(activePolicy);
       } catch (error) {
@@ -47,7 +47,7 @@ const Footer = () => {
     // Obtener términos y condiciones activos
     const fetchTermsConditions = async () => {
       try {
-        const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/terminos_condiciones'); // Endpoint para términos
+        const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/terminos_condiciones');
         const activeTerms = response.data.filter(term => term.estado === 'activo');
         setTermsConditions(activeTerms);
       } catch (error) {
@@ -58,7 +58,7 @@ const Footer = () => {
     // Obtener deslinde legal activo
     const fetchDisclaimer = async () => {
       try {
-        const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/deslinde'); // Endpoint para deslinde legal
+        const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/deslinde');
         const activeDisclaimer = response.data.filter(disclaimer => disclaimer.estado === 'activo');
         setDisclaimer(activeDisclaimer);
       } catch (error) {
@@ -82,35 +82,66 @@ const Footer = () => {
   const handleCloseModal = () => setModalOpen(false);
 
   return (
-    <footer style={{ backgroundColor: '#00bcd4', color: '#ffffff', padding: '10px', textAlign: 'center', position: 'fixed', width: '100%', bottom: 0 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-        {socials.map((social) => {
-          const socialIcon = availableSocials.find((s) => s.name === social.nombre_red)?.icon;
-          return (
-            socialIcon && (
-              <IconButton
-                key={social.id}
-                component="a"
-                href={social.url ? `https://${social.url}` : `tel:${social.url}`} // Enlace a URL o teléfono
-                sx={{ color: '#ffffff' }}
-              >
-                {socialIcon}
-              </IconButton>
-            )
-          );
-        })}
-      </Box>
+    <footer style={{ backgroundColor: '#00bcd4', color: '#ffffff', padding: '30px 0', textAlign: 'center', position: 'fixed', width: '100%', bottom: 0 }}>
+      <Container>
+        <Grid container spacing={4}>
+          {/* Columna 1: Redes sociales y contacto */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              Síguenos en redes sociales
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+              {socials.map((social) => {
+                const socialIcon = availableSocials.find((s) => s.name === social.nombre_red)?.icon;
+                return (
+                  socialIcon && (
+                    <IconButton
+                      key={social.id}
+                      component="a"
+                      href={social.url ? `https://${social.url}` : `tel:${social.url}`} // Enlace a URL o teléfono
+                      sx={{ color: '#ffffff', fontSize: '2rem' }}
+                    >
+                      {socialIcon}
+                    </IconButton>
+                  )
+                );
+              })}
+            </Box>
+            <Typography variant="body1" sx={{ fontSize: '1rem' }}>
+              Estamos aquí para ti. Contáctanos a través de nuestras redes sociales o llámanos directamente.
+            </Typography>
+          </Grid>
 
-      <Typography>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
-      <Button onClick={() => handleOpenModal('Política de Privacidad', privacyPolicy[0]?.contenido || 'No disponible')}>
-        Política de Privacidad
-      </Button>
-      <Button onClick={() => handleOpenModal('Términos y Condiciones', termsConditions[0]?.contenido || 'No disponible')}>
-        Términos y Condiciones
-      </Button>
-      <Button onClick={() => handleOpenModal('Deslinde Legal', disclaimer[0]?.contenido || 'No disponible')}>
-        Deslinde Legal
-      </Button>
+          {/* Columna 2: Enlaces legales */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              Información Legal
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Button
+                onClick={() => handleOpenModal('Política de Privacidad', privacyPolicy[0]?.contenido || 'No disponible')}
+                sx={{ color: '#ffffff', textAlign: 'left' }}
+              >
+                Política de Privacidad
+              </Button>
+              <Button
+                onClick={() => handleOpenModal('Términos y Condiciones', termsConditions[0]?.contenido || 'No disponible')}
+                sx={{ color: '#ffffff', textAlign: 'left' }}
+              >
+                Términos y Condiciones
+              </Button>
+              <Button
+                onClick={() => handleOpenModal('Deslinde Legal', disclaimer[0]?.contenido || 'No disponible')}
+                sx={{ color: '#ffffff', textAlign: 'left' }}
+              >
+                Deslinde Legal
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </Container>
+
+      <Typography sx={{ mt: 2 }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
 
       {/* Modal para mostrar políticas, términos y deslinde */}
       <Modal open={modalOpen} onClose={handleCloseModal}>
