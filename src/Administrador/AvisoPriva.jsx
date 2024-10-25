@@ -1,30 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {
-    TextField,
-    Button,
-    Typography,
-    Paper,
-    IconButton,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Box,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TablePagination,
-} from '@mui/material';
+import {TextField, Button, Typography, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close'; // <---- Importar CloseIcon
 import axios from 'axios';
-import Notificaciones from '../Compartidos/Notificaciones';
+import Notificaciones from '../Compartidos/Notificaciones'; // Importar notificaciones
 
 const PoliticasPrivacidad = () => {
     const [politicas, setPoliticas] = useState([]);
