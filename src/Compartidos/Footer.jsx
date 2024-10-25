@@ -81,7 +81,7 @@ const Footer = () => {
   const handleCloseModal = () => setModalOpen(false);
 
   return (
-    <footer style={{ backgroundColor: '#1976d2', color: '#ffffff', padding: '10px 0', textAlign: 'center', width: '100%' }}>
+    <footer style={{ backgroundColor: '#00BCD4', color: '#ffffff', padding: '10px 0', textAlign: 'center', width: '100%' }}>
       <Container>
         <Grid container spacing={4} alignItems="center">
           {/* Columna 1: Redes sociales y contacto */}
