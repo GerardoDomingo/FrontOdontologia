@@ -256,7 +256,7 @@ const PoliticasPrivacidad = () => {
                             <TableRow key={index}>
                                 <TableCell>{politica.numero_politica}</TableCell>
                                 <TableCell>{politica.titulo}</TableCell>
-                                <TableCell>{politica.version}</TableCell>
+                                <TableCell>{politica.version}</TableCell> {/* Mostrar versión */}
                                 <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
                                 <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
                             </TableRow>
@@ -272,6 +272,7 @@ const PoliticasPrivacidad = () => {
                     rowsPerPageOptions={[]}
                 />
             </TableContainer>
+
 
             {/* Diálogo para visualizar el contenido completo de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
