@@ -31,7 +31,7 @@ const DeslindeLegal = () => {
     // Función para obtener todos los deslindes inactivos
     const fetchDeslindes = async () => {
         try {
-            const response = await axios.get('/api/deslinde/getAllDeslindes');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getAllDeslindes');
             const data = response.data;
             const deslindesInactivos = data.filter(deslinde => deslinde.estado === 'inactivo');
             setDeslindes(deslindesInactivos);
@@ -42,7 +42,7 @@ const DeslindeLegal = () => {
 
     const fetchDeslindeActivo = async () => {
         try {
-            const response = await axios.get('/api/deslinde/getdeslinde');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getdeslinde');
             if (response.data) {
                 setDeslindeActivo(response.data); // Guardar el deslinde activo
             } else {
