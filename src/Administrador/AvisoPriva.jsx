@@ -14,7 +14,7 @@ const PoliticasPrivacidad = () => {
     const [numeroPolitica, setNumeroPolitica] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
-    const [editingId, setEditingId] = useState(null); // Cambiado para almacenar el ID de edición en lugar del índice
+    const [editingId, setEditingId] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
@@ -94,6 +94,7 @@ const PoliticasPrivacidad = () => {
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
     
+            // Actualizar las políticas y la activa después de la operación
             fetchPoliticas(); // Actualizar la lista de políticas inactivas
             fetchPoliticaActiva(); // Actualizar la política activa
             resetForm();
@@ -114,11 +115,15 @@ const PoliticasPrivacidad = () => {
 
     const handleEdit = (id) => {
         const politica = politicas.find(p => p.id === id);
-        setNumeroPolitica(politica.numero_politica); // Setear número de política en edición
-        setTitulo(politica.titulo);
-        setContenido(politica.contenido);
-        setEditingId(id); // Guarda correctamente el ID de la política a editar
-        setIsAddingNewPolicy(true); // Abrir el formulario para editar
+        if (politica) {
+            setNumeroPolitica(politica.numero_politica); // Setear número de política en edición
+            setTitulo(politica.titulo);
+            setContenido(politica.contenido);
+            setEditingId(id); // Guarda correctamente el ID de la política a editar
+            setIsAddingNewPolicy(true); // Abrir el formulario para editar
+        } else {
+            console.error("Política no encontrada para editar.");
+        }
     };
 
     const handleDelete = async (id) => {
@@ -182,7 +187,10 @@ const PoliticasPrivacidad = () => {
                     color="primary"
                     startIcon={<AddIcon />}
                     sx={{ mt: 3 }}
-                    onClick={() => setIsAddingNewPolicy(true)}
+                    onClick={() => {
+                        resetForm(); // Reiniciar el formulario para nueva política
+                        setIsAddingNewPolicy(true);
+                    }}
                     disabled={isAddingNewPolicy} // Deshabilitar botón cuando está activo
                 >
                     Nueva Política
