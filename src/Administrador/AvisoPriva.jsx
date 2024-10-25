@@ -50,6 +50,21 @@ const PoliticasPrivacidad = () => {
         }
     };
 
+    const fetchPoliticaActiva = async () => {
+        try {
+            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
+            const data = response.data;
+
+            setPoliticas([data]);  // Asume que data contiene solo la política activa
+        } catch (error) {
+            console.error('Error al cargar política activa:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchPoliticaActiva();  // Llamar a la función que obtiene la política activa
+    }, []);
+
     const validateForm = () => {
         const newErrors = {};
         if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
@@ -180,7 +195,6 @@ const PoliticasPrivacidad = () => {
                         </Grid>
                     </Paper>
                 )}
-
 
                 {/* Botón Nueva Política */}
                 <Button
