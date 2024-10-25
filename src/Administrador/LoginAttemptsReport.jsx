@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent, Grid, IconButton, Card, CardContent, Avatar } from '@mui/material';
-import { FaUser, FaCalendarAlt, FaPhone, FaEnvelope, FaInfoCircle, FaTimes, FaIdCard } from 'react-icons/fa'; // Íconos
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent, Grid, IconButton, Card, CardContent, Avatar, TextField } from '@mui/material';
+import { FaInfoCircle, FaTimes, FaIdCard, FaCalendarAlt, FaPhone, FaEnvelope } from 'react-icons/fa'; // Íconos
 import { format } from 'date-fns';
 
 const LoginAttemptsReport = () => {
@@ -8,9 +8,11 @@ const LoginAttemptsReport = () => {
   const [selectedPaciente, setSelectedPaciente] = useState(null); // Para almacenar el paciente seleccionado
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false); // Estado para controlar el modal
-  const [maxAttempts, setMaxAttempts] = useState(null); // Estado para los intentos máximos
-  const [lockTimeMinutes, setLockTimeMinutes] = useState(null); // Estado para el tiempo de bloqueo
+  const [maxAttempts, setMaxAttempts] = useState(''); // Estado para los intentos máximos
+  const [lockTimeMinutes, setLockTimeMinutes] = useState(''); // Estado para el tiempo de bloqueo
+  const [message, setMessage] = useState(''); // Estado para mostrar mensajes
 
+  // Obtener los intentos de login y la configuración
   useEffect(() => {
     const fetchLoginAttempts = async () => {
       try {
@@ -62,6 +64,35 @@ const LoginAttemptsReport = () => {
     setSelectedPaciente(null);
   };
 
+  // Función para actualizar la configuración (intentos máximos y tiempo de bloqueo)
+  const handleUpdateConfig = async () => {
+    try {
+      const response1 = await fetch('https://backendodontologia.onrender.com/api/reportes/update-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ settingName: 'MAX_ATTEMPTS', settingValue: maxAttempts }),
+      });
+
+      const response2 = await fetch('https://backendodontologia.onrender.com/api/reportes/update-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ settingName: 'LOCK_TIME_MINUTES', settingValue: lockTimeMinutes }),
+      });
+
+      if (response1.ok && response2.ok) {
+        setMessage('Configuración actualizada exitosamente');
+      } else {
+        setMessage('Error al actualizar la configuración');
+      }
+    } catch (err) {
+      setMessage('Error al actualizar la configuración');
+    }
+  };
+
   return (
     <Box sx={{ padding: 3 }}>
       {error && <Typography color="error">{error}</Typography>}
@@ -70,12 +101,26 @@ const LoginAttemptsReport = () => {
       </Typography>
 
       {/* Mostrar intentos máximos y tiempo de bloqueo si están disponibles */}
-      {maxAttempts !== null && lockTimeMinutes !== null && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1">Intentos máximos permitidos: {maxAttempts}</Typography>
-          <Typography variant="body1">Tiempo de bloqueo: {lockTimeMinutes} minutos</Typography>
-        </Box>
-      )}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          label="Intentos máximos permitidos"
+          value={maxAttempts}
+          onChange={(e) => setMaxAttempts(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          label="Tiempo de bloqueo (minutos)"
+          value={lockTimeMinutes}
+          onChange={(e) => setLockTimeMinutes(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+        <Button variant="contained" color="primary" onClick={handleUpdateConfig}>
+          Actualizar Configuración
+        </Button>
+        {message && <Typography color="success" sx={{ mt: 2 }}>{message}</Typography>}
+      </Box>
 
       <TableContainer component={Paper} sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
         <Table>
