@@ -46,7 +46,6 @@ function App() {
       }
     } catch (error) {
       console.error('Error al obtener los datos del backend:', error);
-      alert("Error al cargar los datos de la empresa. Por favor, intente más tarde.");
     }
   };
 
