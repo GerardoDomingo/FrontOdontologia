@@ -66,6 +66,7 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',  // Incluir cookies en la solicitud
         body: JSON.stringify({ ...formData, captchaValue }),
       });
 
@@ -93,6 +94,7 @@ const Login = () => {
     }
   };
 
+
   return (
     <Box
       sx={{
@@ -108,7 +110,7 @@ const Login = () => {
       <IconButton
         sx={{ position: 'absolute', top: 16, left: 16, color: '#00bcd4' }}
         component={Link}
-        to="/" 
+        to="/"
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <ArrowBack />
@@ -117,7 +119,7 @@ const Login = () => {
           </Typography>
         </Box>
       </IconButton>
-      
+
       <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3, position: 'relative' }}>
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
