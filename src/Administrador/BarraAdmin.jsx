@@ -36,7 +36,7 @@ const BarraPaciente = () => {
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
-                credentials: 'include', // Incluir cookies en la solicitud
+                credentials: 'include', // Incluir cookies en la solicituud
                 headers: {
                     'Content-Type': 'application/json'
                 }
