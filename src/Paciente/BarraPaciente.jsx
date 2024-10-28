@@ -44,21 +44,28 @@ const BarraPaciente = () => {
 
     const handleLogout = async () => {
         try {
+            console.log('Current cookies before logout:', document.cookie); // Verificar cookies antes de logout
+    
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
-                credentials: 'include', // Incluir cookies en la solicitud
+                credentials: 'include' // Para incluir la cookie en la solicitud
             });
-
+    
+            console.log('Estado de la respuesta:', response.status); // Estado de la respuesta
+            const responseData = await response.json();
+            console.log('Datos de la respuesta:', responseData); // Datos devueltos en la respuesta
+    
             if (response.ok) {
-                deleteAllCookies(); // Borra todas las cookies
+                console.log('Cierre de sesión exitoso. Redirigiendo...');
                 navigate('/'); // Redirigir al inicio
             } else {
-                console.error('Error al cerrar sesión');
+                console.error('Error al cerrar sesión:', responseData.message);
             }
         } catch (error) {
             console.error('Error de conexión al cerrar sesión:', error);
         }
     };
+    
 
     return (
         <AppBar
