@@ -17,6 +17,7 @@ const Login = () => {
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
+  // Eliminar mensaje de error después de 3 segundos
   useEffect(() => {
     let errorTimeout;
     if (errorMessage) {
@@ -27,6 +28,7 @@ const Login = () => {
     return () => clearTimeout(errorTimeout);
   }, [errorMessage]);
 
+  // Manejar el cambio de los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
