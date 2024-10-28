@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Divider } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaBell } from 'react-icons/fa'; // Nuevos iconos
-import { FaTooth } from 'react-icons/fa'; // Icono para "Odontología Carol"
+import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaTooth } from 'react-icons/fa';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import Notificaciones from '../Compartidos/Notificaciones'; // Importar el componente Notificaciones
 
-const BarraPaciente = () => {
+const BarraAdmin = () => {
     const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null); // Para manejar el menú desplegable
+    const [openNotification, setOpenNotification] = useState(false); // Estado para la notificación
 
     // Detectar el tema del sistema
     useEffect(() => {
@@ -35,132 +36,148 @@ const BarraPaciente = () => {
         setAnchorEl(null);
     };
 
+    // Función para mostrar la notificación al cerrar sesión
+    const handleLogout = () => {
+        handleMenuClose(); // Cierra el menú
+        setOpenNotification(true); // Activa la notificación
+    };
+
+    // Cerrar la notificación
+    const handleNotificationClose = () => {
+        setOpenNotification(false);
+    };
+
     return (
-        <AppBar
-            position="static"
-            sx={{
-                backgroundColor: isDarkTheme ? '#333' : '#F0F0F0',
-                color: isDarkTheme ? '#fff' : '#333',
-                boxShadow: 3,
-            }}
-        >
-            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                {/* Logo de la barra y título */}
-
-                <Box
-                    component={Link} // Usamos el componente Link
-                    to="/Administrador/principal" // La ruta a la que quieres redirigir
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        textDecoration: 'none', // Para quitar el subrayado típico de los enlaces
-                        color: 'inherit', // Inherita el color para que no cambie por defecto a azul
-                    }}
-                    onClick={handleMenuClose} // Llama a la misma función para cerrar el menú si es necesario
-                >
-                    <FaTooth
-                        style={{
-                            fontSize: 32,
-                            marginRight: '8px',
-                            color: isDarkTheme ? '#fff' : '#333',
-                        }}
-                    />
-                    <Typography
-                        variant="h6"
-                        component="div"
-                        sx={{
-                            flexGrow: 1,
-                            fontWeight: 'bold',
-                            letterSpacing: 1,
-                            color: isDarkTheme ? '#fff' : '#333',
-                        }}
-                    >
-                        Odontología Carol - Administrador
-                    </Typography>
-                </Box>
-
-                {/* Icono del perfil del paciente */}
-                <IconButton
-                    edge="end"
-                    color="inherit"
-                    onClick={handleMenuOpen}
-                    sx={{
-                        '&:hover': { color: '#0066cc' }, // Cambia el color del icono al pasar el puntero
-                        color: isDarkTheme ? '#fff' : '#333', // Color por defecto según el tema
-                    }}
-                >
-                    <AccountCircleIcon sx={{ fontSize: 38 }} />
-                </IconButton>
-
-
-                {/* Menú desplegable del paciente */}
-                <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleMenuClose}
-                    PaperProps={{
-                        style: {
-                            backgroundColor: isDarkTheme ? '#333' : '#fff',
-                            color: isDarkTheme ? '#fff' : '#333',
-                        },
-                    }}
-                >
-                    {/* Nueva opción Inicio */}
-                    <MenuItem
+        <>
+            <AppBar
+                position="static"
+                sx={{
+                    backgroundColor: isDarkTheme ? '#333' : '#F0F0F0',
+                    color: isDarkTheme ? '#fff' : '#333',
+                    boxShadow: 3,
+                }}
+            >
+                <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    {/* Logo de la barra y título */}
+                    <Box
                         component={Link}
                         to="/Administrador/principal"
-                        onClick={handleMenuClose}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                            display: 'flex',
+                            alignItems: 'center',
+                            textDecoration: 'none',
+                            color: 'inherit',
+                        }}
+                        onClick={handleMenuClose}
+                    >
+                        <FaTooth
+                            style={{
+                                fontSize: 32,
+                                marginRight: '8px',
+                                color: isDarkTheme ? '#fff' : '#333',
+                            }}
+                        />
+                        <Typography
+                            variant="h6"
+                            component="div"
+                            sx={{
+                                flexGrow: 1,
+                                fontWeight: 'bold',
+                                letterSpacing: 1,
+                                color: isDarkTheme ? '#fff' : '#333',
+                            }}
+                        >
+                            Odontología Carol - Administrador
+                        </Typography>
+                    </Box>
+
+                    {/* Icono del perfil del paciente */}
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={handleMenuOpen}
+                        sx={{
+                            '&:hover': { color: '#0066cc' },
+                            color: isDarkTheme ? '#fff' : '#333',
                         }}
                     >
-                        <FaHome style={{ marginRight: 8 }} />
-                        Inicio
-                    </MenuItem>
+                        <AccountCircleIcon sx={{ fontSize: 38 }} />
+                    </IconButton>
 
-                    <MenuItem
-                        component={Link}
-                        to="/Administrador/reportes"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                    {/* Menú desplegable del paciente */}
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                        PaperProps={{
+                            style: {
+                                backgroundColor: isDarkTheme ? '#333' : '#fff',
+                                color: isDarkTheme ? '#fff' : '#333',
+                            },
                         }}
                     >
-                        <FaCalendarAlt style={{ marginRight: 8 }} />
-                        Reportes
-                    </MenuItem>
+                        <MenuItem
+                            component={Link}
+                            to="/Administrador/principal"
+                            onClick={handleMenuClose}
+                            sx={{
+                                '&:hover': { color: '#0066cc' },
+                            }}
+                        >
+                            <FaHome style={{ marginRight: 8 }} />
+                            Inicio
+                        </MenuItem>
 
-                    <Divider />
+                        <MenuItem
+                            component={Link}
+                            to="/Administrador/reportes"
+                            onClick={handleMenuClose}
+                            sx={{
+                                '&:hover': { color: '#0066cc' },
+                            }}
+                        >
+                            <FaCalendarAlt style={{ marginRight: 8 }} />
+                            Reportes
+                        </MenuItem>
 
-                    <MenuItem
-                        component={Link}
-                        to="/Administrador/configuracion" // Asegúrate de que la ruta coincide con la definida en App.js
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
-                        }}
-                    >
-                        <FaCog style={{ marginRight: 8 }} />
-                        Configuración
-                    </MenuItem>
+                        <Divider />
 
-                    <Divider />
+                        <MenuItem
+                            component={Link}
+                            to="/Administrador/configuracion"
+                            onClick={handleMenuClose}
+                            sx={{
+                                '&:hover': { color: '#0066cc' },
+                            }}
+                        >
+                            <FaCog style={{ marginRight: 8 }} />
+                            Configuración
+                        </MenuItem>
 
-                    <MenuItem
-                        component={Link}
-                        to="/"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
-                        }}
-                    >
-                        <FaSignOutAlt style={{ marginRight: 8 }} />
-                        Cerrar sesión
-                    </MenuItem>
-                </Menu>
-            </Toolbar>
-        </AppBar>
+                        <Divider />
+
+                        <MenuItem
+                            onClick={handleLogout} // Activa la función de cierre de sesión y notificación
+                            sx={{
+                                '&:hover': { color: '#0066cc' },
+                            }}
+                        >
+                            <FaSignOutAlt style={{ marginRight: 8 }} />
+                            Cerrar sesión
+                        </MenuItem>
+                    </Menu>
+                </Toolbar>
+            </AppBar>
+
+            {/* Notificación de cierre de sesión */}
+            <Notificaciones
+                open={openNotification}
+                message="Has cerrado sesión exitosamente"
+                type="info"
+                handleClose={handleNotificationClose}
+            />
+        </>
     );
 }
 
-export default BarraPaciente;
+export default BarraAdmin;
