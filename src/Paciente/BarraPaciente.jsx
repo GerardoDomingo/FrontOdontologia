@@ -45,25 +45,31 @@ const BarraPaciente = () => {
         setAnchorEl(null);
     };
 
-    // Función para manejar el cierre de sesión
     const handleLogout = async () => {
         try {
+            console.log('Iniciando proceso de cierre de sesión...');
+            
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
-                credentials: 'include' // Incluir cookies en la solicitud
+                credentials: 'include' // Enviar la cookie
             });
-
+    
+            console.log('Estado de la respuesta:', response.status); // Verificar el código de estado de la respuesta
+    
+            const responseData = await response.json();
+            console.log('Datos de la respuesta:', responseData); // Mostrar el cuerpo de la respuesta
+    
             if (response.ok) {
+                console.log('Cierre de sesión exitoso. Redirigiendo...');
                 navigate('/'); // Redirigir al inicio
             } else {
-                console.error('Error al cerrar sesión');
+                console.error('Error al cerrar sesión:', responseData.message);
             }
         } catch (error) {
             console.error('Error de conexión al cerrar sesión:', error);
         }
     };
-
-
+    
     return (
         <AppBar
             position="static"
