@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Divider } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaBell, FaTooth } from 'react-icons/fa'; // Nuevos iconos
+import { Link, useNavigate } from 'react-router-dom';
+import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaBell, FaTooth } from 'react-icons/fa';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Notificaciones from '../Compartidos/Notificaciones'; // Importación del componente de notificación
+import Notificaciones from '../Compartidos/Notificaciones';
 
 const BarraPaciente = () => {
     const [isDarkTheme, setIsDarkTheme] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null); // Para manejar el menú desplegable
-    const [openNotification, setOpenNotification] = useState(false); // Estado para la notificación
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [openNotification, setOpenNotification] = useState(false);
+    const navigate = useNavigate(); // Hook de navegación
 
     // Detectar el tema del sistema
     useEffect(() => {
@@ -36,10 +37,13 @@ const BarraPaciente = () => {
         setAnchorEl(null);
     };
 
-    // Función para mostrar la notificación al cerrar sesión
+    // Función para mostrar la notificación y redirigir al cerrar sesión
     const handleLogout = () => {
         handleMenuClose(); // Cierra el menú
         setOpenNotification(true); // Activa la notificación
+        setTimeout(() => {
+            navigate('/'); // Redirige después de que la notificación aparezca
+        }, 1000); // Espera 1 segundo antes de redirigir
     };
 
     // Cerrar la notificación
@@ -81,8 +85,8 @@ const BarraPaciente = () => {
                         color="inherit"
                         onClick={handleMenuOpen}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color del icono al pasar el puntero
-                            color: isDarkTheme ? '#fff' : '#333', // Color por defecto según el tema
+                            '&:hover': { color: '#0066cc' },
+                            color: isDarkTheme ? '#fff' : '#333',
                         }}
                     >
                         <AccountCircleIcon sx={{ fontSize: 38 }} />
@@ -100,13 +104,12 @@ const BarraPaciente = () => {
                             },
                         }}
                     >
-                        {/* Nueva opción Inicio */}
                         <MenuItem
                             component={Link}
                             to="/Paciente/principal"
                             onClick={handleMenuClose}
                             sx={{
-                                '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                                '&:hover': { color: '#0066cc' },
                             }}
                         >
                             <FaHome style={{ marginRight: 8 }} />
@@ -118,7 +121,7 @@ const BarraPaciente = () => {
                             to="/Paciente/perfil"
                             onClick={handleMenuClose}
                             sx={{
-                                '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                                '&:hover': { color: '#0066cc' },
                             }}
                         >
                             <FaUserCircle style={{ marginRight: 8 }} />
@@ -130,7 +133,7 @@ const BarraPaciente = () => {
                             to="/Paciente/citas"
                             onClick={handleMenuClose}
                             sx={{
-                                '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                                '&:hover': { color: '#0066cc' },
                             }}
                         >
                             <FaCalendarAlt style={{ marginRight: 8 }} />
@@ -142,7 +145,7 @@ const BarraPaciente = () => {
                             to="/Paciente/notificaciones"
                             onClick={handleMenuClose}
                             sx={{
-                                '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                                '&:hover': { color: '#0066cc' },
                             }}
                         >
                             <FaBell style={{ marginRight: 8 }} />
@@ -156,7 +159,7 @@ const BarraPaciente = () => {
                             to="/Paciente/configuracion"
                             onClick={handleMenuClose}
                             sx={{
-                                '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                                '&:hover': { color: '#0066cc' },
                             }}
                         >
                             <FaCog style={{ marginRight: 8 }} />
@@ -167,9 +170,8 @@ const BarraPaciente = () => {
 
                         <MenuItem
                             onClick={handleLogout} // Cerrar sesión y mostrar notificación
-                            to="/"
                             sx={{
-                                '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                                '&:hover': { color: '#0066cc' },
                             }}
                         >
                             <FaSignOutAlt style={{ marginRight: 8 }} />

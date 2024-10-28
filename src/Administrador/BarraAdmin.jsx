@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Divider } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaTooth } from 'react-icons/fa';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Notificaciones from '../Compartidos/Notificaciones'; // Importar el componente Notificaciones
@@ -9,6 +9,7 @@ const BarraAdmin = () => {
     const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null); // Para manejar el menú desplegable
     const [openNotification, setOpenNotification] = useState(false); // Estado para la notificación
+    const navigate = useNavigate(); // Hook de navegación
 
     // Detectar el tema del sistema
     useEffect(() => {
@@ -36,10 +37,13 @@ const BarraAdmin = () => {
         setAnchorEl(null);
     };
 
-    // Función para mostrar la notificación al cerrar sesión
+    // Función para mostrar la notificación y redirigir al cerrar sesión
     const handleLogout = () => {
         handleMenuClose(); // Cierra el menú
         setOpenNotification(true); // Activa la notificación
+        setTimeout(() => {
+            navigate('/'); // Redirige después de que la notificación aparezca
+        }, 1000); // Espera 1 segundo antes de redirigir
     };
 
     // Cerrar la notificación
@@ -158,7 +162,6 @@ const BarraAdmin = () => {
 
                         <MenuItem
                             onClick={handleLogout} // Activa la función de cierre de sesión y notificación
-                            to="/"
                             sx={{
                                 '&:hover': { color: '#0066cc' },
                             }}
