@@ -167,6 +167,7 @@ const BarraPaciente = () => {
 
                         <MenuItem
                             onClick={handleLogout} // Cerrar sesión y mostrar notificación
+                            to="/"
                             sx={{
                                 '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
                             }}

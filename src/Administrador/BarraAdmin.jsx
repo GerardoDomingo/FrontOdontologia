@@ -158,6 +158,7 @@ const BarraAdmin = () => {
 
                         <MenuItem
                             onClick={handleLogout} // Activa la función de cierre de sesión y notificación
+                            to="/"
                             sx={{
                                 '&:hover': { color: '#0066cc' },
                             }}
