@@ -27,7 +27,7 @@ const BarraPaciente = () => {
     useEffect(() => {
         const checkSession = () => {
             const sessionCookie = document.cookie.split('; ').find(row => row.startsWith('cookie='));
-            console.log('Current session cookie:', sessionCookie); // Muestra la cookie activa en el navegador
+            console.log('Current session cookie:', sessionCookie ? sessionCookie.split('=')[1] : 'undefined');
             if (!sessionCookie) {
                 console.log('No hay sesión activa.');
             } else {
@@ -36,6 +36,7 @@ const BarraPaciente = () => {
         };
         checkSession();
     }, []);
+    
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
