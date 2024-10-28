@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Divider } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaBell } from 'react-icons/fa'; // Nuevos iconos
-import { FaTooth } from 'react-icons/fa'; // Icono para "Odontología Carol"
+import { Link, useNavigate } from 'react-router-dom';
+import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaBell, FaTooth } from 'react-icons/fa';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const BarraPaciente = () => {
     const [isDarkTheme, setIsDarkTheme] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null); // Para manejar el menú desplegable
+    const [anchorEl, setAnchorEl] = useState(null);
+    const navigate = useNavigate(); // Hook para redirigir al usuario
 
-    // Detectar el tema del sistema
     useEffect(() => {
         const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
         setIsDarkTheme(matchDarkTheme.matches);
@@ -25,14 +24,31 @@ const BarraPaciente = () => {
         };
     }, []);
 
-    // Abrir el menú
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
-    // Cerrar el menú
     const handleMenuClose = () => {
         setAnchorEl(null);
+    };
+
+    // Función para manejar el cierre de sesión
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
+                method: 'POST',
+                credentials: 'include', // Para enviar la cookie de sesión
+            });
+
+            if (response.ok) {
+                // Redirigir al usuario a la página de inicio de sesión
+                navigate('/');
+            } else {
+                console.error('Error al cerrar sesión');
+            }
+        } catch (error) {
+            console.error('Error de conexión al cerrar sesión:', error);
+        }
     };
 
     return (
@@ -68,13 +84,12 @@ const BarraPaciente = () => {
                     color="inherit"
                     onClick={handleMenuOpen}
                     sx={{
-                        '&:hover': { color: '#0066cc' }, // Cambia el color del icono al pasar el puntero
-                        color: isDarkTheme ? '#fff' : '#333', // Color por defecto según el tema
+                        '&:hover': { color: '#0066cc' },
+                        color: isDarkTheme ? '#fff' : '#333',
                     }}
                 >
                     <AccountCircleIcon sx={{ fontSize: 38 }} />
                 </IconButton>
-
 
                 {/* Menú desplegable del paciente */}
                 <Menu
@@ -88,13 +103,12 @@ const BarraPaciente = () => {
                         },
                     }}
                 >
-                    {/* Nueva opción Inicio */}
                     <MenuItem
                         component={Link}
                         to="/Paciente/principal"
                         onClick={handleMenuClose}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                            '&:hover': { color: '#0066cc' },
                         }}
                     >
                         <FaHome style={{ marginRight: 8 }} />
@@ -106,7 +120,7 @@ const BarraPaciente = () => {
                         to="/Paciente/perfil"
                         onClick={handleMenuClose}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                            '&:hover': { color: '#0066cc' },
                         }}
                     >
                         <FaUserCircle style={{ marginRight: 8 }} />
@@ -118,7 +132,7 @@ const BarraPaciente = () => {
                         to="/Paciente/citas"
                         onClick={handleMenuClose}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                            '&:hover': { color: '#0066cc' },
                         }}
                     >
                         <FaCalendarAlt style={{ marginRight: 8 }} />
@@ -130,7 +144,7 @@ const BarraPaciente = () => {
                         to="/Paciente/notificaciones"
                         onClick={handleMenuClose}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                            '&:hover': { color: '#0066cc' },
                         }}
                     >
                         <FaBell style={{ marginRight: 8 }} />
@@ -144,7 +158,7 @@ const BarraPaciente = () => {
                         to="/Paciente/configuracion"
                         onClick={handleMenuClose}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                            '&:hover': { color: '#0066cc' },
                         }}
                     >
                         <FaCog style={{ marginRight: 8 }} />
@@ -153,12 +167,14 @@ const BarraPaciente = () => {
 
                     <Divider />
 
+                    {/* Cerrar sesión */}
                     <MenuItem
-                        component={Link}
-                        to="/"
-                        onClick={handleMenuClose}
+                        onClick={() => {
+                            handleLogout(); // Llama a handleLogout
+                            handleMenuClose();
+                        }}
                         sx={{
-                            '&:hover': { color: '#0066cc' }, // Cambia el color de icono y texto
+                            '&:hover': { color: '#0066cc' },
                         }}
                     >
                         <FaSignOutAlt style={{ marginRight: 8 }} />
