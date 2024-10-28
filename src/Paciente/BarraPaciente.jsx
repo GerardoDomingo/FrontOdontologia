@@ -37,12 +37,17 @@ const BarraPaciente = () => {
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
-                credentials: 'include', // Para enviar la cookie de sesión
+                credentials: 'include', // Incluir cookies en la solicitud
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
-
+    
             if (response.ok) {
-                // Redirigir al usuario a la página de inicio de sesión
+                // Cierre de sesión exitoso, redirigir al inicio de sesión o inicio
                 navigate('/');
+            } else if (response.status === 400) {
+                console.error('Sesión no activa o ya cerrada.');
             } else {
                 console.error('Error al cerrar sesión');
             }
@@ -50,6 +55,7 @@ const BarraPaciente = () => {
             console.error('Error de conexión al cerrar sesión:', error);
         }
     };
+    
 
     return (
         <AppBar
@@ -61,9 +67,24 @@ const BarraPaciente = () => {
             }}
         >
             <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                {/* Logo de la barra y título */}
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <FaTooth style={{ fontSize: 32, marginRight: '8px', color: isDarkTheme ? '#fff' : '#333' }} />
+                <Box
+                    component={Link}
+                    to="/Administrador/principal"
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                    }}
+                    onClick={handleMenuClose}
+                >
+                    <FaTooth
+                        style={{
+                            fontSize: 32,
+                            marginRight: '8px',
+                            color: isDarkTheme ? '#fff' : '#333',
+                        }}
+                    />
                     <Typography
                         variant="h6"
                         component="div"
@@ -74,11 +95,10 @@ const BarraPaciente = () => {
                             color: isDarkTheme ? '#fff' : '#333',
                         }}
                     >
-                        Odontología Carol
+                        Odontología Carol - Administrador
                     </Typography>
                 </Box>
 
-                {/* Icono del perfil del paciente */}
                 <IconButton
                     edge="end"
                     color="inherit"
@@ -91,7 +111,6 @@ const BarraPaciente = () => {
                     <AccountCircleIcon sx={{ fontSize: 38 }} />
                 </IconButton>
 
-                {/* Menú desplegable del paciente */}
                 <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
@@ -105,7 +124,7 @@ const BarraPaciente = () => {
                 >
                     <MenuItem
                         component={Link}
-                        to="/Paciente/principal"
+                        to="/Administrador/principal"
                         onClick={handleMenuClose}
                         sx={{
                             '&:hover': { color: '#0066cc' },
@@ -117,45 +136,21 @@ const BarraPaciente = () => {
 
                     <MenuItem
                         component={Link}
-                        to="/Paciente/perfil"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' },
-                        }}
-                    >
-                        <FaUserCircle style={{ marginRight: 8 }} />
-                        Perfil
-                    </MenuItem>
-
-                    <MenuItem
-                        component={Link}
-                        to="/Paciente/citas"
+                        to="/Administrador/reportes"
                         onClick={handleMenuClose}
                         sx={{
                             '&:hover': { color: '#0066cc' },
                         }}
                     >
                         <FaCalendarAlt style={{ marginRight: 8 }} />
-                        Citas
-                    </MenuItem>
-
-                    <MenuItem
-                        component={Link}
-                        to="/Paciente/notificaciones"
-                        onClick={handleMenuClose}
-                        sx={{
-                            '&:hover': { color: '#0066cc' },
-                        }}
-                    >
-                        <FaBell style={{ marginRight: 8 }} />
-                        Notificaciones
+                        Reportes
                     </MenuItem>
 
                     <Divider />
 
                     <MenuItem
                         component={Link}
-                        to="/Paciente/configuracion"
+                        to="/Administrador/configuracion"
                         onClick={handleMenuClose}
                         sx={{
                             '&:hover': { color: '#0066cc' },
@@ -167,10 +162,9 @@ const BarraPaciente = () => {
 
                     <Divider />
 
-                    {/* Cerrar sesión */}
                     <MenuItem
                         onClick={() => {
-                            handleLogout(); // Llama a handleLogout
+                            handleLogout();
                             handleMenuClose();
                         }}
                         sx={{
