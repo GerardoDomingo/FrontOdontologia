@@ -23,12 +23,13 @@ const Home = () => {
   const isDarkMode = theme.palette.mode === 'dark';
 
   const colors = {
-    background: isDarkMode ? '#121212' : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)',
-    primaryText: isDarkMode ? '#BBDEFB' : '#1976d2', // Azul más claro en modo oscuro
-    secondaryText: isDarkMode ? '#B0BEC5' : '#616161', // Texto gris en modo oscuro
-    cardBackground: isDarkMode ? '#1E1E1E' : '#FFFFFF', // Fondo de tarjeta más oscuro
+    background: isDarkMode ? '#0D0D0D' : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Fondo más oscuro en modo oscuro
+    primaryText: isDarkMode ? '#82B1FF' : '#1976d2', // Azul brillante en oscuro
+    secondaryText: isDarkMode ? '#CFD8DC' : '#616161', // Texto gris claro en oscuro
+    cardBackground: isDarkMode ? '#1A1A1A' : '#FFFFFF', // Fondo de tarjeta más oscuro en modo oscuro
+    cardHover: isDarkMode ? '#333333' : '#E3F2FD', // Fondo de tarjeta al pasar el ratón
   };
-
+  
   return (
     <Box
       sx={{
