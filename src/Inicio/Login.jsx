@@ -52,48 +52,51 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Validar que el captcha esté completado
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-
-    setIsLoading(true); // Activar el estado de carga
-
+  
+    setIsLoading(true); // Mostrar el loader mientras se procesa la solicitud
+  
     try {
+      // Realizar la solicitud de inicio de sesión al backend
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',  // Incluir cookies en la solicitud
-        body: JSON.stringify({ ...formData, captchaValue }),
+        credentials: 'include', // Para incluir cookies en la solicitud
+        body: JSON.stringify({ ...formData, captchaValue }), // Datos del formulario y captcha
       });
-
+  
+      // Parsear la respuesta del servidor
       const data = await response.json();
-
+  
+      // Si el inicio de sesión es exitoso
       if (response.ok) {
-        // Verificar el tipo de usuario y redirigir
+        // Verificar el tipo de usuario y redirigir a la página correspondiente
         if (data.user.tipo === 'administrador') {
-          navigate('/Administrador/principal');  // Redirigir a la página del administrador
+          navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
-          navigate('/Paciente/principal');  // Redirigir a la página del paciente
+          navigate('/Paciente/principal');
         }
       } else {
-        // Mostrar notificación y resetear el captcha
+        // Si el inicio de sesión falla, mostrar el mensaje de error
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts || 0}`);
         setOpenNotification(true);
-        recaptchaRef.current.reset(); // Resetear el captcha
-        setCaptchaValue(null); // Deshabilitar el botón de nuevo
+        recaptchaRef.current.reset(); // Resetear el captcha en caso de error
+        setCaptchaValue(null); // Desactivar el captcha hasta que el usuario lo complete de nuevo
         setErrorMessage(data.message || 'Error al iniciar sesión');
       }
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {
-      setIsLoading(false); // Desactivar el estado de carga
+      setIsLoading(false); // Desactivar el loader después de que termine la solicitud
     }
-  };
-
+  };  
 
   return (
     <Box

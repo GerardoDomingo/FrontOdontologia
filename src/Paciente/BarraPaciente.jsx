@@ -24,6 +24,19 @@ const BarraPaciente = () => {
         };
     }, []);
 
+    useEffect(() => {
+        const checkSession = () => {
+            const sessionCookie = document.cookie.split('; ').find(row => row.startsWith('cookie='));
+            if (!sessionCookie) {
+                console.log('No hay sesión activa.');
+            } else {
+                console.log('Sesión activa encontrada.');
+            }
+        };
+        checkSession();
+    }, []);
+
+
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -37,17 +50,11 @@ const BarraPaciente = () => {
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
-                credentials: 'include', // Incluir cookies en la solicitud
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                credentials: 'include' // Incluir cookies en la solicitud
             });
-    
+
             if (response.ok) {
-                // Cierre de sesión exitoso, redirigir al inicio de sesión o inicio
-                navigate('/');
-            } else if (response.status === 400) {
-                console.error('Sesión no activa o ya cerrada.');
+                navigate('/'); // Redirigir al inicio
             } else {
                 console.error('Error al cerrar sesión');
             }
@@ -55,7 +62,7 @@ const BarraPaciente = () => {
             console.error('Error de conexión al cerrar sesión:', error);
         }
     };
-    
+
 
     return (
         <AppBar
