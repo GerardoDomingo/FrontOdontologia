@@ -17,7 +17,6 @@ const Login = () => {
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
-  // Eliminar mensaje de error después de 3 segundos
   useEffect(() => {
     let errorTimeout;
     if (errorMessage) {
@@ -28,7 +27,6 @@ const Login = () => {
     return () => clearTimeout(errorTimeout);
   }, [errorMessage]);
 
-  // Manejar el cambio de los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -53,16 +51,14 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Validar que el captcha esté completado
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
   
-    setIsLoading(true); // Mostrar el loader mientras se procesa la solicitud
+    setIsLoading(true); 
   
     try {
-      // Realizar la solicitud de inicio de sesión al backend
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
@@ -72,29 +68,25 @@ const Login = () => {
         body: JSON.stringify({ ...formData, captchaValue }), // Datos del formulario y captcha
       });
   
-      // Parsear la respuesta del servidor
       const data = await response.json();
   
-      // Si el inicio de sesión es exitoso
       if (response.ok) {
-        // Verificar el tipo de usuario y redirigir a la página correspondiente
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
       } else {
-        // Si el inicio de sesión falla, mostrar el mensaje de error
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts || 0}`);
         setOpenNotification(true);
-        recaptchaRef.current.reset(); // Resetear el captcha en caso de error
-        setCaptchaValue(null); // Desactivar el captcha hasta que el usuario lo complete de nuevo
+        recaptchaRef.current.reset(); 
+        setCaptchaValue(null); 
         setErrorMessage(data.message || 'Error al iniciar sesión');
       }
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {
-      setIsLoading(false); // Desactivar el loader después de que termine la solicitud
+      setIsLoading(false); 
     }
   };  
 
@@ -211,7 +203,7 @@ const Login = () => {
                 py: 1.5,
                 fontSize: '16px',
               }}
-              disabled={!captchaValue || isLoading}  // Deshabilitar el botón si no se ha resuelto el captcha o si está cargando
+              disabled={!captchaValue || isLoading} 
             >
               {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}  {/* Mostrar el loader o texto */}
             </Button>
