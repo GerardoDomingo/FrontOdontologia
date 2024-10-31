@@ -19,15 +19,14 @@ import img3 from '../img/img3_1.png';
 
 const Home = () => {
   const theme = useTheme();
-
   const isDarkMode = theme.palette.mode === 'dark';
 
   const colors = {
-    background: isDarkMode ? '#0D0D0D' : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Fondo más oscuro en modo oscuro
+    background: isDarkMode ? '#1A2A3A' : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Gris azulado oscuro en modo oscuro
     primaryText: isDarkMode ? '#82B1FF' : '#1976d2', // Azul brillante en oscuro
-    secondaryText: isDarkMode ? '#CFD8DC' : '#616161', // Texto gris claro en oscuro
-    cardBackground: isDarkMode ? '#1A1A1A' : '#FFFFFF', // Fondo de tarjeta más oscuro en modo oscuro
-    cardHover: isDarkMode ? '#333333' : '#E3F2FD', // Fondo de tarjeta al pasar el ratón
+    secondaryText: isDarkMode ? '#B0BEC5' : '#616161', // Gris claro en oscuro
+    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF', // Fondo de tarjeta oscuro en modo oscuro
+    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD', // Fondo de tarjeta al pasar el ratón
   };
   
   return (
