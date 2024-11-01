@@ -13,9 +13,26 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para controlar el loader
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
+
+  // Detectar el tema del sistema
+  useEffect(() => {
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(matchDarkTheme.matches);
+
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    matchDarkTheme.addEventListener('change', handleThemeChange);
+
+    return () => {
+      matchDarkTheme.removeEventListener('change', handleThemeChange);
+    };
+  }, []);
 
   // Eliminar mensaje de error después de 3 segundos
   useEffect(() => {
@@ -52,14 +69,14 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-  
-    setIsLoading(true); 
-  
+
+    setIsLoading(true);
+
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
@@ -67,11 +84,11 @@ const Login = () => {
           'Content-Type': 'application/json',
         },
         credentials: 'include', // Para incluir cookies en la solicitud
-        body: JSON.stringify({ ...formData, captchaValue }), // Datos del formulario y captcha
+        body: JSON.stringify({ ...formData, captchaValue }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
@@ -81,21 +98,23 @@ const Login = () => {
       } else {
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts || 0}`);
         setOpenNotification(true);
-        recaptchaRef.current.reset(); 
-        setCaptchaValue(null); 
+        recaptchaRef.current.reset();
+        setCaptchaValue(null);
         setErrorMessage(data.message || 'Error al iniciar sesión');
       }
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
-  };  
+  };
 
   return (
     <Box
       sx={{
-        backgroundColor: '#FFFFFF',
+        background: isDarkMode 
+          ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)' 
+          : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)',
         minHeight: '100vh',
         display: 'flex',
         justifyContent: 'center',
@@ -117,7 +136,16 @@ const Login = () => {
         </Box>
       </IconButton>
 
-      <Card sx={{ maxWidth: 400, width: '100%', borderRadius: '15px', boxShadow: 3, position: 'relative' }}>
+      <Card 
+        sx={{ 
+          maxWidth: 400, 
+          width: '100%', 
+          borderRadius: '15px', 
+          boxShadow: 3, 
+          position: 'relative',
+          backgroundColor: isDarkMode ? '#1D2A38' : '#FFFFFF', // Fondo más oscuro en modo oscuro
+        }}
+      >
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
             <FaTooth />
@@ -207,7 +235,7 @@ const Login = () => {
               }}
               disabled={!captchaValue || isLoading} 
             >
-              {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}  {/* Mostrar el loader o texto */}
+              {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}
             </Button>
 
             <Box sx={{ mt: 3, textAlign: 'center' }}>

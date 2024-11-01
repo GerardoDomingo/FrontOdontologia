@@ -36,12 +36,15 @@ const Home = () => {
   }, []);
 
   const colors = {
-    background: isDarkMode ? '#1A2A3A' : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Gris azulado oscuro en modo oscuro
-    primaryText: isDarkMode ? '#82B1FF' : '#1976d2', // Azul brillante en oscuro
-    secondaryText: isDarkMode ? '#B0BEC5' : '#616161', // Gris claro en oscuro
-    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF', // Fondo de tarjeta oscuro en modo oscuro
-    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD', // Fondo de tarjeta al pasar el ratón
+    background: isDarkMode 
+      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)'  // Gradiente en modo oscuro
+      : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Gradiente en modo claro
+    primaryText: isDarkMode ? '#82B1FF' : '#1976d2',          // Azul brillante en oscuro
+    secondaryText: isDarkMode ? '#B0BEC5' : '#616161',        // Gris claro en oscuro
+    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF',       // Fondo de tarjeta oscuro en modo oscuro
+    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD',            // Fondo de tarjeta al pasar el ratón
   };
+  
   
   return (
     <Box
@@ -170,7 +173,7 @@ const Home = () => {
             py: 8,
             borderRadius: '16px',
             boxShadow: 3,
-            mb: 20,
+            mb: 5,
           }}
         >
           <Typography
