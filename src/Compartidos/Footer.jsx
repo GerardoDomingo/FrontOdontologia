@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, IconButton, Modal, Button, Grid, Container } from '@mui/material';
+import { Box, Typography, IconButton, Modal, Button, Grid, Container, Divider } from '@mui/material';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import axios from 'axios';
 
-// Redes sociales disponibles con sus iconos
 const availableSocials = [
   { label: 'Facebook', name: 'facebook', icon: <FaFacebook /> },
   { label: 'Twitter', name: 'twitter', icon: <FaTwitter /> },
@@ -20,8 +19,25 @@ const Footer = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('');
   const [modalTitle, setModalTitle] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Obtener redes sociales
+  // Detectar el tema del sistema
+  useEffect(() => {
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(matchDarkTheme.matches);
+
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    matchDarkTheme.addEventListener('change', handleThemeChange);
+
+    return () => {
+      matchDarkTheme.removeEventListener('change', handleThemeChange);
+    };
+  }, []);
+
+  // Obtener datos del backend
   useEffect(() => {
     const fetchSocials = async () => {
       try {
@@ -32,7 +48,6 @@ const Footer = () => {
       }
     };
 
-    // Obtener políticas de privacidad activas
     const fetchPrivacyPolicy = async () => {
       try {
         const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/politicas_privacidad');
@@ -43,7 +58,6 @@ const Footer = () => {
       }
     };
 
-    // Obtener términos y condiciones activos
     const fetchTermsConditions = async () => {
       try {
         const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/terminos_condiciones');
@@ -54,7 +68,6 @@ const Footer = () => {
       }
     };
 
-    // Obtener deslinde legal activo
     const fetchDisclaimer = async () => {
       try {
         const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/deslinde');
@@ -71,7 +84,7 @@ const Footer = () => {
     fetchDisclaimer();
   }, []);
 
-  // Abrir modal con el contenido seleccionado
+  // Manejar la apertura y cierre del modal
   const handleOpenModal = (title, content) => {
     setModalTitle(title);
     setModalContent(content);
@@ -81,15 +94,66 @@ const Footer = () => {
   const handleCloseModal = () => setModalOpen(false);
 
   return (
-    <footer style={{ backgroundColor: '#00BCD4', color: '#ffffff', padding: '10px 0', textAlign: 'center', width: '100%' }}>
+    <footer
+      style={{
+        backgroundColor: isDarkMode ? '#0D1B2A' : '#00BCD4', // Fondo diferente en tema oscuro
+        color: '#ffffff',
+        padding: '20px 0',
+        textAlign: 'center',
+        width: '100%',
+      }}
+    >
       <Container>
-        <Grid container spacing={4} alignItems="center">
-          {/* Columna 1: Redes sociales y contacto */}
-          <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1rem', md: '1.2rem' } }}>
-              Síguenos en redes sociales
-            </Typography>
-            <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, gap: 1, mb: 1 }}>
+        <Grid container spacing={4}>
+          {/* Columna 1: Acerca de Carol */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Acerca de Carol</Typography>
+            <Button sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}>
+              Información sobre nuestra empresa
+            </Button>
+            <Divider sx={{ backgroundColor: '#ffffff', my: 1, opacity: 0.5 }} />
+          </Grid>
+
+          {/* Columna 2: Servicio al Cliente */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Servicio al Cliente</Typography>
+            <Button sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}>
+              Preguntas frecuentes
+            </Button>
+            <Button sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}>
+              Contáctanos
+            </Button>
+            <Divider sx={{ backgroundColor: '#ffffff', my: 1, opacity: 0.5 }} />
+          </Grid>
+
+          {/* Columna 3: Normatividad */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Normatividad</Typography>
+            <Button
+              onClick={() => handleOpenModal('Política de Privacidad', privacyPolicy[0]?.contenido || 'No disponible')}
+              sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
+            >
+              Política de Privacidad
+            </Button>
+            <Button
+              onClick={() => handleOpenModal('Términos y Condiciones', termsConditions[0]?.contenido || 'No disponible')}
+              sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
+            >
+              Términos y Condiciones
+            </Button>
+            <Button
+              onClick={() => handleOpenModal('Deslinde Legal', disclaimer[0]?.contenido || 'No disponible')}
+              sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
+            >
+              Deslinde Legal
+            </Button>
+            <Divider sx={{ backgroundColor: '#ffffff', my: 1, opacity: 0.5 }} />
+          </Grid>
+
+          {/* Columna 4: Redes Sociales */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Síguenos en redes sociales</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 1 }}>
               {socials.map((social) => {
                 const socialIcon = availableSocials.find((s) => s.name === social.nombre_red)?.icon;
                 return (
@@ -97,8 +161,8 @@ const Footer = () => {
                     <IconButton
                       key={social.id}
                       component="a"
-                      href={social.url ? `https://${social.url}` : `tel:${social.url}`} // Enlace a URL o teléfono
-                      sx={{ color: '#ffffff', fontSize: '1.25rem' }} // Tamaño reducido del icono
+                      href={social.url ? `https://${social.url}` : `tel:${social.url}`}
+                      sx={{ color: '#ffffff', fontSize: '1.5rem' }}
                     >
                       {socialIcon}
                     </IconButton>
@@ -106,41 +170,11 @@ const Footer = () => {
                 );
               })}
             </Box>
-            <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-              Contáctanos a través de nuestras redes sociales o llámanos directamente.
-            </Typography>
-          </Grid>
-
-          {/* Columna 2: Enlaces legales */}
-          <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1rem', md: '1.2rem' } }}>
-              Información Legal
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: { xs: 'center', md: 'flex-start' } }}>
-              <Button
-                onClick={() => handleOpenModal('Política de Privacidad', privacyPolicy[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
-              >
-                Política de Privacidad
-              </Button>
-              <Button
-                onClick={() => handleOpenModal('Términos y Condiciones', termsConditions[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
-              >
-                Términos y Condiciones
-              </Button>
-              <Button
-                onClick={() => handleOpenModal('Deslinde Legal', disclaimer[0]?.contenido || 'No disponible')}
-                sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
-              >
-                Deslinde Legal
-              </Button>
-            </Box>
+            <Divider sx={{ backgroundColor: '#ffffff', my: 1, opacity: 0.5 }} />
           </Grid>
         </Grid>
+        <Typography sx={{ mt: 2, fontSize: '0.7rem' }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
       </Container>
-
-      <Typography sx={{ mt: 1, fontSize: '0.7rem' }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
 
       {/* Modal para mostrar políticas, términos y deslinde */}
       <Modal open={modalOpen} onClose={handleCloseModal}>
@@ -151,18 +185,14 @@ const Footer = () => {
             margin: 'auto',
             marginTop: '10%',
             maxWidth: 600,
-            maxHeight: '80vh', // Limitar la altura del modal
-            overflowY: 'auto', // Agregar scroll vertical
+            maxHeight: '80vh',
+            overflowY: 'auto',
             borderRadius: 2,
             boxShadow: 24,
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-            {modalTitle}
-          </Typography>
-          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-            {modalContent}
-          </Typography>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>{modalTitle}</Typography>
+          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>{modalContent}</Typography>
           <Button
             onClick={handleCloseModal}
             sx={{ mt: 3, backgroundColor: '#00BCD4', color: '#ffffff', '&:hover': { backgroundColor: '#0097a7' } }}
@@ -171,7 +201,6 @@ const Footer = () => {
           </Button>
         </Box>
       </Modal>
-
     </footer>
   );
 };
