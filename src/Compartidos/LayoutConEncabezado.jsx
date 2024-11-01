@@ -21,7 +21,6 @@ const LayoutConEncabezado = ({ children }) => {
         component="main"
         sx={{
           flex: 1, // Hace que el main ocupe todo el espacio disponible
-          p: 3, // Espaciado alrededor del contenido
         }}
       >
         {children}
