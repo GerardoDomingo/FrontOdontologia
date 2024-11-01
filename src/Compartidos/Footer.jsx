@@ -173,7 +173,7 @@ const Footer = () => {
             <Divider sx={{ backgroundColor: '#ffffff', my: 1, opacity: 0.5 }} />
           </Grid>
         </Grid>
-        <Typography sx={{ mt: 2, fontSize: '0.7rem' }}>© 2024 Tu Compañía. Todos los derechos reservados.</Typography>
+        <Typography sx={{ mt: 2, fontSize: '0.7rem' }}>© 2024 Odontologia Carol. Todos los derechos reservados.</Typography>
       </Container>
 
       {/* Modal para mostrar políticas, términos y deslinde */}
