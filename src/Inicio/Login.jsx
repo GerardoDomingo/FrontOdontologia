@@ -143,8 +143,8 @@ const Login = () => {
           borderRadius: '15px', 
           boxShadow: 3, 
           position: 'relative',
-          backgroundColor: isDarkMode ? '#333333' : '#FFFFFF', // Fondo oscuro en modo oscuro
-          color: isDarkMode ? '#FFFFFF' : '#000000',           // Texto blanco en modo oscuro
+          backgroundColor: isDarkMode ? '#333333' : '#FFFFFF',
+          color: isDarkMode ? '#FFFFFF' : '#000000',
           padding: '20px',
         }}
       >
@@ -175,13 +175,18 @@ const Login = () => {
                   ),
                 }}
                 sx={{
-                  backgroundColor: isDarkMode ? '#444444' : '#FFFFFF', // Fondo claro en modo oscuro
+                  backgroundColor: isDarkMode ? '#444444' : '#FFFFFF',
                   borderRadius: '5px',
                   '& .MuiInputBase-input': {
-                    color: isDarkMode ? '#FFFFFF' : '#000000', // Texto blanco en modo oscuro
+                    color: isDarkMode ? '#FFFFFF' : '#000000',
                   },
                   '& .MuiInputLabel-root': {
-                    color: isDarkMode ? '#B0BEC5' : '#616161', // Texto de label gris claro en modo oscuro
+                    color: isDarkMode ? '#B0BEC5' : '#616161',
+                  },
+                  // Estilos para el autocompletado
+                  '&:-webkit-autofill': {
+                    WebkitBoxShadow: `0 0 0 100px ${isDarkMode ? '#444444' : '#FFFFFF'} inset`,
+                    WebkitTextFillColor: isDarkMode ? '#FFFFFF' : '#000000',
                   },
                 }}
               />
@@ -213,13 +218,17 @@ const Login = () => {
                   ),
                 }}
                 sx={{
-                  backgroundColor: isDarkMode ? '#444444' : '#FFFFFF', // Fondo claro en modo oscuro
+                  backgroundColor: isDarkMode ? '#444444' : '#FFFFFF',
                   borderRadius: '5px',
                   '& .MuiInputBase-input': {
-                    color: isDarkMode ? '#FFFFFF' : '#000000', // Texto blanco en modo oscuro
+                    color: isDarkMode ? '#FFFFFF' : '#000000',
                   },
                   '& .MuiInputLabel-root': {
-                    color: isDarkMode ? '#B0BEC5' : '#616161', // Texto de label gris claro en modo oscuro
+                    color: isDarkMode ? '#B0BEC5' : '#616161',
+                  },
+                  '&:-webkit-autofill': {
+                    WebkitBoxShadow: `0 0 0 100px ${isDarkMode ? '#444444' : '#FFFFFF'} inset`,
+                    WebkitTextFillColor: isDarkMode ? '#FFFFFF' : '#000000',
                   },
                 }}
               />
@@ -255,12 +264,15 @@ const Login = () => {
               variant="contained"
               sx={{
                 backgroundColor: '#00bcd4',
-                color: '#FFFFFF',
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#000000',
                 '&:hover': { backgroundColor: '#00a3ba' },
                 py: 1.5,
                 fontSize: '16px',
                 fontWeight: 'bold',
                 boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                '&.Mui-disabled': {
+                  color: 'rgba(255, 255, 255, 0.5)', // Texto gris claro cuando está deshabilitado
+                },
               }}
               disabled={!captchaValue || isLoading} 
             >
