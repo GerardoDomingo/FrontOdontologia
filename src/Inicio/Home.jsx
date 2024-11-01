@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -8,7 +8,6 @@ import {
   CardContent,
   CardMedia,
   IconButton,
-  useTheme,
 } from '@mui/material';
 import { CleaningServices, MedicalServices, LocalHospital, Phone, Email } from '@mui/icons-material';
 
@@ -18,8 +17,23 @@ import img2 from '../img/img2_1.jpg';
 import img3 from '../img/img3_1.png';
 
 const Home = () => {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detectar el tema del sistema
+  useEffect(() => {
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(matchDarkTheme.matches);
+
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    matchDarkTheme.addEventListener('change', handleThemeChange);
+
+    return () => {
+      matchDarkTheme.removeEventListener('change', handleThemeChange);
+    };
+  }, []);
 
   const colors = {
     background: isDarkMode ? '#1A2A3A' : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Gris azulado oscuro en modo oscuro
