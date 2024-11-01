@@ -1,12 +1,26 @@
-// LayoutConEncabezado.js
-import React from 'react';
-import { Box, useTheme } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
 import BarraNav from './barraNav';
 import PieDePagina from './Footer';
 
 const LayoutConEncabezado = ({ children }) => {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detectar el tema del sistema
+  useEffect(() => {
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(matchDarkTheme.matches);
+
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    matchDarkTheme.addEventListener('change', handleThemeChange);
+
+    return () => {
+      matchDarkTheme.removeEventListener('change', handleThemeChange);
+    };
+  }, []);
 
   return (
     <Box
@@ -25,7 +39,7 @@ const LayoutConEncabezado = ({ children }) => {
         sx={{
           flex: 1, // Hace que el main ocupe todo el espacio disponible
           p: 3, // Espaciado alrededor del contenido
-          backgroundColor: isDarkMode ? '#14212d' : '#ffffff', // Cambia el color del padding según el tema
+          backgroundColor: isDarkMode ? '#1d2a38' : '#ffffff', // Cambia el color del padding según el tema
         }}
       >
         {children}
@@ -44,6 +58,6 @@ const LayoutConEncabezado = ({ children }) => {
       </Box>
     </Box>
   );
-}
+};
 
 export default LayoutConEncabezado;
