@@ -83,7 +83,7 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Para incluir cookies en la solicitud
+        credentials: 'include',
         body: JSON.stringify({ ...formData, captchaValue }),
       });
 
@@ -143,11 +143,12 @@ const Login = () => {
           borderRadius: '15px', 
           boxShadow: 3, 
           position: 'relative',
-          backgroundColor: isDarkMode ? '#1D2A38' : '#FFFFFF', // Fondo más oscuro en modo oscuro
+          backgroundColor: isDarkMode ? '#333333' : '#FFFFFF', // Fondo oscuro en modo oscuro
+          color: isDarkMode ? '#FFFFFF' : '#000000',           // Texto blanco en modo oscuro
         }}
       >
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
-          <IconButton sx={{ fontSize: 40, color: '#00bcd4' }}>
+          <IconButton sx={{ fontSize: 40, color: isDarkMode ? '#FFFFFF' : '#00bcd4' }}>
             <FaTooth />
           </IconButton>
           <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
@@ -165,10 +166,15 @@ const Login = () => {
                 required
                 InputProps={{
                   startAdornment: (
-                    <IconButton sx={{ mr: 1 }}>
+                    <IconButton sx={{ mr: 1, color: isDarkMode ? '#FFFFFF' : '#000000' }}>
                       <Email />
                     </IconButton>
                   ),
+                }}
+                sx={{
+                  backgroundColor: isDarkMode ? '#f5f5f5' : '#FFFFFF',
+                  borderRadius: '5px',
+                  input: { color: isDarkMode ? '#000000' : '#000000' }
                 }}
               />
             </Box>
@@ -184,17 +190,22 @@ const Login = () => {
                 required
                 InputProps={{
                   startAdornment: (
-                    <IconButton sx={{ mr: 1 }}>
+                    <IconButton sx={{ mr: 1, color: isDarkMode ? '#FFFFFF' : '#000000' }}>
                       <Lock />
                     </IconButton>
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={handleTogglePasswordVisibility}>
+                      <IconButton onClick={handleTogglePasswordVisibility} sx={{ color: isDarkMode ? '#FFFFFF' : '#000000' }}>
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),
+                }}
+                sx={{
+                  backgroundColor: isDarkMode ? '#f5f5f5' : '#FFFFFF',
+                  borderRadius: '5px',
+                  input: { color: isDarkMode ? '#000000' : '#000000' }
                 }}
               />
             </Box>
