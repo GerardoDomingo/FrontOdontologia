@@ -1,10 +1,13 @@
 // LayoutConEncabezado.js
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import BarraNav from './barraNav';
 import PieDePagina from './Footer';
 
 const LayoutConEncabezado = ({ children }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
   return (
     <Box
       sx={{
@@ -21,6 +24,8 @@ const LayoutConEncabezado = ({ children }) => {
         component="main"
         sx={{
           flex: 1, // Hace que el main ocupe todo el espacio disponible
+          p: 3, // Espaciado alrededor del contenido
+          backgroundColor: isDarkMode ? '#14212d' : '#ffffff', // Cambia el color del padding según el tema
         }}
       >
         {children}
