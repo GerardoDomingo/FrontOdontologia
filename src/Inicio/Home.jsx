@@ -52,7 +52,7 @@ const Home = () => {
         padding: 0,
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ py: 10 }} disableGutters>
         {/* Encabezado principal */}
         <Box sx={{ textAlign: 'center', mb: 8 }}>
           <Typography
