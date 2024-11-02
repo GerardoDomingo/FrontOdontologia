@@ -33,12 +33,20 @@ const DeslindeLegal = () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getAllDeslindes');
             const data = response.data;
+
+            // Filtrar deslindes inactivos
             const deslindesInactivos = data.filter(deslinde => deslinde.estado === 'inactivo');
+
+            // Ordenar por versión en orden descendente (de mayor a menor)
+            deslindesInactivos.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
+
+            // Establecer los deslindes ordenados en el estado
             setDeslindes(deslindesInactivos);
         } catch (error) {
             console.error('Error al cargar deslindes:', error);
         }
     };
+
 
     const fetchDeslindeActivo = async () => {
         try {
@@ -70,11 +78,11 @@ const DeslindeLegal = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!validateForm()) return;
-    
+
         const deslindeData = { numero_deslinde: numeroDeslinde, titulo, contenido };
-    
+
         try {
             if (editingId !== null) {
                 // Actualización de un deslinde existente
@@ -85,7 +93,7 @@ const DeslindeLegal = () => {
                 await axios.post('https://backendodontologia.onrender.com/api/deslinde/insert', deslindeData);
                 setNotification({ open: true, message: 'Deslinde insertado con éxito', type: 'success' });
             }
-    
+
             // Actualizar los deslindes y el activo después de la operación
             await fetchDeslindes(); // Actualizar la lista de deslindes inactivos
             await fetchDeslindeActivo(); // Actualizar el deslinde activo
@@ -95,7 +103,7 @@ const DeslindeLegal = () => {
             setNotification({ open: true, message: 'Error al enviar deslinde', type: 'error' });
         }
     };
-    
+
     const resetForm = () => {
         setNumeroDeslinde('');
         setTitulo('');
@@ -110,7 +118,7 @@ const DeslindeLegal = () => {
             // Cargar el deslinde activo directamente para edición
             const response = await axios.get(`https://backendodontologia.onrender.com/api/deslinde/get/${id}`);
             const deslinde = response.data;
-    
+
             if (deslinde) {
                 setNumeroDeslinde(deslinde.numero_deslinde);
                 setTitulo(deslinde.titulo);
@@ -152,7 +160,7 @@ const DeslindeLegal = () => {
             {/* Deslinde Vigente */}
             <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" align="center" gutterBottom>
-                    Deslinde 
+                    Deslinde
                 </Typography>
                 {deslindeActivo && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>

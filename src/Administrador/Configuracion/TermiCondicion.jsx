@@ -33,12 +33,20 @@ const TerminosCondiciones = () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/getAllTerminos');
             const data = response.data;
+
+            // Filtrar términos inactivos
             const terminosInactivos = data.filter(termino => termino.estado === 'inactivo');
+
+            // Ordenar por versión en orden descendente (de mayor a menor)
+            terminosInactivos.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
+
+            // Establecer los términos ordenados en el estado
             setTerminos(terminosInactivos);
         } catch (error) {
             console.error('Error al cargar términos:', error);
         }
     };
+
 
     const fetchTerminoActivo = async () => {
         try {
@@ -70,11 +78,11 @@ const TerminosCondiciones = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!validateForm()) return;
-    
+
         const terminoData = { numero_termino: numeroTermino, titulo, contenido };
-    
+
         try {
             if (editingId !== null) {
                 // Actualización de un término existente
@@ -85,7 +93,7 @@ const TerminosCondiciones = () => {
                 await axios.post('https://backendodontologia.onrender.com/api/termiCondicion/insert', terminoData);
                 setNotification({ open: true, message: 'Término insertado con éxito', type: 'success' });
             }
-    
+
             // Actualizar los términos y el activo después de la operación
             await fetchTerminos(); // Actualizar la lista de términos inactivos
             await fetchTerminoActivo(); // Actualizar el término activo
@@ -95,7 +103,7 @@ const TerminosCondiciones = () => {
             setNotification({ open: true, message: 'Error al enviar término', type: 'error' });
         }
     };
-    
+
     const resetForm = () => {
         setNumeroTermino('');
         setTitulo('');
@@ -110,7 +118,7 @@ const TerminosCondiciones = () => {
             // Cargar el término activo directamente para edición
             const response = await axios.get(`https://backendodontologia.onrender.com/api/termiCondicion/get/${id}`);
             const termino = response.data;
-    
+
             if (termino) {
                 setNumeroTermino(termino.numero_termino);
                 setTitulo(termino.titulo);
@@ -122,7 +130,7 @@ const TerminosCondiciones = () => {
             console.error("Error al cargar el término para editar:", error);
         }
     };
-    
+
     const handleDelete = async (id) => {
         try {
             await axios.put(`https://backendodontologia.onrender.com/api/termiCondicion/deactivate/${id}`, { estado: 'inactivo' });
