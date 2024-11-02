@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import axios from 'axios'; // Para hacer solicitudes al backend
+import axios from 'axios';
 
 //Inicio
 import Home from './Inicio/Home';
@@ -12,7 +12,7 @@ import Reset from './Inicio/CambiarContrasena.jsx';
 
 //Paciente
 import Principal from './Paciente/Principal.jsx';
-import LayoutPaciente from './Paciente/LayoutPaciente'; // Nuevo layout específico para pacientes
+import LayoutPaciente from './Paciente/LayoutPaciente';
 
 //Administrador
 import LayoutAdmin from './Administrador/LayoutAdmin.jsx';
@@ -22,11 +22,23 @@ import Reportes from './Administrador/reportes.jsx';
 import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
 
 function App() {
-  const [tituloPagina, setTituloPagina] = useState(''); 
-  const [logo, setLogo] = useState(''); 
-  const fetchTitleAndLogo = async () => {
+  const [tituloPagina, setTituloPagina] = useState('');
+  const [logo, setLogo] = useState('');
+  const [fetchErrors, setFetchErrors] = useState(0);
+
+  const fetchTitleAndLogo = async (retries = 3) => {
     try {
-      const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
+      const source = axios.CancelToken.source(); // Cancel token para el timeout
+      const timeout = setTimeout(() => {
+        source.cancel("La solicitud tardó demasiado en responder."); // Cancela la solicitud si toma demasiado tiempo
+      }, 5000); // Timeout de 5 segundos
+
+      const response = await axios.get(
+        'https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo',
+        { cancelToken: source.token }
+      );
+      clearTimeout(timeout); // Limpia el timeout si la solicitud fue exitosa
+
       const { titulo_pagina, logo } = response.data;
 
       if (titulo_pagina) {
@@ -37,20 +49,46 @@ function App() {
         const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
         link.type = 'image/x-icon';
         link.rel = 'shortcut icon';
-        link.href = `data:image/png;base64,${logo}`; 
+        link.href = `data:image/png;base64,${logo}`;
         document.getElementsByTagName('head')[0].appendChild(link);
         setLogo(`data:image/png;base64,${logo}`);
       }
+      setFetchErrors(0); // Reinicia el contador de errores si fue exitoso
     } catch (error) {
-      console.error('Error al obtener los datos del backend:', error);
+      clearTimeout(timeout); // Limpia el timeout en caso de error
+      if (axios.isCancel(error)) {
+        console.error("Error de timeout:", error.message);
+      } else if (error.response) {
+        console.error("Error en la respuesta del servidor:", error.response.status);
+      } else if (error.request) {
+        console.error("Error en la solicitud:", error.request);
+      } else {
+        console.error("Error desconocido:", error.message);
+      }
+
+      // Manejo de reintentos
+      if (retries > 0) {
+        console.log(`Reintentando... (${3 - retries + 1})`);
+        await new Promise((res) => setTimeout(res, 1000)); // Espera 1 segundo antes de reintentar
+        fetchTitleAndLogo(retries - 1);
+      } else {
+        setFetchErrors((prev) => prev + 1); // Incrementa el contador de errores
+      }
     }
   };
 
   useEffect(() => {
     fetchTitleAndLogo();
     const interval = setInterval(fetchTitleAndLogo, 15000);
+
+    // Detén los reintentos si hay demasiados errores consecutivos
+    if (fetchErrors >= 5) {
+      clearInterval(interval);
+      console.error("Demasiados errores al intentar conectarse con el backend.");
+    }
+
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchErrors]);
 
   return (
     <Router>
