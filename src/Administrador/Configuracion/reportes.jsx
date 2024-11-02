@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Tab, Tabs, Card, CardContent, IconButton, CircularProgress } from '@mui/material';
 import { FaSignInAlt, FaFileAlt, FaBuilding } from 'react-icons/fa'; // Íconos
 import LoginAttemptsReport from './LoginAttemptsReport'; // Importar el reporte de intentos de login
-import LogsReport from './Configuracion/LogsReport'; // Importar el reporte de logs
+import LogsReport from './LogsReport'; // Importar el reporte de logs
 import { Link } from 'react-router-dom';
 
 const Reportes = () => {
