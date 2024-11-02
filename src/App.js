@@ -28,17 +28,7 @@ function App() {
 
   const fetchTitleAndLogo = async (retries = 3) => {
     try {
-      const source = axios.CancelToken.source(); // Cancel token para el timeout
-      const timeout = setTimeout(() => {
-        source.cancel("La solicitud tardó demasiado en responder."); // Cancela la solicitud si toma demasiado tiempo
-      }, 5000); // Timeout de 5 segundos
-
-      const response = await axios.get(
-        'https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo',
-        { cancelToken: source.token }
-      );
-      clearTimeout(timeout); // Limpia el timeout si la solicitud fue exitosa
-
+      const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
       const { titulo_pagina, logo } = response.data;
 
       if (titulo_pagina) {
@@ -55,10 +45,7 @@ function App() {
       }
       setFetchErrors(0); // Reinicia el contador de errores si fue exitoso
     } catch (error) {
-      clearTimeout(timeout); // Limpia el timeout en caso de error
-      if (axios.isCancel(error)) {
-        console.error("Error de timeout:", error.message);
-      } else if (error.response) {
+      if (error.response) {
         console.error("Error en la respuesta del servidor:", error.response.status);
       } else if (error.request) {
         console.error("Error en la solicitud:", error.request);
