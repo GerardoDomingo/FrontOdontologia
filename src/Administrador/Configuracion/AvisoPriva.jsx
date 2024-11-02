@@ -28,17 +28,21 @@ const PoliticasPrivacidad = () => {
         fetchPoliticaActiva(); // Cargar política activa
     }, []);
 
-    // Función para obtener todas las políticas inactivas
-    const fetchPoliticas = async () => {
-        try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
-            const data = response.data;
-            const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
-            setPoliticas(politicasInactivas);
-        } catch (error) {
-            console.error('Error al cargar políticas:', error);
-        }
-    };
+// Función para obtener todas las políticas inactivas
+const fetchPoliticas = async () => {
+    try {
+        const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
+        const data = response.data;
+
+        const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
+
+        politicasInactivas.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
+
+        setPoliticas(politicasInactivas);
+    } catch (error) {
+        console.error('Error al cargar políticas:', error);
+    }
+};
 
     const fetchPoliticaActiva = async () => {
         try {
