@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Typography, Tab, Tabs, Card, CardContent, IconButton, CircularProgress } from '@mui/material';
 import { FaUserShield, FaFileAlt, FaExclamationTriangle, FaFileContract, FaBuilding } from 'react-icons/fa'; // Íconos
-import AvisoDePrivacidad from './AvisoPriva';
-import DeslindeLegal from './DeslindeLegal';
-import TerminosCondiciones from './TermiCondicion';
+import AvisoDePrivacidad from './Configuracion/AvisoPriva';
+import DeslindeLegal from './Configuracion/DeslindeLegal';
+import TerminosCondiciones from './Configuracion/TermiCondicion';
 import { Link } from 'react-router-dom';
 
 const Configuracion = () => {

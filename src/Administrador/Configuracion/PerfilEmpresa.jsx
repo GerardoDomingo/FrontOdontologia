@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Save as SaveIcon, Edit as EditIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon } from '@mui/icons-material';
 import axios from 'axios';
-import Notificaciones from '../Compartidos/Notificaciones';
+import Notificaciones from '../../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
 import RedesSociales from './RedesSociales';
 

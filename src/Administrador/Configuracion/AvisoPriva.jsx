@@ -8,60 +8,60 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import Notificaciones from '../Compartidos/Notificaciones';
-
-const TerminosCondiciones = () => {
-    const [numeroTermino, setNumeroTermino] = useState('');
+import Notificaciones from '../../Compartidos/Notificaciones';
+//POLITICAS
+const PoliticasPrivacidad = () => {
+    const [numeroPolitica, setNumeroPolitica] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingId, setEditingId] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
-    const [terminos, setTerminos] = useState([]);
-    const [terminoActivo, setTerminoActivo] = useState(null);
+    const [politicas, setPoliticas] = useState([]);
+    const [politicaActiva, setPoliticaActiva] = useState(null);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
-    const [isAddingNewTermino, setIsAddingNewTermino] = useState(false);
+    const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false);
 
     useEffect(() => {
-        fetchTerminos();
-        fetchTerminoActivo(); // Cargar término activo
+        fetchPoliticas();
+        fetchPoliticaActiva(); // Cargar política activa
     }, []);
 
-    // Función para obtener todos los términos inactivos
-    const fetchTerminos = async () => {
+    // Función para obtener todas las políticas inactivas
+    const fetchPoliticas = async () => {
         try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/getAllTerminos');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
             const data = response.data;
-            const terminosInactivos = data.filter(termino => termino.estado === 'inactivo');
-            setTerminos(terminosInactivos);
+            const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
+            setPoliticas(politicasInactivas);
         } catch (error) {
-            console.error('Error al cargar términos:', error);
+            console.error('Error al cargar políticas:', error);
         }
     };
 
-    const fetchTerminoActivo = async () => {
+    const fetchPoliticaActiva = async () => {
         try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/gettermino');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
             if (response.data) {
-                setTerminoActivo(response.data); // Guardar el término activo
+                setPoliticaActiva(response.data); // Guardar la política activa
             } else {
-                setTerminoActivo(null); // En caso de que no haya un término activo
+                setPoliticaActiva(null); // En caso de que no haya una política activa
             }
         } catch (error) {
             if (error.response && error.response.status === 404) {
-                setTerminoActivo(null); // Establecer término activo a null si no existe
-                console.error('No hay términos activos.');
+                setPoliticaActiva(null); // Establecer política activa a null si no existe
+                console.error('No hay políticas activas.');
             } else {
-                console.error('Error al cargar término activo:', error);
-                setTerminoActivo(null);
+                console.error('Error al cargar política activa:', error);
+                setPoliticaActiva(null);
             }
         }
     };
 
     const validateForm = () => {
         const newErrors = {};
-        if (!numeroTermino) newErrors.numeroTermino = "El número de término es obligatorio.";
+        if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
         if (!titulo) newErrors.titulo = "El título es obligatorio.";
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
@@ -73,69 +73,70 @@ const TerminosCondiciones = () => {
     
         if (!validateForm()) return;
     
-        const terminoData = { numero_termino: numeroTermino, titulo, contenido };
+        const politicaData = { numero_politica: numeroPolitica, titulo, contenido };
     
         try {
             if (editingId !== null) {
-                // Actualización de un término existente
-                await axios.put(`https://backendodontologia.onrender.com/api/termiCondicion/update/${editingId}`, terminoData);
-                setNotification({ open: true, message: `Término actualizado correctamente`, type: 'success' });
+                // Actualización de una política existente
+                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${editingId}`, politicaData);
+                setNotification({ open: true, message: `Política actualizada correctamente`, type: 'success' });
             } else {
-                // Creación de un nuevo término
-                await axios.post('https://backendodontologia.onrender.com/api/termiCondicion/insert', terminoData);
-                setNotification({ open: true, message: 'Término insertado con éxito', type: 'success' });
+                // Creación de una nueva política
+                await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
+                setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
     
-            // Actualizar los términos y el activo después de la operación
-            await fetchTerminos(); // Actualizar la lista de términos inactivos
-            await fetchTerminoActivo(); // Actualizar el término activo
+            // Actualizar las políticas y la activa después de la operación
+            await fetchPoliticas(); // Actualizar la lista de políticas inactivas
+            await fetchPoliticaActiva(); // Actualizar la política activa
             resetForm();
-            setIsAddingNewTermino(false);
+            setIsAddingNewPolicy(false);
         } catch (error) {
-            setNotification({ open: true, message: 'Error al enviar término', type: 'error' });
+            setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
         }
     };
     
     const resetForm = () => {
-        setNumeroTermino('');
+        setNumeroPolitica('');
         setTitulo('');
         setContenido('');
         setEditingId(null); // Reseteamos el ID de edición
         setErrors({});
-        setIsAddingNewTermino(false); // Reactivar el botón "Nuevo Término"
+        setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
     };
 
     const handleEdit = async (id) => {
         try {
-            // Cargar el término activo directamente para edición
-            const response = await axios.get(`https://backendodontologia.onrender.com/api/termiCondicion/get/${id}`);
-            const termino = response.data;
+            // Cargar la política activa directamente para edición
+            const response = await axios.get(`https://backendodontologia.onrender.com/api/politicas/get/${id}`);
+            const politica = response.data;
     
-            if (termino) {
-                setNumeroTermino(termino.numero_termino);
-                setTitulo(termino.titulo);
-                setContenido(termino.contenido);
-                setEditingId(id); // Guarda correctamente el ID del término a editar
-                setIsAddingNewTermino(true); // Abrir el formulario para editar
+            if (politica) {
+                setNumeroPolitica(politica.numero_politica);
+                setTitulo(politica.titulo);
+                setContenido(politica.contenido);
+                setEditingId(id); // Guarda correctamente el ID de la política a editar
+                setIsAddingNewPolicy(true); // Abrir el formulario para editar
             }
         } catch (error) {
-            console.error("Error al cargar el término para editar:", error);
+            console.error("Error al cargar la política para editar:", error);
         }
     };
     
+
     const handleDelete = async (id) => {
         try {
-            await axios.put(`https://backendodontologia.onrender.com/api/termiCondicion/deactivate/${id}`, { estado: 'inactivo' });
-            setNotification({ open: true, message: 'Término eliminado con éxito', type: 'success' });
-            await fetchTerminos();
-            await fetchTerminoActivo(); // Refresca el término activo tras eliminar
+            await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${id}`, { estado: 'inactivo' });
+            setNotification({ open: true, message: 'Política eliminada con éxito', type: 'success' });
+            await fetchPoliticas();
+            await fetchPoliticaActiva(); // Refresca la política activa tras eliminar
         } catch (error) {
-            setNotification({ open: true, message: 'Error al eliminar término', type: 'error' });
+            setNotification({ open: true, message: 'Error al eliminar política', type: 'error' });
         }
     };
 
-    const handleDialogOpen = (termino) => {
-        setDialogContent(termino); // Guardamos todo el objeto del término en lugar de solo el contenido
+    const handleDialogOpen = (politica) => {
+        setDialogContent(politica); // Guardamos todo el objeto de la política en lugar de solo el contenido
         setOpenDialog(true);
     };
 
@@ -149,62 +150,62 @@ const TerminosCondiciones = () => {
 
     return (
         <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
-            {/* Término de Condiciones Vigente */}
+            {/* Política de Privacidad Vigente */}
             <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" align="center" gutterBottom>
-                    Término de Condiciones
+                    Política de Privacidad
                 </Typography>
-                {terminoActivo && (
+                {politicaActiva && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={9}>
-                                <Typography variant="h5">Vigente: {terminoActivo.titulo}</Typography>
+                                <Typography variant="h5">Vigente: {politicaActiva.titulo}</Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Número: {terminoActivo.numero_termino}
+                                    Número: {politicaActiva.numero_politica}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Versión: {terminoActivo.version}
+                                    Versión: {politicaActiva.version}
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
-                                <IconButton onClick={() => handleEdit(terminoActivo.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
-                                <IconButton onClick={() => handleDelete(terminoActivo.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
+                                <IconButton onClick={() => handleEdit(politicaActiva.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
+                                <IconButton onClick={() => handleDelete(politicaActiva.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
                             </Grid>
                             <Grid item xs={12}>
                                 <Typography variant="body2">
-                                    {truncateContent(terminoActivo.contenido)}{' '}
-                                    <Button variant="outlined" onClick={() => handleDialogOpen(terminoActivo)}>Ver más</Button>
+                                    {truncateContent(politicaActiva.contenido)}{' '}
+                                    <Button variant="outlined" onClick={() => handleDialogOpen(politicaActiva)}>Ver más</Button>
                                 </Typography>
                             </Grid>
                         </Grid>
                     </Paper>
                 )}
-                {/* Botón Nuevo Término */}
+                {/* Botón Nueva Política */}
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     sx={{ mt: 3 }}
                     onClick={() => {
-                        resetForm(); // Reiniciar el formulario para nuevo término
-                        setIsAddingNewTermino(true);
+                        resetForm(); // Reiniciar el formulario para nueva política
+                        setIsAddingNewPolicy(true);
                     }}
-                    disabled={isAddingNewTermino} // Deshabilitar botón cuando está activo
+                    disabled={isAddingNewPolicy} // Deshabilitar botón cuando está activo
                 >
-                    Nuevo Término
+                    Nueva Política
                 </Button>
 
-                {/* Formulario para agregar o actualizar términos */}
-                {isAddingNewTermino && (
+                {/* Formulario para agregar o actualizar políticas */}
+                {isAddingNewPolicy && (
                     <form onSubmit={handleSubmit}>
                         <TextField
-                            label="Número de Término"
-                            value={numeroTermino}
-                            onChange={(e) => setNumeroTermino(e.target.value)}
+                            label="Número de Política"
+                            value={numeroPolitica}
+                            onChange={(e) => setNumeroPolitica(e.target.value)}
                             fullWidth
                             sx={{ mt: 3 }}
-                            error={!!errors.numeroTermino}
-                            helperText={errors.numeroTermino}
+                            error={!!errors.numeroPolitica}
+                            helperText={errors.numeroPolitica}
                         />
                         <TextField
                             label="Título"
@@ -247,16 +248,16 @@ const TerminosCondiciones = () => {
                 )}
             </Paper>
 
-            {/* Historial de Términos */}
+            {/* Historial de Políticas */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
-                Historial de Términos por Versión
+                Historial de Políticas por Versión
             </Typography>
 
             <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell><Typography fontWeight="bold">Número de Término</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Número de Política</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
@@ -264,20 +265,20 @@ const TerminosCondiciones = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {terminos.length > 0 ? (
-                            terminos.map((termino, index) => (
+                        {politicas.length > 0 ? (
+                            politicas.map((politica, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{termino.numero_termino}</TableCell>
-                                    <TableCell>{termino.titulo}</TableCell>
-                                    <TableCell>{termino.version}</TableCell>
-                                    <TableCell>{new Date(termino.fecha_creacion).toLocaleDateString()}</TableCell>
-                                    <TableCell>{new Date(termino.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{politica.numero_politica}</TableCell>
+                                    <TableCell>{politica.titulo}</TableCell>
+                                    <TableCell>{politica.version}</TableCell>
+                                    <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={5} align="center">
-                                    No hay términos inactivos.
+                                    No hay políticas inactivas.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -285,21 +286,21 @@ const TerminosCondiciones = () => {
                 </Table>
             </TableContainer>
 
-            {/* Diálogo para visualizar el contenido completo del término */}
+            {/* Diálogo para visualizar el contenido completo de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Detalles del Término de Condiciones</DialogTitle>
+                <DialogTitle>Detalles de la Política de Privacidad</DialogTitle>
                 <DialogContent>
-                    {/* Título del término */}
+                    {/* Título de la política */}
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                         Título: {dialogContent?.titulo}
                     </Typography>
 
-                    {/* Número del término */}
+                    {/* Número de la política */}
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        Número de Término: {dialogContent?.numero_termino}
+                        Número de Política: {dialogContent?.numero_politica}
                     </Typography>
 
-                    {/* Contenido del término */}
+                    {/* Contenido de la política */}
                     <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
                         {dialogContent?.contenido}
                     </Typography>
@@ -329,4 +330,4 @@ const TerminosCondiciones = () => {
     );
 };
 
-export default TerminosCondiciones;
+export default PoliticasPrivacidad;

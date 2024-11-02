@@ -19,7 +19,7 @@ import LayoutAdmin from './Administrador/LayoutAdmin.jsx';
 import PrincipalAdmin from './Administrador/Principal.jsx';
 import Configuracion from './Administrador/Configuracion.jsx';
 import Reportes from './Administrador/reportes.jsx';
-import PerfilEmpresa from './Administrador/PerfilEmpresa.jsx';
+import PerfilEmpresa from './Administrador/Configuracion/PerfilEmpresa.jsx';
 
 function App() {
   const [tituloPagina, setTituloPagina] = useState('');

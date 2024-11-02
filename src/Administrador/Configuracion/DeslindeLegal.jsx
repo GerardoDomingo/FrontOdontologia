@@ -8,60 +8,60 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import Notificaciones from '../Compartidos/Notificaciones';
-//POLITICAS
-const PoliticasPrivacidad = () => {
-    const [numeroPolitica, setNumeroPolitica] = useState('');
+import Notificaciones from '../../Compartidos/Notificaciones';
+
+const DeslindeLegal = () => {
+    const [numeroDeslinde, setNumeroDeslinde] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingId, setEditingId] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
     const [errors, setErrors] = useState({});
-    const [politicas, setPoliticas] = useState([]);
-    const [politicaActiva, setPoliticaActiva] = useState(null);
+    const [deslindes, setDeslindes] = useState([]);
+    const [deslindeActivo, setDeslindeActivo] = useState(null);
     const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
-    const [isAddingNewPolicy, setIsAddingNewPolicy] = useState(false);
+    const [isAddingNewDeslinde, setIsAddingNewDeslinde] = useState(false);
 
     useEffect(() => {
-        fetchPoliticas();
-        fetchPoliticaActiva(); // Cargar política activa
+        fetchDeslindes();
+        fetchDeslindeActivo(); // Cargar deslinde activo
     }, []);
 
-    // Función para obtener todas las políticas inactivas
-    const fetchPoliticas = async () => {
+    // Función para obtener todos los deslindes inactivos
+    const fetchDeslindes = async () => {
         try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getAllDeslindes');
             const data = response.data;
-            const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
-            setPoliticas(politicasInactivas);
+            const deslindesInactivos = data.filter(deslinde => deslinde.estado === 'inactivo');
+            setDeslindes(deslindesInactivos);
         } catch (error) {
-            console.error('Error al cargar políticas:', error);
+            console.error('Error al cargar deslindes:', error);
         }
     };
 
-    const fetchPoliticaActiva = async () => {
+    const fetchDeslindeActivo = async () => {
         try {
-            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
+            const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getdeslinde');
             if (response.data) {
-                setPoliticaActiva(response.data); // Guardar la política activa
+                setDeslindeActivo(response.data); // Guardar el deslinde activo
             } else {
-                setPoliticaActiva(null); // En caso de que no haya una política activa
+                setDeslindeActivo(null); // En caso de que no haya un deslinde activo
             }
         } catch (error) {
             if (error.response && error.response.status === 404) {
-                setPoliticaActiva(null); // Establecer política activa a null si no existe
-                console.error('No hay políticas activas.');
+                setDeslindeActivo(null); // Establecer deslinde activo a null si no existe
+                console.error('No hay deslindes activos.');
             } else {
-                console.error('Error al cargar política activa:', error);
-                setPoliticaActiva(null);
+                console.error('Error al cargar deslinde activo:', error);
+                setDeslindeActivo(null);
             }
         }
     };
 
     const validateForm = () => {
         const newErrors = {};
-        if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
+        if (!numeroDeslinde) newErrors.numeroDeslinde = "El número de deslinde es obligatorio.";
         if (!titulo) newErrors.titulo = "El título es obligatorio.";
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
@@ -73,70 +73,69 @@ const PoliticasPrivacidad = () => {
     
         if (!validateForm()) return;
     
-        const politicaData = { numero_politica: numeroPolitica, titulo, contenido };
+        const deslindeData = { numero_deslinde: numeroDeslinde, titulo, contenido };
     
         try {
             if (editingId !== null) {
-                // Actualización de una política existente
-                await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${editingId}`, politicaData);
-                setNotification({ open: true, message: `Política actualizada correctamente`, type: 'success' });
+                // Actualización de un deslinde existente
+                await axios.put(`https://backendodontologia.onrender.com/api/deslinde/update/${editingId}`, deslindeData);
+                setNotification({ open: true, message: `Deslinde actualizado correctamente`, type: 'success' });
             } else {
-                // Creación de una nueva política
-                await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
-                setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
+                // Creación de un nuevo deslinde
+                await axios.post('https://backendodontologia.onrender.com/api/deslinde/insert', deslindeData);
+                setNotification({ open: true, message: 'Deslinde insertado con éxito', type: 'success' });
             }
     
-            // Actualizar las políticas y la activa después de la operación
-            await fetchPoliticas(); // Actualizar la lista de políticas inactivas
-            await fetchPoliticaActiva(); // Actualizar la política activa
+            // Actualizar los deslindes y el activo después de la operación
+            await fetchDeslindes(); // Actualizar la lista de deslindes inactivos
+            await fetchDeslindeActivo(); // Actualizar el deslinde activo
             resetForm();
-            setIsAddingNewPolicy(false);
+            setIsAddingNewDeslinde(false);
         } catch (error) {
-            setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
+            setNotification({ open: true, message: 'Error al enviar deslinde', type: 'error' });
         }
     };
     
     const resetForm = () => {
-        setNumeroPolitica('');
+        setNumeroDeslinde('');
         setTitulo('');
         setContenido('');
         setEditingId(null); // Reseteamos el ID de edición
         setErrors({});
-        setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
+        setIsAddingNewDeslinde(false); // Reactivar el botón "Nuevo Deslinde"
     };
 
     const handleEdit = async (id) => {
         try {
-            // Cargar la política activa directamente para edición
-            const response = await axios.get(`https://backendodontologia.onrender.com/api/politicas/get/${id}`);
-            const politica = response.data;
+            // Cargar el deslinde activo directamente para edición
+            const response = await axios.get(`https://backendodontologia.onrender.com/api/deslinde/get/${id}`);
+            const deslinde = response.data;
     
-            if (politica) {
-                setNumeroPolitica(politica.numero_politica);
-                setTitulo(politica.titulo);
-                setContenido(politica.contenido);
-                setEditingId(id); // Guarda correctamente el ID de la política a editar
-                setIsAddingNewPolicy(true); // Abrir el formulario para editar
+            if (deslinde) {
+                setNumeroDeslinde(deslinde.numero_deslinde);
+                setTitulo(deslinde.titulo);
+                setContenido(deslinde.contenido);
+                setEditingId(id); // Guarda correctamente el ID del deslinde a editar
+                setIsAddingNewDeslinde(true); // Abrir el formulario para editar
             }
         } catch (error) {
-            console.error("Error al cargar la política para editar:", error);
+            console.error("Error al cargar el deslinde para editar:", error);
         }
     };
-    
 
     const handleDelete = async (id) => {
         try {
-            await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${id}`, { estado: 'inactivo' });
-            setNotification({ open: true, message: 'Política eliminada con éxito', type: 'success' });
-            await fetchPoliticas();
-            await fetchPoliticaActiva(); // Refresca la política activa tras eliminar
+            await axios.put(`https://backendodontologia.onrender.com/api/deslinde/deactivate/${id}`, { estado: 'inactivo' });
+            setNotification({ open: true, message: 'Deslinde eliminado con éxito', type: 'success' });
+            await fetchDeslindes();
+            await fetchDeslindeActivo(); // Refresca el deslinde activo tras eliminar
         } catch (error) {
-            setNotification({ open: true, message: 'Error al eliminar política', type: 'error' });
+            setNotification({ open: true, message: 'Error al eliminar deslinde', type: 'error' });
         }
     };
 
-    const handleDialogOpen = (politica) => {
-        setDialogContent(politica); // Guardamos todo el objeto de la política en lugar de solo el contenido
+    const handleDialogOpen = (deslinde) => {
+        setDialogContent(deslinde); // Guardamos todo el objeto del deslinde en lugar de solo el contenido
         setOpenDialog(true);
     };
 
@@ -150,62 +149,62 @@ const PoliticasPrivacidad = () => {
 
     return (
         <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
-            {/* Política de Privacidad Vigente */}
+            {/* Deslinde Vigente */}
             <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" align="center" gutterBottom>
-                    Política de Privacidad
+                    Deslinde 
                 </Typography>
-                {politicaActiva && (
+                {deslindeActivo && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={9}>
-                                <Typography variant="h5">Vigente: {politicaActiva.titulo}</Typography>
+                                <Typography variant="h5">Vigente: {deslindeActivo.titulo}</Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Número: {politicaActiva.numero_politica}
+                                    Número: {deslindeActivo.numero_deslinde}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Versión: {politicaActiva.version}
+                                    Versión: {deslindeActivo.version}
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
-                                <IconButton onClick={() => handleEdit(politicaActiva.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
-                                <IconButton onClick={() => handleDelete(politicaActiva.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
+                                <IconButton onClick={() => handleEdit(deslindeActivo.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
+                                <IconButton onClick={() => handleDelete(deslindeActivo.id)}><DeleteIcon sx={{ color: 'red' }} /></IconButton>
                             </Grid>
                             <Grid item xs={12}>
                                 <Typography variant="body2">
-                                    {truncateContent(politicaActiva.contenido)}{' '}
-                                    <Button variant="outlined" onClick={() => handleDialogOpen(politicaActiva)}>Ver más</Button>
+                                    {truncateContent(deslindeActivo.contenido)}{' '}
+                                    <Button variant="outlined" onClick={() => handleDialogOpen(deslindeActivo)}>Ver más</Button>
                                 </Typography>
                             </Grid>
                         </Grid>
                     </Paper>
                 )}
-                {/* Botón Nueva Política */}
+                {/* Botón Nuevo Deslinde */}
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     sx={{ mt: 3 }}
                     onClick={() => {
-                        resetForm(); // Reiniciar el formulario para nueva política
-                        setIsAddingNewPolicy(true);
+                        resetForm(); // Reiniciar el formulario para nuevo deslinde
+                        setIsAddingNewDeslinde(true);
                     }}
-                    disabled={isAddingNewPolicy} // Deshabilitar botón cuando está activo
+                    disabled={isAddingNewDeslinde} // Deshabilitar botón cuando está activo
                 >
-                    Nueva Política
+                    Nuevo Deslinde
                 </Button>
 
-                {/* Formulario para agregar o actualizar políticas */}
-                {isAddingNewPolicy && (
+                {/* Formulario para agregar o actualizar deslindes */}
+                {isAddingNewDeslinde && (
                     <form onSubmit={handleSubmit}>
                         <TextField
-                            label="Número de Política"
-                            value={numeroPolitica}
-                            onChange={(e) => setNumeroPolitica(e.target.value)}
+                            label="Número de Deslinde"
+                            value={numeroDeslinde}
+                            onChange={(e) => setNumeroDeslinde(e.target.value)}
                             fullWidth
                             sx={{ mt: 3 }}
-                            error={!!errors.numeroPolitica}
-                            helperText={errors.numeroPolitica}
+                            error={!!errors.numeroDeslinde}
+                            helperText={errors.numeroDeslinde}
                         />
                         <TextField
                             label="Título"
@@ -248,16 +247,16 @@ const PoliticasPrivacidad = () => {
                 )}
             </Paper>
 
-            {/* Historial de Políticas */}
+            {/* Historial de Deslindes */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
-                Historial de Políticas por Versión
+                Historial de Deslindes por Versión
             </Typography>
 
             <TableContainer component={Paper} sx={{ maxWidth: '100%', marginTop: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell><Typography fontWeight="bold">Número de Política</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Número de Deslinde</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
@@ -265,20 +264,20 @@ const PoliticasPrivacidad = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {politicas.length > 0 ? (
-                            politicas.map((politica, index) => (
+                        {deslindes.length > 0 ? (
+                            deslindes.map((deslinde, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{politica.numero_politica}</TableCell>
-                                    <TableCell>{politica.titulo}</TableCell>
-                                    <TableCell>{politica.version}</TableCell>
-                                    <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
-                                    <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{deslinde.numero_deslinde}</TableCell>
+                                    <TableCell>{deslinde.titulo}</TableCell>
+                                    <TableCell>{deslinde.version}</TableCell>
+                                    <TableCell>{new Date(deslinde.fecha_creacion).toLocaleDateString()}</TableCell>
+                                    <TableCell>{new Date(deslinde.fecha_actualizacion).toLocaleDateString()}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={5} align="center">
-                                    No hay políticas inactivas.
+                                    No hay deslindes inactivos.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -286,21 +285,21 @@ const PoliticasPrivacidad = () => {
                 </Table>
             </TableContainer>
 
-            {/* Diálogo para visualizar el contenido completo de la política */}
+            {/* Diálogo para visualizar el contenido completo del deslinde */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Detalles de la Política de Privacidad</DialogTitle>
+                <DialogTitle>Detalles del Deslinde</DialogTitle>
                 <DialogContent>
-                    {/* Título de la política */}
+                    {/* Título del deslinde */}
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                         Título: {dialogContent?.titulo}
                     </Typography>
 
-                    {/* Número de la política */}
+                    {/* Número del deslinde */}
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        Número de Política: {dialogContent?.numero_politica}
+                        Número de Deslinde: {dialogContent?.numero_deslinde}
                     </Typography>
 
-                    {/* Contenido de la política */}
+                    {/* Contenido del deslinde */}
                     <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
                         {dialogContent?.contenido}
                     </Typography>
@@ -330,4 +329,4 @@ const PoliticasPrivacidad = () => {
     );
 };
 
-export default PoliticasPrivacidad;
+export default DeslindeLegal;
