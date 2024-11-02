@@ -18,7 +18,7 @@ import LayoutPaciente from './Paciente/LayoutPaciente';
 import LayoutAdmin from './Administrador/LayoutAdmin.jsx';
 import PrincipalAdmin from './Administrador/Principal.jsx';
 import Configuracion from './Administrador/Configuracion.jsx';
-import Reportes from './Administrador/reportes.jsx';
+import Reportes from './Administrador/Configuracion/reportes.jsx';
 import PerfilEmpresa from './Administrador/Configuracion/PerfilEmpresa.jsx';
 
 function App() {
