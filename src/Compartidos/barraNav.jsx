@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText, Select, MenuItem } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { FaTooth, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const BarraNav = () => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const navigate = useNavigate(); // Hook de navegación
+  const navigate = useNavigate();
 
   // Detectar el tema del sistema
   useEffect(() => {
@@ -31,14 +31,6 @@ const BarraNav = () => {
       return;
     }
     setDrawerOpen(open);
-  };
-
-  // Función para manejar la selección del menú
-  const handleSelectChange = (event) => {
-    const value = event.target.value;
-    if (value) {
-      navigate(value); // Navegar a la ruta seleccionada
-    }
   };
 
   // Lista de enlaces en el Drawer
@@ -68,7 +60,7 @@ const BarraNav = () => {
 
   return (
     <>
-      <AppBar position="static" sx={{ backgroundColor: isDarkTheme ? '#333' : '#f0f0f0' }}>
+      <AppBar position="static" sx={{ backgroundColor: isDarkTheme ? '#2A3A4A' : '#f0f0f0' }}>
         <Toolbar>
           {/* Logo y nombre de la empresa */}
           <Typography

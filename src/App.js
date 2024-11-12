@@ -43,7 +43,7 @@ function App() {
         document.getElementsByTagName('head')[0].appendChild(link);
         setLogo(`data:image/png;base64,${logo}`);
       }
-      setFetchErrors(0); // Reinicia el contador de errores si fue exitoso
+      setFetchErrors(0);
     } catch (error) {
       if (error.response) {
         console.error("Error en la respuesta del servidor:", error.response.status);
@@ -53,13 +53,12 @@ function App() {
         console.error("Error desconocido:", error.message);
       }
 
-      // Manejo de reintentos
       if (retries > 0) {
         console.log(`Reintentando... (${3 - retries + 1})`);
-        await new Promise((res) => setTimeout(res, 1000)); // Espera 1 segundo antes de reintentar
+        await new Promise((res) => setTimeout(res, 1000)); 
         fetchTitleAndLogo(retries - 1);
       } else {
-        setFetchErrors((prev) => prev + 1); // Incrementa el contador de errores
+        setFetchErrors((prev) => prev + 1); 
       }
     }
   };
@@ -68,7 +67,6 @@ function App() {
     fetchTitleAndLogo();
     const interval = setInterval(fetchTitleAndLogo, 15000);
 
-    // Detén los reintentos si hay demasiados errores consecutivos
     if (fetchErrors >= 5) {
       clearInterval(interval);
       console.error("Demasiados errores al intentar conectarse con el backend.");
