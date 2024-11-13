@@ -196,20 +196,27 @@ const Register = () => {
       }
     }
 
-    // Validación de edad (entre 1 y 100 años)
-    if (name === 'edad') {
-      if (value < 1 || value > 100) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          edad: 'Verifique que su edad sea la correcta',
-        }));
-      } else {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          edad: '',
-        }));
-      }
+  // Validación de edad (entre 1 y 100 años)
+  if (name === 'edad') {
+    const numericValue = value.replace(/\D/g, '');
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: numericValue,
+    }));
+    if (numericValue === '' || Number(numericValue) < 1 || Number(numericValue) > 100) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        edad: 'Verifique que su edad sea la correcta',
+      }));
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        edad: '',
+      }));
     }
+  }
+
     if (name === 'email') {
       if (value !== trimmedValue || !emailRegex.test(trimmedValue)) {
         setErrors((prevErrors) => ({
