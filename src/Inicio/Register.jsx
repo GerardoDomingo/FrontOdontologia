@@ -65,18 +65,20 @@ const Register = () => {
     setAllAccepted(checked);
   };
 
+
   // Funciones para abrir y cerrar los modales
-  const handleOpenPrivacyModal = () => {
-    fetchPrivacyPolicy();
+  const handleOpenPrivacyModal = (event) => {
+    event.stopPropagation(); // Evita que el clic en el enlace cambie el checkbox
     setOpenPrivacyModal(true);
   };
 
   const handleClosePrivacyModal = () => setOpenPrivacyModal(false);
 
-  const handleOpenTermsModal = () => {
-    fetchTermsConditions();
+  const handleOpenTermsModal = (event) => {
+    event.stopPropagation(); // Evita que el clic en el enlace cambie el checkbox
     setOpenTermsModal(true);
   };
+
 
   const handleCloseTermsModal = () => setOpenTermsModal(false);
 
