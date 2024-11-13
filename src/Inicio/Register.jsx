@@ -1045,12 +1045,17 @@ const Register = () => {
                       />
                     }
                     label={
-                      <>
+                      <Typography variant="body2">
                         Acepto las{' '}
-                        <Link component="button" onClick={handleOpenPrivacyModal} sx={{ textDecoration: 'underline', color: 'blue' }}>
+                        <Link
+                          component="span"
+                          onClick={handleOpenPrivacyModal}
+                          sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+                        >
                           Políticas de Privacidad
                         </Link>
-                      </>
+                        .
+                      </Typography>
                     }
                   />
 
@@ -1065,12 +1070,17 @@ const Register = () => {
                       />
                     }
                     label={
-                      <>
+                      <Typography variant="body2">
                         Acepto los{' '}
-                        <Link component="button" onClick={handleOpenTermsModal} sx={{ textDecoration: 'underline', color: 'blue' }}>
+                        <Link
+                          component="span"
+                          onClick={handleOpenTermsModal}
+                          sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+                        >
                           Términos y Condiciones
                         </Link>
-                      </>
+                        .
+                      </Typography>
                     }
                   />
                 </Box>
@@ -1105,7 +1115,7 @@ const Register = () => {
             <Modal open={openPrivacyModal} onClose={handleClosePrivacyModal}>
               <Box sx={{ width: '80%', maxWidth: 600, bgcolor: 'background.paper', p: 4, m: 'auto', mt: 5, borderRadius: 2 }}>
                 <Typography variant="h6" gutterBottom>Políticas de Privacidad</Typography>
-                <Typography variant="body1">{privacyPolicy}</Typography>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>{privacyPolicy}</Typography>
                 <Button onClick={handleClosePrivacyModal} sx={{ mt: 2 }} variant="contained">Cerrar</Button>
               </Box>
             </Modal>
@@ -1114,12 +1124,11 @@ const Register = () => {
             <Modal open={openTermsModal} onClose={handleCloseTermsModal}>
               <Box sx={{ width: '80%', maxWidth: 600, bgcolor: 'background.paper', p: 4, m: 'auto', mt: 5, borderRadius: 2 }}>
                 <Typography variant="h6" gutterBottom>Términos y Condiciones</Typography>
-                <Typography variant="body1">{termsConditions}</Typography>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>{termsConditions}</Typography>
                 <Button onClick={handleCloseTermsModal} sx={{ mt: 2 }} variant="contained">Cerrar</Button>
               </Box>
             </Modal>
           </form>
-
         </CardContent>
       </Card>
     </Container>
