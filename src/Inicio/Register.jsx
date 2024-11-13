@@ -1031,55 +1031,39 @@ const Register = () => {
 
             {/* Contenedor para los botones y checkboxes */}
             <Box sx={{ mt: 4 }}>
-              {/* Mostrar checkboxes solo en el último paso */}
+              {/* Mostrar aviso de términos y condiciones solo en el último paso */}
               {activeStep === steps.length - 1 && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                  {/* Checkbox para Políticas de Privacidad */}
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={acceptPrivacyPolicy}
-                        onChange={(e) => setAcceptPrivacyPolicy(e.target.checked)}
-                        name="privacyPolicy"
+                        checked={acceptPrivacyPolicy && acceptTermsConditions}
+                        onChange={(e) => {
+                          setAcceptPrivacyPolicy(e.target.checked);
+                          setAcceptTermsConditions(e.target.checked);
+                        }}
+                        name="acceptAll"
                         color="primary"
                       />
                     }
                     label={
                       <Typography variant="body2">
-                        Acepto las{' '}
-                        <Link
-                          component="span"
-                          onClick={handleOpenPrivacyModal}
-                          sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
-                        >
-                          Políticas de Privacidad
-                        </Link>
-                        .
-                      </Typography>
-                    }
-                  />
-
-                  {/* Checkbox para Términos y Condiciones */}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={acceptTermsConditions}
-                        onChange={(e) => setAcceptTermsConditions(e.target.checked)}
-                        name="termsConditions"
-                        color="primary"
-                      />
-                    }
-                    label={
-                      <Typography variant="body2">
-                        Acepto los{' '}
+                        Al registrarte, confirmas que estás de acuerdo con nuestros{' '}
                         <Link
                           component="span"
                           onClick={handleOpenTermsModal}
                           sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
                         >
-                          Términos y Condiciones
-                        </Link>
-                        .
+                          términos y condiciones
+                        </Link>{' '}
+                        y que entiendes nuestra{' '}
+                        <Link
+                          component="span"
+                          onClick={handleOpenPrivacyModal}
+                          sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+                        >
+                          política de privacidad
+                        </Link>.
                       </Typography>
                     }
                   />
@@ -1129,6 +1113,8 @@ const Register = () => {
               </Box>
             </Modal>
           </form>
+
+
         </CardContent>
       </Card>
     </Container>
