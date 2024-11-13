@@ -55,6 +55,15 @@ const Register = () => {
 
   const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
   const [acceptTermsConditions, setAcceptTermsConditions] = useState(false);
+  const [allAccepted, setAllAccepted] = useState(false);
+
+  // Manejar cambios en el checkbox
+  const handleAcceptChange = (e) => {
+    const checked = e.target.checked;
+    setAcceptPrivacyPolicy(checked);
+    setAcceptTermsConditions(checked);
+    setAllAccepted(checked);
+  };
 
   // Funciones para abrir y cerrar los modales
   const handleOpenPrivacyModal = () => {
@@ -1025,23 +1034,19 @@ const Register = () => {
               </Step>
             ))}
           </Stepper>
-
           <form onSubmit={handleSubmit}>
             {getStepContent(activeStep)}
 
             {/* Contenedor para los botones y checkboxes */}
             <Box sx={{ mt: 4 }}>
-              {/* Mostrar aviso de términos y condiciones solo en el último paso */}
               {activeStep === steps.length - 1 && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                  {/* Checkbox para la aceptación de términos y política */}
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={acceptPrivacyPolicy && acceptTermsConditions}
-                        onChange={(e) => {
-                          setAcceptPrivacyPolicy(e.target.checked);
-                          setAcceptTermsConditions(e.target.checked);
-                        }}
+                        checked={allAccepted}
+                        onChange={handleAcceptChange}
                         name="acceptAll"
                         color="primary"
                       />
@@ -1051,7 +1056,10 @@ const Register = () => {
                         Al registrarte, confirmas que estás de acuerdo con nuestros{' '}
                         <Link
                           component="span"
-                          onClick={handleOpenTermsModal}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleOpenTermsModal();
+                          }}
                           sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
                         >
                           términos y condiciones
@@ -1059,7 +1067,10 @@ const Register = () => {
                         y que entiendes nuestra{' '}
                         <Link
                           component="span"
-                          onClick={handleOpenPrivacyModal}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleOpenPrivacyModal();
+                          }}
                           sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
                         >
                           política de privacidad
@@ -1083,7 +1094,7 @@ const Register = () => {
                     color="primary"
                     type="submit"
                     sx={{ px: 4 }}
-                    disabled={isLoading || !acceptPrivacyPolicy || !acceptTermsConditions} // Deshabilitar si no se aceptan los términos
+                    disabled={isLoading || !allAccepted} // Deshabilitar si no se aceptan los términos
                   >
                     {isLoading ? <CircularProgress size={24} /> : 'Registrar'}
                   </Button>
@@ -1113,7 +1124,6 @@ const Register = () => {
               </Box>
             </Modal>
           </form>
-
 
         </CardContent>
       </Card>
