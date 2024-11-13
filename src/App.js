@@ -54,7 +54,6 @@ function App() {
       }
 
       if (retries > 0) {
-        console.log(`Reintentando... (${3 - retries + 1})`);
         await new Promise((res) => setTimeout(res, 1000)); 
         fetchTitleAndLogo(retries - 1);
       } else {

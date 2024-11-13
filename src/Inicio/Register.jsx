@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment, CircularProgress } from '@mui/material'; // Aquí ya no importamos Grid
+import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment, CircularProgress, Checkbox, FormControlLabel, Link, Modal } from '@mui/material';
 import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye, FaPlusCircle } from 'react-icons/fa'; // Importamos 
 import zxcvbn from 'zxcvbn';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { useNavigate } from 'react-router-dom';
 import Notificaciones from '../Compartidos/Notificaciones'
+
 
 const Register = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -47,6 +48,49 @@ const Register = () => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
   const phoneRegex = /^\d{10}$/;
 
+  const [privacyPolicy, setPrivacyPolicy] = useState('');
+  const [termsConditions, setTermsConditions] = useState('');
+  const [openPrivacyModal, setOpenPrivacyModal] = useState(false);
+  const [openTermsModal, setOpenTermsModal] = useState(false);
+
+  // Funciones para abrir y cerrar los modales
+  const handleOpenPrivacyModal = () => {
+    fetchPrivacyPolicy();
+    setOpenPrivacyModal(true);
+  };
+
+  const handleClosePrivacyModal = () => setOpenPrivacyModal(false);
+
+  const handleOpenTermsModal = () => {
+    fetchTermsConditions();
+    setOpenTermsModal(true);
+  };
+
+  const handleCloseTermsModal = () => setOpenTermsModal(false);
+
+  const fetchPrivacyPolicy = async () => {
+    try {
+      const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/politicas_privacidad');
+      const activePolicy = response.data.find(policy => policy.estado === 'activo');
+      setPrivacyPolicy(activePolicy ? activePolicy.contenido : 'No se encontraron políticas de privacidad activas.');
+    } catch (error) {
+      console.error('Error al obtener las políticas de privacidad', error);
+      setPrivacyPolicy('Error al cargar las políticas de privacidad.');
+    }
+  };
+
+  const fetchTermsConditions = async () => {
+    try {
+      const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/terminos_condiciones');
+      const activeTerms = response.data.find(term => term.estado === 'activo');
+      setTermsConditions(activeTerms ? activeTerms.contenido : 'No se encontraron términos y condiciones activos.');
+    } catch (error) {
+      console.error('Error al obtener los términos y condiciones', error);
+      setTermsConditions('Error al cargar los términos y condiciones.');
+    }
+  };
+
+
   const handleCloseNotification = () => {
     setOpenNotification(false); // Función para cerrar la notificacióooon
   };
@@ -61,6 +105,15 @@ const Register = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
+  // Función para manejar los cambios en los checkboxes
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    if (name === 'privacyPolicy') {
+      setAcceptPrivacyPolicy(checked);
+    } else if (name === 'termsConditions') {
+      setAcceptTermsConditions(checked);
+    }
+  };
 
   // Función para verificar las reglas personalizadas
   const checkPasswordRules = (password) => {
@@ -198,12 +251,12 @@ const Register = () => {
 
     if (name === 'edad') {
       const numericValue = value.replace(/[^0-9]/g, '');
-  
+
       setFormData((prevData) => ({
         ...prevData,
         edad: numericValue,
       }));
-  
+
       if (value !== numericValue) {
         setErrors((prevErrors) => ({
           ...prevErrors,
@@ -279,31 +332,31 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Iniciar el estado de cargando
     setIsLoading(true);
-  
+
     // Forzar una espera de 2 segundos para mostrar el spinner de carga
     await delay(2000);
-  
+
     let newErrors = {};
-  
+
     // Verificar la opción de "Otro" en alergias
     if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
       newErrors.otraAlergia = 'Especifica la alergia';
     }
-  
+
     setErrors(newErrors);
-  
+
     // Si hay errores, detener la carga y no continuar con el registro
     if (Object.keys(newErrors).length > 0) {
       setIsLoading(false);
       return;
     }
-  
+
     // Verificar la validez de la contraseña antes de permitir el registro
     const isPasswordValid = await checkPasswordValidity(formData.password);
-  
+
     // Validar la fortaleza de la contraseña
     if (!isPasswordValid || passwordStrength < 3) {
       setNotificationMessage(
@@ -316,32 +369,32 @@ const Register = () => {
       setIsLoading(false);
       return;
     }
-  
+
     // Reemplazar "Otro" en el arreglo de alergias y en el lugar si es necesario
     const alergiasFinal = formData.alergias.map((alergia) =>
       alergia === 'Otro' ? formData.otraAlergia : alergia
     );
     const lugarFinal = formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar;
-  
+
     // Preparar datos finales para el envío
     const dataToSubmit = {
       ...formData,
       lugar: lugarFinal,
       alergias: alergiasFinal,
     };
-  
+
     try {
       const response = await axios.post('https://backendodontologia.onrender.com/api/register', dataToSubmit, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (response.status === 200 || response.status === 201) {
         setNotificationMessage('Usuario registrado exitosamente');
         setNotificationType('success');
         setOpenNotification(true);
-  
+
         setTimeout(() => {
           navigate('/login'); // Redirigir al login
         }, 2000);
@@ -362,7 +415,7 @@ const Register = () => {
       setIsLoading(false); // Finalizar el estado de cargando
     }
   };
-  
+
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
 
@@ -935,7 +988,6 @@ const Register = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 6, mb: 14 }}> {/* Aquí agregamos marginTop y marginBottoom */}
-      {/* Aquí va la notificación */}
       <Notificaciones
         open={openNotification}
         message={notificationMessage}
@@ -971,34 +1023,98 @@ const Register = () => {
             ))}
           </Stepper>
 
-
-
           <form onSubmit={handleSubmit}>
             {getStepContent(activeStep)}
 
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-              {activeStep !== 0 && (
-                <Button onClick={handleBack} sx={{ mr: 2 }} disabled={isLoading}>
-                  Regresar
-                </Button>
-              )}
-              {activeStep === steps.length - 1 ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  sx={{ px: 4 }}
-                  disabled={isLoading} // Deshabilitar el botón mientras se carga
-                >
-                  {isLoading ? <CircularProgress size={24} /> : 'Registrar'} {/* Mostrar spinner si está cargando */}
-                </Button>
+            {/* Contenedor para los botones y checkboxes */}
+            <Box sx={{ mt: 4 }}>
+              {/* Mostrar checkboxes solo en el último paso */}
+              {activeStep === steps.length - 1 && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                  {/* Checkbox para Políticas de Privacidad */}
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={acceptPrivacyPolicy}
+                        onChange={(e) => setAcceptPrivacyPolicy(e.target.checked)}
+                        name="privacyPolicy"
+                        color="primary"
+                      />
+                    }
+                    label={
+                      <>
+                        Acepto las{' '}
+                        <Link component="button" onClick={handleOpenPrivacyModal} sx={{ textDecoration: 'underline', color: 'blue' }}>
+                          Políticas de Privacidad
+                        </Link>
+                      </>
+                    }
+                  />
 
-              ) : (
-                <Button variant="contained" color="primary" onClick={handleNext} sx={{ px: 4 }} disabled={isLoading}>
-                  {isLoading ? <CircularProgress size={24} /> : 'Siguiente'}
-                </Button>
+                  {/* Checkbox para Términos y Condiciones */}
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={acceptTermsConditions}
+                        onChange={(e) => setAcceptTermsConditions(e.target.checked)}
+                        name="termsConditions"
+                        color="primary"
+                      />
+                    }
+                    label={
+                      <>
+                        Acepto los{' '}
+                        <Link component="button" onClick={handleOpenTermsModal} sx={{ textDecoration: 'underline', color: 'blue' }}>
+                          Términos y Condiciones
+                        </Link>
+                      </>
+                    }
+                  />
+                </Box>
               )}
+
+              {/* Contenedor de botones para Navegar y Enviar */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                {activeStep !== 0 && (
+                  <Button onClick={handleBack} sx={{ mr: 2 }} disabled={isLoading}>
+                    Regresar
+                  </Button>
+                )}
+                {activeStep === steps.length - 1 ? (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    sx={{ px: 4 }}
+                    disabled={isLoading || !acceptPrivacyPolicy || !acceptTermsConditions} // Deshabilitar si no se aceptan los términos
+                  >
+                    {isLoading ? <CircularProgress size={24} /> : 'Registrar'}
+                  </Button>
+                ) : (
+                  <Button variant="contained" color="primary" onClick={handleNext} sx={{ px: 4 }} disabled={isLoading}>
+                    {isLoading ? <CircularProgress size={24} /> : 'Siguiente'}
+                  </Button>
+                )}
+              </Box>
             </Box>
+
+            {/* Modal para Políticas de Privacidad */}
+            <Modal open={openPrivacyModal} onClose={handleClosePrivacyModal}>
+              <Box sx={{ width: '80%', maxWidth: 600, bgcolor: 'background.paper', p: 4, m: 'auto', mt: 5, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom>Políticas de Privacidad</Typography>
+                <Typography variant="body1">{privacyPolicy}</Typography>
+                <Button onClick={handleClosePrivacyModal} sx={{ mt: 2 }} variant="contained">Cerrar</Button>
+              </Box>
+            </Modal>
+
+            {/* Modal para Términos y Condiciones */}
+            <Modal open={openTermsModal} onClose={handleCloseTermsModal}>
+              <Box sx={{ width: '80%', maxWidth: 600, bgcolor: 'background.paper', p: 4, m: 'auto', mt: 5, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom>Términos y Condiciones</Typography>
+                <Typography variant="body1">{termsConditions}</Typography>
+                <Button onClick={handleCloseTermsModal} sx={{ mt: 2 }} variant="contained">Cerrar</Button>
+              </Box>
+            </Modal>
           </form>
 
         </CardContent>
