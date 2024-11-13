@@ -53,6 +53,9 @@ const Register = () => {
   const [openPrivacyModal, setOpenPrivacyModal] = useState(false);
   const [openTermsModal, setOpenTermsModal] = useState(false);
 
+  const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
+  const [acceptTermsConditions, setAcceptTermsConditions] = useState(false);
+
   // Funciones para abrir y cerrar los modales
   const handleOpenPrivacyModal = () => {
     fetchPrivacyPolicy();
