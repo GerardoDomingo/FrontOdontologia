@@ -196,27 +196,31 @@ const Register = () => {
       }
     }
 
-  // Validación de edad (entre 1 y 100 años)
-  if (name === 'edad') {
-    const numericValue = value.replace(/\D/g, '');
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: numericValue,
-    }));
-    if (numericValue === '' || Number(numericValue) < 1 || Number(numericValue) > 100) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        edad: 'Verifique que su edad sea la correcta',
+    if (name === 'edad') {
+      const numericValue = value.replace(/[^0-9]/g, '');
+  
+      setFormData((prevData) => ({
+        ...prevData,
+        edad: numericValue,
       }));
-    } else {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        edad: '',
-      }));
+  
+      if (value !== numericValue) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          edad: 'Solo se permiten números entre 1 y 100',
+        }));
+      } else if (numericValue === '' || Number(numericValue) < 1 || Number(numericValue) > 100) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          edad: 'Verifique que su edad sea la correcta (entre 1 y 100)',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          edad: '',
+        }));
+      }
     }
-  }
-
     if (name === 'email') {
       if (value !== trimmedValue || !emailRegex.test(trimmedValue)) {
         setErrors((prevErrors) => ({
@@ -944,7 +948,7 @@ const Register = () => {
             variant="h4"
             sx={{ textAlign: 'center', mb: 4, color: '#1976d2', fontFamily: 'Roboto, sans-serif', fontWeight: 'bold' }}
           >
-            Registro de Paciente
+            Registro
           </Typography>
 
           <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
