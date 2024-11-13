@@ -264,30 +264,36 @@ const Register = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  // Manejar el registro del formulario
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     // Iniciar el estado de cargando
     setIsLoading(true);
   
+    // Forzar una espera de 2 segundos para mostrar el spinner de carga
+    await delay(2000);
+  
     let newErrors = {};
+  
     // Verificar la opción de "Otro" en alergias
     if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
       newErrors.otraAlergia = 'Especifica la alergia';
     }
   
     setErrors(newErrors);
+  
     // Si hay errores, detener la carga y no continuar con el registro
     if (Object.keys(newErrors).length > 0) {
-      setIsLoading(false); // Detener la carga si hay errores
+      setIsLoading(false);
       return;
     }
   
-    // Verificar la validez de la contraseña antes de permitir el registro (reglas y filtrado)
+    // Verificar la validez de la contraseña antes de permitir el registro
     const isPasswordValid = await checkPasswordValidity(formData.password);
   
-    // Verificar que la fortaleza de la contraseña sea al menos "Fuerte"
+    // Validar la fortaleza de la contraseña
     if (!isPasswordValid || passwordStrength < 3) {
       setNotificationMessage(
         passwordStrength < 3
@@ -296,26 +302,23 @@ const Register = () => {
       );
       setNotificationType('error');
       setOpenNotification(true);
-      setIsLoading(false); // Detener la carga si la contraseña no es válida
+      setIsLoading(false);
       return;
     }
   
-    // Reemplazar "Otro" con el valor de "otraAlergia" en el arreglo de alergias
-    const alergiasFinal = formData.alergias.map(alergia =>
+    // Reemplazar "Otro" en el arreglo de alergias y en el lugar si es necesario
+    const alergiasFinal = formData.alergias.map((alergia) =>
       alergia === 'Otro' ? formData.otraAlergia : alergia
     );
-  
-    // Si el valor de "lugar" es "Otro", reemplazar con el valor de "otroLugar"
     const lugarFinal = formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar;
   
     // Preparar datos finales para el envío
     const dataToSubmit = {
       ...formData,
-      lugar: lugarFinal, // Usar el valor correcto del lugar
-      alergias: alergiasFinal, // Reemplazar "Otro" con el valor especificado
+      lugar: lugarFinal,
+      alergias: alergiasFinal,
     };
   
-    // Si todo es válido, proceder con el registro
     try {
       const response = await axios.post('https://backendodontologia.onrender.com/api/register', dataToSubmit, {
         headers: {
@@ -329,8 +332,8 @@ const Register = () => {
         setOpenNotification(true);
   
         setTimeout(() => {
-          navigate('/login');  // Redirigir al login
-        }, 2000);  // Retraso de 2 segundos
+          navigate('/login'); // Redirigir al login
+        }, 2000);
       } else {
         setNotificationMessage('Error al registrar el usuario');
         setNotificationType('error');
@@ -345,12 +348,10 @@ const Register = () => {
       setNotificationType('error');
       setOpenNotification(true);
     } finally {
-      // Finalizar el estado de cargando después del envío o el error
-      setIsLoading(false);
+      setIsLoading(false); // Finalizar el estado de cargando
     }
   };
   
-
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
 
