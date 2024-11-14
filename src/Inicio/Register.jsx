@@ -53,34 +53,23 @@ const Register = () => {
   const [openPrivacyModal, setOpenPrivacyModal] = useState(false);
   const [openTermsModal, setOpenTermsModal] = useState(false);
 
-  const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
-  const [acceptTermsConditions, setAcceptTermsConditions] = useState(false);
-  const [allAccepted, setAllAccepted] = useState(false);
-
-  // Manejar cambios en el checkbox
-  const handleAcceptChange = (e) => {
-    const checked = e.target.checked;
-    setAcceptPrivacyPolicy(checked);
-    setAcceptTermsConditions(checked);
-    setAllAccepted(checked);
-  };
-
-
-  // Funciones para abrir y cerrar los modales
-  const handleOpenPrivacyModal = (event) => {
-    event.stopPropagation(); // Evita que el clic en el enlace cambie el checkbox
+  // Función para abrir el modal de políticas de privacidad y obtener su contenido si aún no está cargado
+  const handleOpenPrivacyModal = async (event) => {
+    event.stopPropagation();
+    if (!privacyPolicy) await fetchPrivacyPolicy(); // Solo llamar si no está cargado
     setOpenPrivacyModal(true);
   };
 
-  const handleClosePrivacyModal = () => setOpenPrivacyModal(false);
-
-  const handleOpenTermsModal = (event) => {
-    event.stopPropagation(); // Evita que el clic en el enlace cambie el checkbox
+  // Función para abrir el modal de términos y condiciones y obtener su contenido si aún no está cargado
+  const handleOpenTermsModal = async (event) => {
+    event.stopPropagation();
+    if (!termsConditions) await fetchTermsConditions(); // Solo llamar si no está cargado
     setOpenTermsModal(true);
   };
 
-
+  const handleClosePrivacyModal = () => setOpenPrivacyModal(false);
   const handleCloseTermsModal = () => setOpenTermsModal(false);
+
 
   const fetchPrivacyPolicy = async () => {
     try {
@@ -1060,7 +1049,7 @@ const Register = () => {
                           component="span"
                           onClick={(e) => {
                             e.preventDefault();
-                            handleOpenTermsModal();
+                            handleOpenTermsModal(e);  // Evita el click en el checkbox
                           }}
                           sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
                         >
@@ -1071,7 +1060,7 @@ const Register = () => {
                           component="span"
                           onClick={(e) => {
                             e.preventDefault();
-                            handleOpenPrivacyModal();
+                            handleOpenPrivacyModal(e);  // Evita el click en el checkbox
                           }}
                           sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
                         >
@@ -1126,6 +1115,7 @@ const Register = () => {
               </Box>
             </Modal>
           </form>
+
 
         </CardContent>
       </Card>
