@@ -113,16 +113,6 @@ const Register = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // Función para manejar los cambios en los checkboxes
-  const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target;
-    if (name === 'privacyPolicy') {
-      setAcceptPrivacyPolicy(checked);
-    } else if (name === 'termsConditions') {
-      setAcceptTermsConditions(checked);
-    }
-  };
-
   // Función para verificar las reglas personalizadas
   const checkPasswordRules = (password) => {
     const errors = [];
