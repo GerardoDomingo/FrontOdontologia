@@ -52,6 +52,11 @@ const Register = () => {
   const [termsConditions, setTermsConditions] = useState('');
   const [openPrivacyModal, setOpenPrivacyModal] = useState(false);
   const [openTermsModal, setOpenTermsModal] = useState(false);
+  const [allAccepted, setAllAccepted] = useState(false);
+  const handleAcceptChange = (event) => {
+    setAllAccepted(event.target.checked);
+  };
+
 
   // Función para abrir el modal de políticas de privacidad y obtener su contenido si aún no está cargado
   const handleOpenPrivacyModal = async (event) => {
