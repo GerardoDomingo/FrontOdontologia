@@ -660,11 +660,17 @@ const Register = () => {
               required
               error={!!errors.fechaNacimiento}
               helperText={
-                errors.fechaNacimiento ||
-                'Selecciona tu fecha de nacimiento'
+                errors.fechaNacimiento || 'Selecciona tu fecha de nacimiento'
               }
               InputLabelProps={{ shrink: true }}
             />
+            {/* Mostrar mensaje si es menor de edad */}
+            {!formData.esMayorDeEdad && (
+              <Typography sx={{ color: 'red', mt: 1 }}>
+                Parece que es menor de edad, por lo que se necesitan los datos del tutor.
+              </Typography>
+            )}
+      
             {/* Mostrar campos de tutor si es menor de edad */}
             {!formData.esMayorDeEdad && (
               <Box sx={{ mt: 2 }}>
@@ -682,6 +688,22 @@ const Register = () => {
                   </Select>
                   {errors.tipoTutor && <FormHelperText>{errors.tipoTutor}</FormHelperText>}
                 </FormControl>
+      
+                {formData.tipoTutor === 'Otro' && (
+                  <TextField
+                    fullWidth
+                    label="Especificar relación con el menor"
+                    name="relacionTutor"
+                    value={formData.relacionTutor || ''}
+                    onChange={handleChange}
+                    margin="normal"
+                    required
+                    error={!!errors.relacionTutor}
+                    helperText={
+                      errors.relacionTutor || 'Por ejemplo, tío, primo, vecino, etc.'
+                    }
+                  />
+                )}
       
                 <TextField
                   fullWidth
@@ -708,7 +730,7 @@ const Register = () => {
               >
                 <MenuItem value="Masculino">Masculino</MenuItem>
                 <MenuItem value="Femenino">Femenino</MenuItem>
-                <MenuItem value="Otro">Otro</MenuItem>
+                <MenuItem value="Prefiero no decirlo">Prefiero no decirlo</MenuItem>
               </Select>
               {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
             </FormControl>
@@ -748,7 +770,7 @@ const Register = () => {
               />
             )}
           </Box>
-        );
+        );      
         case 1:
         return (
           <Box>
