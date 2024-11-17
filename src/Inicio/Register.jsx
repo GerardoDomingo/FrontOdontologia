@@ -256,7 +256,7 @@ const Register = () => {
         [name]: value,
         esMayorDeEdad: edad >= 18, // Booleano para saber si es mayor o menor de edad
       }));
-    
+
       if (edad < 18) {
         setErrors((prevErrors) => ({
           ...prevErrors,
@@ -269,7 +269,7 @@ const Register = () => {
         }));
       }
     }
-    
+
     if (name === 'email') {
       if (value !== trimmedValue || !emailRegex.test(trimmedValue)) {
         setErrors((prevErrors) => ({
@@ -324,7 +324,7 @@ const Register = () => {
     }
     return edad;
   };
-  
+
 
   const handleNext = () => {
     if (validateStep()) {
@@ -340,25 +340,25 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Iniciar el estado de cargando
     setIsLoading(true);
-  
+
     // Forzar una espera de 2 segundos para mostrar el spinner de carga
     await delay(2000);
-  
+
     let newErrors = {};
-  
+
     // Validación para "Otro" en alergias
     if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
       newErrors.otraAlergia = 'Especifica la alergia';
     }
-  
+
     // Validación de lugar "Otro"
     if (formData.lugar === 'Otro' && !formData.otroLugar.trim()) {
       newErrors.otroLugar = 'Especifica el lugar';
     }
-  
+
     // Validación de tutor si es menor de edad
     if (!formData.esMayorDeEdad) {
       if (!formData.tipoTutor) {
@@ -368,19 +368,19 @@ const Register = () => {
         newErrors.nombreTutor = 'El nombre del tutor es obligatorio';
       }
     }
-  
+
     // Establecer errores si los hay
     setErrors(newErrors);
-  
+
     // Si hay errores, detener la carga y no continuar con el registro
     if (Object.keys(newErrors).length > 0) {
       setIsLoading(false);
       return;
     }
-  
+
     // Verificar la validez de la contraseña antes de permitir el registro
     const isPasswordValid = await checkPasswordValidity(formData.password);
-  
+
     // Validar la fortaleza de la contraseña
     if (!isPasswordValid || passwordStrength < 3) {
       setNotificationMessage(
@@ -393,13 +393,13 @@ const Register = () => {
       setIsLoading(false);
       return;
     }
-  
+
     // Reemplazar "Otro" en alergias y lugar si es necesario
     const alergiasFinal = formData.alergias.map((alergia) =>
       alergia === 'Otro' ? formData.otraAlergia : alergia
     );
     const lugarFinal = formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar;
-  
+
     // Preparar datos finales para el envío
     const dataToSubmit = {
       ...formData,
@@ -409,19 +409,19 @@ const Register = () => {
         ? { tipo: formData.tipoTutor, nombre: formData.nombreTutor }
         : null, // Solo incluir tutor si es menor de edad
     };
-  
+
     try {
       const response = await axios.post('https://backendodontologia.onrender.com/api/register', dataToSubmit, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (response.status === 200 || response.status === 201) {
         setNotificationMessage('Usuario registrado exitosamente');
         setNotificationType('success');
         setOpenNotification(true);
-  
+
         // Redirigir al login después de 2 segundos
         setTimeout(() => {
           navigate('/login');
@@ -443,7 +443,7 @@ const Register = () => {
       setIsLoading(false); // Finalizar el estado de cargando
     }
   };
-  
+
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
@@ -649,29 +649,29 @@ const Register = () => {
             />
             {/* Campo de Fecha de Nacimiento */}
             <TextField
-  fullWidth
-  label="Fecha de Nacimiento"
-  name="fechaNacimiento"
-  type="date"
-  inputProps={{ max: today }}
-  value={formData.fechaNacimiento}
-  onChange={handleChange}
-  margin="normal"
-  required
-  error={!!errors.fechaNacimiento}
-  helperText={
-    errors.fechaNacimiento || 'Selecciona tu fecha de nacimiento'
-  }
-  InputLabelProps={{ shrink: true }}
-/>
-{/* Mostrar mensaje si es menor de edad */}
-{!formData.esMayorDeEdad && (
-  <Typography variant="caption" sx={{ color: 'red', mt: 1 }}>
-    Parece que es menor de edad, por lo que se necesitan los datos del tutor.
-  </Typography>
-)}
+              fullWidth
+              label="Fecha de Nacimiento"
+              name="fechaNacimiento"
+              type="date"
+              inputProps={{ max: today }}
+              value={formData.fechaNacimiento}
+              onChange={handleChange}
+              margin="normal"
+              required
+              error={!!errors.fechaNacimiento}
+              helperText={
+                errors.fechaNacimiento || 'Selecciona tu fecha de nacimiento'
+              }
+              InputLabelProps={{ shrink: true }}
+            />
+            {/* Mostrar mensaje si es menor de edad después de seleccionar la fecha */}
+            {formData.fechaNacimiento && !formData.esMayorDeEdad && (
+              <Typography variant="caption" sx={{ color: 'red', mt: 1 }}>
+                Parece que es menor de edad, por lo que se necesitan los datos del tutor.
+              </Typography>
+            )}
 
-      
+
             {/* Mostrar campos de tutor si es menor de edad */}
             {!formData.esMayorDeEdad && (
               <Box sx={{ mt: 2 }}>
@@ -689,7 +689,7 @@ const Register = () => {
                   </Select>
                   {errors.tipoTutor && <FormHelperText>{errors.tipoTutor}</FormHelperText>}
                 </FormControl>
-      
+
                 {formData.tipoTutor === 'Otro' && (
                   <TextField
                     fullWidth
@@ -705,7 +705,7 @@ const Register = () => {
                     }
                   />
                 )}
-      
+
                 <TextField
                   fullWidth
                   label="Nombre del Tutor"
@@ -719,7 +719,7 @@ const Register = () => {
                 />
               </Box>
             )}
-      
+
             {/* Campo de Género */}
             <FormControl fullWidth margin="normal" required error={!!errors.genero}>
               <InputLabel>Género</InputLabel>
@@ -735,7 +735,7 @@ const Register = () => {
               </Select>
               {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
             </FormControl>
-      
+
             {/* Campo de Lugar de Procedencia */}
             <FormControl fullWidth margin="normal" required error={!!errors.lugar}>
               <InputLabel>Lugar de Proveniencia</InputLabel>
@@ -755,7 +755,7 @@ const Register = () => {
               </Select>
               {errors.lugar && <FormHelperText>{errors.lugar}</FormHelperText>}
             </FormControl>
-      
+
             {/* Campo Especificar Lugar */}
             {formData.lugar === 'Otro' && (
               <TextField
@@ -771,8 +771,8 @@ const Register = () => {
               />
             )}
           </Box>
-        );      
-        case 1:
+        );
+      case 1:
         return (
           <Box>
             {/* Campo de correo electrónico */}
