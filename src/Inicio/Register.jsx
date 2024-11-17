@@ -27,11 +27,11 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [isEmailSent, setIsEmailSent] = useState(false); // Para saber si se ha enviado el correo
-  const [isEmailVerified, setIsEmailVerified] = useState(false); // Para saber si el correo ya está verificado
-  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false); // Saber si se está verificando el correo
-  const [isVerifiedComplete, setIsVerifiedComplete] = useState(false); // Saber si ya está verificado el código
-  const [emailVerificationError, setEmailVerificationError] = useState(''); // Errores de verificación de correo
+  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [isVerifiedComplete, setIsVerifiedComplete] = useState(false);
+  const [emailVerificationError, setEmailVerificationError] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState('success');
   const [openNotification, setOpenNotification] = useState(false); const [passwordStrength, setPasswordStrength] = useState(0);
@@ -44,9 +44,11 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const steps = ['Datos personales', 'Información de contacto', 'Datos de acceso'];
-  const nameRegex = /^[A-Za-z\s]+$/;
+  const nameRegex = /^[A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]+$/;
   const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
   const phoneRegex = /^\d{10}$/;
+  const today = new Date().toISOString().split('T')[0];
+
 
   const [privacyPolicy, setPrivacyPolicy] = useState('');
   const [termsConditions, setTermsConditions] = useState('');
@@ -209,7 +211,7 @@ const Register = () => {
       if (!nameRegex.test(value)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          nombre: 'El nombre solo debe contener letras',
+          nombre: 'El nombre solo debe contener letras.',
         }));
       } else {
         setErrors((prevErrors) => ({
@@ -247,31 +249,27 @@ const Register = () => {
       }
     }
 
-    if (name === 'edad') {
-      const numericValue = value.replace(/[^0-9]/g, '');
-
+    if (name === 'fechaNacimiento') {
+      const edad = calcularEdad(value);
       setFormData((prevData) => ({
         ...prevData,
-        edad: numericValue,
+        [name]: value,
+        esMayorDeEdad: edad >= 18, // Booleano para saber si es mayor o menor de edad
       }));
-
-      if (value !== numericValue) {
+    
+      if (edad < 18) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          edad: 'Solo se permiten números entre 1 y 100',
-        }));
-      } else if (numericValue === '' || Number(numericValue) < 1 || Number(numericValue) > 100) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          edad: 'Verifique que su edad sea la correcta (entre 1 y 100)',
+          tutor: 'Por favor, selecciona un tutor legal.',
         }));
       } else {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          edad: '',
+          tutor: '',
         }));
       }
     }
+    
     if (name === 'email') {
       if (value !== trimmedValue || !emailRegex.test(trimmedValue)) {
         setErrors((prevErrors) => ({
@@ -316,6 +314,18 @@ const Register = () => {
 
   };
 
+  const calcularEdad = (fechaNacimiento) => {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
+  };
+  
+
   const handleNext = () => {
     if (validateStep()) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -330,31 +340,47 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Iniciar el estado de cargando
     setIsLoading(true);
-
+  
     // Forzar una espera de 2 segundos para mostrar el spinner de carga
     await delay(2000);
-
+  
     let newErrors = {};
-
-    // Verificar la opción de "Otro" en alergias
+  
+    // Validación para "Otro" en alergias
     if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
       newErrors.otraAlergia = 'Especifica la alergia';
     }
-
+  
+    // Validación de lugar "Otro"
+    if (formData.lugar === 'Otro' && !formData.otroLugar.trim()) {
+      newErrors.otroLugar = 'Especifica el lugar';
+    }
+  
+    // Validación de tutor si es menor de edad
+    if (!formData.esMayorDeEdad) {
+      if (!formData.tipoTutor) {
+        newErrors.tipoTutor = 'Selecciona un tutor';
+      }
+      if (!formData.nombreTutor || formData.nombreTutor.trim() === '') {
+        newErrors.nombreTutor = 'El nombre del tutor es obligatorio';
+      }
+    }
+  
+    // Establecer errores si los hay
     setErrors(newErrors);
-
+  
     // Si hay errores, detener la carga y no continuar con el registro
     if (Object.keys(newErrors).length > 0) {
       setIsLoading(false);
       return;
     }
-
+  
     // Verificar la validez de la contraseña antes de permitir el registro
     const isPasswordValid = await checkPasswordValidity(formData.password);
-
+  
     // Validar la fortaleza de la contraseña
     if (!isPasswordValid || passwordStrength < 3) {
       setNotificationMessage(
@@ -367,34 +393,38 @@ const Register = () => {
       setIsLoading(false);
       return;
     }
-
-    // Reemplazar "Otro" en el arreglo de alergias y en el lugar si es necesario
+  
+    // Reemplazar "Otro" en alergias y lugar si es necesario
     const alergiasFinal = formData.alergias.map((alergia) =>
       alergia === 'Otro' ? formData.otraAlergia : alergia
     );
     const lugarFinal = formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar;
-
+  
     // Preparar datos finales para el envío
     const dataToSubmit = {
       ...formData,
       lugar: lugarFinal,
       alergias: alergiasFinal,
+      tutor: !formData.esMayorDeEdad
+        ? { tipo: formData.tipoTutor, nombre: formData.nombreTutor }
+        : null, // Solo incluir tutor si es menor de edad
     };
-
+  
     try {
       const response = await axios.post('https://backendodontologia.onrender.com/api/register', dataToSubmit, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
+  
       if (response.status === 200 || response.status === 201) {
         setNotificationMessage('Usuario registrado exitosamente');
         setNotificationType('success');
         setOpenNotification(true);
-
+  
+        // Redirigir al login después de 2 segundos
         setTimeout(() => {
-          navigate('/login'); // Redirigir al login
+          navigate('/login');
         }, 2000);
       } else {
         setNotificationMessage('Error al registrar el usuario');
@@ -413,6 +443,7 @@ const Register = () => {
       setIsLoading(false); // Finalizar el estado de cargando
     }
   };
+  
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
@@ -559,6 +590,7 @@ const Register = () => {
       case 0:
         return (
           <Box>
+            {/* Campo de Nombre */}
             <TextField
               fullWidth
               label="Nombre"
@@ -568,7 +600,7 @@ const Register = () => {
               margin="normal"
               required
               error={!!errors.nombre}
-              helperText={errors.nombre}
+              helperText={errors.nombre || 'Solo letras, espacios y acentos.'}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -577,6 +609,7 @@ const Register = () => {
                 ),
               }}
             />
+            {/* Campo de Apellido Paterno */}
             <TextField
               fullWidth
               label="Apellido Paterno"
@@ -586,7 +619,7 @@ const Register = () => {
               margin="normal"
               required
               error={!!errors.aPaterno}
-              helperText={errors.aPaterno}
+              helperText={errors.aPaterno || 'Solo letras, espacios y acentos.'}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -595,6 +628,7 @@ const Register = () => {
                 ),
               }}
             />
+            {/* Campo de Apellido Materno */}
             <TextField
               fullWidth
               label="Apellido Materno"
@@ -604,7 +638,7 @@ const Register = () => {
               margin="normal"
               required
               error={!!errors.aMaterno}
-              helperText={errors.aMaterno}
+              helperText={errors.aMaterno || 'Solo letras, espacios y acentos.'}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -613,18 +647,57 @@ const Register = () => {
                 ),
               }}
             />
+            {/* Campo de Fecha de Nacimiento */}
             <TextField
               fullWidth
-              label="Edad"
-              name="edad"
-              type="number"
-              value={formData.edad}
+              label="Fecha de Nacimiento"
+              name="fechaNacimiento"
+              type="date"
+              inputProps={{ max: today }}
+              value={formData.fechaNacimiento}
               onChange={handleChange}
               margin="normal"
               required
-              error={!!errors.edad}
-              helperText={errors.edad}
+              error={!!errors.fechaNacimiento}
+              helperText={
+                errors.fechaNacimiento ||
+                'Selecciona tu fecha de nacimiento'
+              }
+              InputLabelProps={{ shrink: true }}
             />
+            {/* Mostrar campos de tutor si es menor de edad */}
+            {!formData.esMayorDeEdad && (
+              <Box sx={{ mt: 2 }}>
+                <FormControl fullWidth margin="normal" required error={!!errors.tipoTutor}>
+                  <InputLabel>Selecciona el tutor</InputLabel>
+                  <Select
+                    value={formData.tipoTutor || ''}
+                    onChange={handleChange}
+                    label="Selecciona el tutor"
+                    name="tipoTutor"
+                  >
+                    <MenuItem value="Madre">Madre</MenuItem>
+                    <MenuItem value="Padre">Padre</MenuItem>
+                    <MenuItem value="Otro">Otro</MenuItem>
+                  </Select>
+                  {errors.tipoTutor && <FormHelperText>{errors.tipoTutor}</FormHelperText>}
+                </FormControl>
+      
+                <TextField
+                  fullWidth
+                  label="Nombre del Tutor"
+                  name="nombreTutor"
+                  value={formData.nombreTutor || ''}
+                  onChange={handleChange}
+                  margin="normal"
+                  required
+                  error={!!errors.nombreTutor}
+                  helperText={errors.nombreTutor || 'Escribe el nombre del tutor'}
+                />
+              </Box>
+            )}
+      
+            {/* Campo de Género */}
             <FormControl fullWidth margin="normal" required error={!!errors.genero}>
               <InputLabel>Género</InputLabel>
               <Select
@@ -639,7 +712,8 @@ const Register = () => {
               </Select>
               {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
             </FormControl>
-
+      
+            {/* Campo de Lugar de Procedencia */}
             <FormControl fullWidth margin="normal" required error={!!errors.lugar}>
               <InputLabel>Lugar de Proveniencia</InputLabel>
               <Select
@@ -658,7 +732,8 @@ const Register = () => {
               </Select>
               {errors.lugar && <FormHelperText>{errors.lugar}</FormHelperText>}
             </FormControl>
-
+      
+            {/* Campo Especificar Lugar */}
             {formData.lugar === 'Otro' && (
               <TextField
                 fullWidth
@@ -669,13 +744,12 @@ const Register = () => {
                 margin="normal"
                 required
                 error={!!errors.otroLugar}
-                helperText={errors.otroLugar}
+                helperText={errors.otroLugar || 'Escribe el lugar específico'}
               />
             )}
-
           </Box>
         );
-      case 1:
+        case 1:
         return (
           <Box>
             {/* Campo de correo electrónico */}
