@@ -708,7 +708,7 @@ const Register = () => {
 
                 <TextField
                   fullWidth
-                  label="Nombre del Tutor"
+                  label="Nombre completo del Tutor"
                   name="nombreTutor"
                   value={formData.nombreTutor || ''}
                   onChange={handleChange}
