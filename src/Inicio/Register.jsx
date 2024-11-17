@@ -649,27 +649,28 @@ const Register = () => {
             />
             {/* Campo de Fecha de Nacimiento */}
             <TextField
-              fullWidth
-              label="Fecha de Nacimiento"
-              name="fechaNacimiento"
-              type="date"
-              inputProps={{ max: today }}
-              value={formData.fechaNacimiento}
-              onChange={handleChange}
-              margin="normal"
-              required
-              error={!!errors.fechaNacimiento}
-              helperText={
-                errors.fechaNacimiento || 'Selecciona tu fecha de nacimiento'
-              }
-              InputLabelProps={{ shrink: true }}
-            />
-            {/* Mostrar mensaje si es menor de edad */}
-            {!formData.esMayorDeEdad && (
-              <Typography sx={{ color: 'red', mt: 1 }}>
-                Parece que es menor de edad, por lo que se necesitan los datos del tutor.
-              </Typography>
-            )}
+  fullWidth
+  label="Fecha de Nacimiento"
+  name="fechaNacimiento"
+  type="date"
+  inputProps={{ max: today }}
+  value={formData.fechaNacimiento}
+  onChange={handleChange}
+  margin="normal"
+  required
+  error={!!errors.fechaNacimiento}
+  helperText={
+    errors.fechaNacimiento || 'Selecciona tu fecha de nacimiento'
+  }
+  InputLabelProps={{ shrink: true }}
+/>
+{/* Mostrar mensaje si es menor de edad */}
+{!formData.esMayorDeEdad && (
+  <Typography variant="caption" sx={{ color: 'red', mt: 1 }}>
+    Parece que es menor de edad, por lo que se necesitan los datos del tutor.
+  </Typography>
+)}
+
       
             {/* Mostrar campos de tutor si es menor de edad */}
             {!formData.esMayorDeEdad && (
