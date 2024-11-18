@@ -1288,26 +1288,78 @@ const Register = () => {
               </Box>
             </Box>
 
-            {/* Modal para Políticas de Privacidad */}
             <Modal open={openPrivacyModal} onClose={handleClosePrivacyModal}>
-              <Box sx={{ width: '80%', maxWidth: 600, bgcolor: 'background.paper', p: 4, m: 'auto', mt: 5, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>Políticas de Privacidad</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>{privacyPolicy}</Typography>
-                <Button onClick={handleClosePrivacyModal} sx={{ mt: 2 }} variant="contained">Cerrar</Button>
+              <Box
+                sx={{
+                  width: '90%', // 90% of the viewport width
+                  maxWidth: 600, // Maximum width
+                  maxHeight: '80vh', // Limit height to 80% of the viewport
+                  bgcolor: 'background.paper',
+                  p: 4,
+                  m: 'auto',
+                  mt: 5,
+                  borderRadius: 2,
+                  overflowY: 'auto', // Enable vertical scrolling
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  Políticas de Privacidad
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    whiteSpace: 'pre-line', // Preserve line breaks
+                  }}
+                >
+                  {privacyPolicy}
+                </Typography>
+                <Button
+                  onClick={handleClosePrivacyModal}
+                  sx={{ mt: 2 }}
+                  variant="contained"
+                  fullWidth
+                >
+                  Cerrar
+                </Button>
               </Box>
             </Modal>
 
-            {/* Modal para Términos y Condiciones */}
             <Modal open={openTermsModal} onClose={handleCloseTermsModal}>
-              <Box sx={{ width: '80%', maxWidth: 600, bgcolor: 'background.paper', p: 4, m: 'auto', mt: 5, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>Términos y Condiciones</Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>{termsConditions}</Typography>
-                <Button onClick={handleCloseTermsModal} sx={{ mt: 2 }} variant="contained">Cerrar</Button>
+              <Box
+                sx={{
+                  width: '90%', // 90% of the viewport width
+                  maxWidth: 600, // Maximum width
+                  maxHeight: '80vh', // Limit height to 80% of the viewport
+                  bgcolor: 'background.paper',
+                  p: 4,
+                  m: 'auto',
+                  mt: 5,
+                  borderRadius: 2,
+                  overflowY: 'auto', // Enable vertical scrolling
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  Términos y Condiciones
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    whiteSpace: 'pre-line', // Preserve line breaks
+                  }}
+                >
+                  {termsConditions}
+                </Typography>
+                <Button
+                  onClick={handleCloseTermsModal}
+                  sx={{ mt: 2 }}
+                  variant="contained"
+                  fullWidth
+                >
+                  Cerrar
+                </Button>
               </Box>
             </Modal>
           </form>
-
-
         </CardContent>
       </Card>
     </Container>
