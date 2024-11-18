@@ -48,6 +48,7 @@ const Register = () => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
   const phoneRegex = /^\d{10}$/;
   const today = new Date().toISOString().split('T')[0];
+  const [showChangeEmailConfirmation, setShowChangeEmailConfirmation] = useState(false);
 
 
   const [privacyPolicy, setPrivacyPolicy] = useState('');
@@ -433,6 +434,26 @@ const Register = () => {
     }
   };
 
+  const handleEmailChange = () => {
+    // Cierra el modal de confirmación
+    setShowChangeEmailConfirmation(false);
+  
+    // Reinicia los estados relacionados al correo
+    setIsEmailSent(false); // Deshabilita "Correo Enviado"
+    setIsEmailVerified(false); // Marca como no verificado
+    setIsVerifiedComplete(false); // Reinicia el estado de "Verificado completo"
+    setEmailVerificationError(''); // Limpia cualquier error previo
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      verificationToken: '', // Limpia el token de verificación
+    }));
+  
+    // Notificación opcional
+    setNotificationMessage('Por favor, ingresa el nuevo correo y verifica nuevamente.');
+    setNotificationType('info');
+    setOpenNotification(true);
+  };
+  
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
@@ -765,7 +786,12 @@ const Register = () => {
               label="Correo electrónico"
               name="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                setIsEmailSent(false); // Reseteamos el estado para permitir reenviar
+                setIsEmailVerified(false); // El correo no está verificado si se edita
+                setIsVerifiedComplete(false); // El flujo de verificación se reinicia
+              }}
               margin="normal"
               required
               error={!!errors.email}
@@ -779,7 +805,8 @@ const Register = () => {
               }}
               disabled={isEmailVerified || isVerifiedComplete} // Deshabilitar si ya está verificado
             />
-
+      
+            {/* Botón para verificar el correo */}
             {!isEmailVerified && (
               <Button
                 variant="contained"
@@ -788,24 +815,77 @@ const Register = () => {
                 sx={{ mt: 2 }}
                 disabled={isVerifyingEmail || isVerifiedComplete || isEmailSent} // Deshabilitar si ya se verificó o se está verificando
               >
-                {isVerifiedComplete ? 'Verificado' : isVerifyingEmail ? 'Verificando...' : isEmailSent ? 'Correo Enviado' : 'Verificar Correo'}
+                {isVerifiedComplete
+                  ? 'Verificado'
+                  : isVerifyingEmail
+                  ? 'Verificando...'
+                  : isEmailSent
+                  ? 'Correo Enviado'
+                  : 'Verificar Correo'}
               </Button>
-
             )}
-
+      
+            {/* Botón "Cambiar correo" */}
+            {isEmailSent && !isEmailVerified && (
+              <Button
+                variant="text"
+                color="secondary"
+                sx={{ mt: 1 }}
+                onClick={() => setShowChangeEmailConfirmation(true)} // Muestra el cuadro de confirmación
+                disabled={!formData.email || !isEmailSent} // Deshabilitar si el correo no está bloqueado
+              >
+                Cambiar correo
+              </Button>
+            )}
+      
+            {/* Confirmación para cambiar correo */}
+            <Modal open={showChangeEmailConfirmation} onClose={() => setShowChangeEmailConfirmation(false)}>
+              <Box
+                sx={{
+                  width: '80%',
+                  maxWidth: 400,
+                  bgcolor: 'background.paper',
+                  p: 4,
+                  m: 'auto',
+                  mt: 5,
+                  borderRadius: 2,
+                  textAlign: 'center',
+                }}
+              >
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  ¿Estás seguro de que deseas cambiar el correo? Esto invalidará el código enviado anteriormente.
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleEmailChange()} // Manejar el cambio de correo
+                  sx={{ mr: 2 }}
+                >
+                  Sí, cambiar correo
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => setShowChangeEmailConfirmation(false)}
+                >
+                  Cancelar
+                </Button>
+              </Box>
+            </Modal>
+      
             {/* Mostrar mensaje de verificación exitosa o error */}
             {isEmailVerified && (
               <Typography sx={{ color: 'green', mt: 2 }}>
                 Correo verificado correctamente.
               </Typography>
             )}
-
+      
             {emailVerificationError && (
               <Typography sx={{ color: 'red', mt: 2 }}>
                 {emailVerificationError}
               </Typography>
             )}
-
+      
             {/* Si el correo está verificado, permitir la entrada del código de verificación */}
             {isEmailSent && !isEmailVerified && (
               <TextField
@@ -827,7 +907,7 @@ const Register = () => {
                 }}
               />
             )}
-
+      
             {/* Botón para validar el código de verificación */}
             {isEmailSent && !isEmailVerified && (
               <Button
