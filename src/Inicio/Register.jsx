@@ -727,7 +727,7 @@ const Register = () => {
 
             {/* Campo de Género */}
             <FormControl fullWidth margin="normal" required error={!!errors.genero}>
-              <InputLabel>Género</InputLabel>
+              <InputLabel>Género del paciente</InputLabel>
               <Select
                 value={formData.genero}
                 onChange={handleChange}
@@ -1043,9 +1043,22 @@ const Register = () => {
               fullWidth
               label="Contraseña"
               name="password"
-              type={showPassword ? 'text' : 'password'}  // Alterna entre 'text' y 'password'
+              type={showPassword ? 'text' : 'password'} // Alterna entre 'text' y 'password'
               value={formData.password}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e); // Actualiza el estado
+                if (e.target.value !== formData.confirmPassword) {
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    confirmPassword: 'Las contraseñas no coinciden',
+                  }));
+                } else {
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    confirmPassword: '',
+                  }));
+                }
+              }}
               margin="normal"
               required
               error={!!errors.password}
@@ -1059,7 +1072,7 @@ const Register = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <Button onClick={togglePasswordVisibility}>
-                      {showPassword ? <FaEye /> : <FaEyeSlash />}  {/* Cambia el ícono */}
+                      {showPassword ? <FaEye /> : <FaEyeSlash />} {/* Cambia el ícono */}
                     </Button>
                   </InputAdornment>
                 ),
@@ -1069,9 +1082,22 @@ const Register = () => {
               fullWidth
               label="Confirmar Contraseña"
               name="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}  // Alterna entre 'text' y 'password'
+              type={showConfirmPassword ? 'text' : 'password'} // Alterna entre 'text' y 'password'
               value={formData.confirmPassword}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e); // Actualiza el estado
+                if (e.target.value !== formData.password) {
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    confirmPassword: 'Las contraseñas no coinciden',
+                  }));
+                } else {
+                  setErrors((prevErrors) => ({
+                    ...prevErrors,
+                    confirmPassword: '',
+                  }));
+                }
+              }}
               margin="normal"
               required
               error={!!errors.confirmPassword}
@@ -1085,12 +1111,13 @@ const Register = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <Button onClick={toggleConfirmPasswordVisibility}>
-                      {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}  {/* Cambia el ícono */}
+                      {showConfirmPassword ? <FaEye /> : <FaEyeSlash />} {/* Cambia el ícono */}
                     </Button>
                   </InputAdornment>
                 ),
               }}
             />
+
 
             {/* Indicadores de seguridad de la contraseña */}
             {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
