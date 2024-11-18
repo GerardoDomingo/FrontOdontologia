@@ -437,7 +437,7 @@ const Register = () => {
   const handleEmailChange = () => {
     // Cierra el modal de confirmación
     setShowChangeEmailConfirmation(false);
-  
+
     // Reinicia los estados relacionados al correo
     setIsEmailSent(false); // Deshabilita "Correo Enviado"
     setIsEmailVerified(false); // Marca como no verificado
@@ -447,13 +447,13 @@ const Register = () => {
       ...prevFormData,
       verificationToken: '', // Limpia el token de verificación
     }));
-  
+
     // Notificación opcional
     setNotificationMessage('Por favor, ingresa el nuevo correo y verifica nuevamente.');
     setNotificationType('info');
     setOpenNotification(true);
   };
-  
+
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
@@ -805,39 +805,47 @@ const Register = () => {
               }}
               disabled={isEmailVerified || isVerifiedComplete} // Deshabilitar si ya está verificado
             />
-      
+
             {/* Botón para verificar el correo */}
             {!isEmailVerified && (
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleVerifyEmail} // Función para verificar el correo
-                sx={{ mt: 2 }}
+                sx={{
+                  mt: 2,
+                  mx: 1, // Separación horizontal
+                  textTransform: 'none', // Para que el texto no sea todo mayúsculas
+                }}
                 disabled={isVerifyingEmail || isVerifiedComplete || isEmailSent} // Deshabilitar si ya se verificó o se está verificando
               >
                 {isVerifiedComplete
                   ? 'Verificado'
                   : isVerifyingEmail
-                  ? 'Verificando...'
-                  : isEmailSent
-                  ? 'Correo Enviado'
-                  : 'Verificar Correo'}
+                    ? 'Verificando...'
+                    : isEmailSent
+                      ? 'Correo Enviado'
+                      : 'Verificar Correo'}
               </Button>
             )}
-      
+
             {/* Botón "Cambiar correo" */}
             {isEmailSent && !isEmailVerified && (
               <Button
-                variant="text"
+                variant="outlined" // Cambiar a "outlined" para diferenciar del botón principal
                 color="secondary"
-                sx={{ mt: 1 }}
+                sx={{
+                  mt: 2,
+                  mx: 1, // Separación horizontal
+                  textTransform: 'none', // Para que el texto no sea todo mayúsculas
+                }}
                 onClick={() => setShowChangeEmailConfirmation(true)} // Muestra el cuadro de confirmación
                 disabled={!formData.email || !isEmailSent} // Deshabilitar si el correo no está bloqueado
               >
                 Cambiar correo
               </Button>
             )}
-      
+
             {/* Confirmación para cambiar correo */}
             <Modal open={showChangeEmailConfirmation} onClose={() => setShowChangeEmailConfirmation(false)}>
               <Box
@@ -872,20 +880,20 @@ const Register = () => {
                 </Button>
               </Box>
             </Modal>
-      
+
             {/* Mostrar mensaje de verificación exitosa o error */}
             {isEmailVerified && (
               <Typography sx={{ color: 'green', mt: 2 }}>
                 Correo verificado correctamente.
               </Typography>
             )}
-      
+
             {emailVerificationError && (
               <Typography sx={{ color: 'red', mt: 2 }}>
                 {emailVerificationError}
               </Typography>
             )}
-      
+
             {/* Si el correo está verificado, permitir la entrada del código de verificación */}
             {isEmailSent && !isEmailVerified && (
               <TextField
@@ -907,7 +915,7 @@ const Register = () => {
                 }}
               />
             )}
-      
+
             {/* Botón para validar el código de verificación */}
             {isEmailSent && !isEmailVerified && (
               <Button
