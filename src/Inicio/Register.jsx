@@ -250,25 +250,14 @@ const Register = () => {
     }
 
     if (name === 'fechaNacimiento') {
-      const edad = calcularEdad(value);
+      const edad = calcularEdad(value); // Calcula la edad
       setFormData((prevData) => ({
         ...prevData,
         [name]: value,
-        esMayorDeEdad: edad >= 18, // Booleano para saber si es mayor o menor de edad
+        esMayorDeEdad: edad >= 18, // Booleano: true si es mayor de edad
       }));
-
-      if (edad < 18) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          tutor: 'Por favor, selecciona un tutor legal.',
-        }));
-      } else {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          tutor: '',
-        }));
-      }
     }
+
 
     if (name === 'email') {
       if (value !== trimmedValue || !emailRegex.test(trimmedValue)) {
@@ -545,11 +534,6 @@ const Register = () => {
         stepErrors.aMaterno = 'El apellido materno solo debe contener letras';
       }
 
-      // Validación de la edad (entre 1 y 100 años)
-      if (!formData.edad || formData.edad < 1 || formData.edad > 100) {
-        stepErrors.edad = 'Verifique que su edad sea la correcta';
-      }
-
       // Validación de género y lugar de procedencia (ya existente)
       if (!formData.genero) {
         stepErrors.genero = 'Selecciona un género';
@@ -671,9 +655,8 @@ const Register = () => {
               </Typography>
             )}
 
-
-            {/* Mostrar campos de tutor si es menor de edad */}
-            {!formData.esMayorDeEdad && (
+            {/* Mostrar campos de tutor solo si es menor de edad */}
+            {formData.fechaNacimiento && !formData.esMayorDeEdad && (
               <Box sx={{ mt: 2 }}>
                 <FormControl fullWidth margin="normal" required error={!!errors.tipoTutor}>
                   <InputLabel>Selecciona el tutor</InputLabel>
@@ -715,10 +698,11 @@ const Register = () => {
                   margin="normal"
                   required
                   error={!!errors.nombreTutor}
-                  helperText={errors.nombreTutor || 'Escribe el nombre del tutor'}
+                  helperText={errors.nombreTutor || 'Escribe el nombre completo del tutor'}
                 />
               </Box>
             )}
+
 
             {/* Campo de Género */}
             <FormControl fullWidth margin="normal" required error={!!errors.genero}>
