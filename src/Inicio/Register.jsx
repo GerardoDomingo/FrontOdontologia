@@ -926,7 +926,7 @@ const Register = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => handleEmailChange()} // Manejar el cambio de correo
+                  onClick={handleEmailChange} // Llamar a la función para habilitar edición
                   sx={{ mr: 2 }}
                 >
                   Sí, cambiar correo
