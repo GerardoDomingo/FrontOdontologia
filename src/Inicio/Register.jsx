@@ -900,11 +900,11 @@ const Register = () => {
                   textTransform: 'none', // Para que el texto no sea todo mayúsculas
                 }}
                 onClick={() => setShowChangeEmailConfirmation(true)} // Muestra el cuadro de confirmación
-                disabled={!formData.email || !isEmailSent} // Deshabilitar si el correo no está bloqueado
               >
                 Cambiar correo
               </Button>
             )}
+
 
             {/* Confirmación para cambiar correo */}
             <Modal open={showChangeEmailConfirmation} onClose={() => setShowChangeEmailConfirmation(false)}>
