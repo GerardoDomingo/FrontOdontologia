@@ -9,9 +9,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import Notificaciones from '../../Compartidos/Notificaciones';
-//POLITICAS
+
 const PoliticasPrivacidad = () => {
-    const [numeroPolitica, setNumeroPolitica] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -25,36 +24,35 @@ const PoliticasPrivacidad = () => {
 
     useEffect(() => {
         fetchPoliticas();
-        fetchPoliticaActiva(); // Cargar política activa
+        fetchPoliticaActiva();
     }, []);
 
-// Función para obtener todas las políticas inactivas
-const fetchPoliticas = async () => {
-    try {
-        const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
-        const data = response.data;
+    const fetchPoliticas = async () => {
+        try {
+            const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getAllPoliticas');
+            const data = response.data;
 
-        const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
+            const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
 
-        politicasInactivas.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
+            politicasInactivas.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
 
-        setPoliticas(politicasInactivas);
-    } catch (error) {
-        console.error('Error al cargar políticas:', error);
-    }
-};
+            setPoliticas(politicasInactivas);
+        } catch (error) {
+            console.error('Error al cargar políticas:', error);
+        }
+    };
 
     const fetchPoliticaActiva = async () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/politicas/getpolitica');
             if (response.data) {
-                setPoliticaActiva(response.data); // Guardar la política activa
+                setPoliticaActiva(response.data);
             } else {
-                setPoliticaActiva(null); // En caso de que no haya una política activa
+                setPoliticaActiva(null);
             }
         } catch (error) {
             if (error.response && error.response.status === 404) {
-                setPoliticaActiva(null); // Establecer política activa a null si no existe
+                setPoliticaActiva(null);
                 console.error('No hay políticas activas.');
             } else {
                 console.error('Error al cargar política activa:', error);
@@ -65,7 +63,6 @@ const fetchPoliticas = async () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!numeroPolitica) newErrors.numeroPolitica = "El número de política es obligatorio.";
         if (!titulo) newErrors.titulo = "El título es obligatorio.";
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
@@ -74,73 +71,66 @@ const fetchPoliticas = async () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!validateForm()) return;
-    
-        const politicaData = { numero_politica: numeroPolitica, titulo, contenido };
-    
+
+        const politicaData = { titulo, contenido, estado: 'inactivo' };
+
         try {
             if (editingId !== null) {
-                // Actualización de una política existente
                 await axios.put(`https://backendodontologia.onrender.com/api/politicas/update/${editingId}`, politicaData);
                 setNotification({ open: true, message: `Política actualizada correctamente`, type: 'success' });
             } else {
-                // Creación de una nueva política
                 await axios.post('https://backendodontologia.onrender.com/api/politicas/insert', politicaData);
                 setNotification({ open: true, message: 'Política insertada con éxito', type: 'success' });
             }
-    
-            // Actualizar las políticas y la activa después de la operación
-            await fetchPoliticas(); // Actualizar la lista de políticas inactivas
-            await fetchPoliticaActiva(); // Actualizar la política activa
+
+            await fetchPoliticas();
+            await fetchPoliticaActiva();
             resetForm();
             setIsAddingNewPolicy(false);
         } catch (error) {
             setNotification({ open: true, message: 'Error al enviar política', type: 'error' });
         }
     };
-    
+
     const resetForm = () => {
-        setNumeroPolitica('');
         setTitulo('');
         setContenido('');
-        setEditingId(null); // Reseteamos el ID de edición
+        setEditingId(null);
         setErrors({});
-        setIsAddingNewPolicy(false); // Reactivar el botón "Nueva Política"
+        setIsAddingNewPolicy(false);
     };
 
     const handleEdit = async (id) => {
         try {
-            // Cargar la política activa directamente para edición
             const response = await axios.get(`https://backendodontologia.onrender.com/api/politicas/get/${id}`);
             const politica = response.data;
-    
+
             if (politica) {
-                setNumeroPolitica(politica.numero_politica);
                 setTitulo(politica.titulo);
                 setContenido(politica.contenido);
-                setEditingId(id); // Guarda correctamente el ID de la política a editar
-                setIsAddingNewPolicy(true); // Abrir el formulario para editar
+                setEditingId(id);
+                setIsAddingNewPolicy(true);
             }
         } catch (error) {
             console.error("Error al cargar la política para editar:", error);
         }
     };
-    
 
     const handleDelete = async (id) => {
         try {
             await axios.put(`https://backendodontologia.onrender.com/api/politicas/deactivate/${id}`, { estado: 'inactivo' });
             setNotification({ open: true, message: 'Política eliminada con éxito', type: 'success' });
             await fetchPoliticas();
-            await fetchPoliticaActiva(); // Refresca la política activa tras eliminar
+            await fetchPoliticaActiva();
         } catch (error) {
             setNotification({ open: true, message: 'Error al eliminar política', type: 'error' });
         }
     };
 
     const handleDialogOpen = (politica) => {
-        setDialogContent(politica); // Guardamos todo el objeto de la política en lugar de solo el contenido
+        setDialogContent(politica);
         setOpenDialog(true);
     };
 
@@ -154,7 +144,6 @@ const fetchPoliticas = async () => {
 
     return (
         <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
-            {/* Política de Privacidad Vigente */}
             <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" align="center" gutterBottom>
                     Política de Privacidad
@@ -164,9 +153,6 @@ const fetchPoliticas = async () => {
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={9}>
                                 <Typography variant="h5">Vigente: {politicaActiva.titulo}</Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Número: {politicaActiva.numero_politica}
-                                </Typography>
                                 <Typography variant="body2" color="textSecondary">
                                     Versión: {politicaActiva.version}
                                 </Typography>
@@ -184,33 +170,22 @@ const fetchPoliticas = async () => {
                         </Grid>
                     </Paper>
                 )}
-                {/* Botón Nueva Política */}
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     sx={{ mt: 3 }}
                     onClick={() => {
-                        resetForm(); // Reiniciar el formulario para nueva política
+                        resetForm();
                         setIsAddingNewPolicy(true);
                     }}
-                    disabled={isAddingNewPolicy} // Deshabilitar botón cuando está activo
+                    disabled={isAddingNewPolicy}
                 >
                     Nueva Política
                 </Button>
 
-                {/* Formulario para agregar o actualizar políticas */}
                 {isAddingNewPolicy && (
                     <form onSubmit={handleSubmit}>
-                        <TextField
-                            label="Número de Política"
-                            value={numeroPolitica}
-                            onChange={(e) => setNumeroPolitica(e.target.value)}
-                            fullWidth
-                            sx={{ mt: 3 }}
-                            error={!!errors.numeroPolitica}
-                            helperText={errors.numeroPolitica}
-                        />
                         <TextField
                             label="Título"
                             value={titulo}
@@ -252,7 +227,6 @@ const fetchPoliticas = async () => {
                 )}
             </Paper>
 
-            {/* Historial de Políticas */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
                 Historial de Políticas por Versión
             </Typography>
@@ -261,9 +235,9 @@ const fetchPoliticas = async () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell><Typography fontWeight="bold">Número de Política</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Estado</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Actualización</Typography></TableCell>
                         </TableRow>
@@ -272,9 +246,9 @@ const fetchPoliticas = async () => {
                         {politicas.length > 0 ? (
                             politicas.map((politica, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{politica.numero_politica}</TableCell>
                                     <TableCell>{politica.titulo}</TableCell>
                                     <TableCell>{politica.version}</TableCell>
+                                    <TableCell>Inactivo</TableCell>
                                     <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
                                     <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
                                 </TableRow>
@@ -290,32 +264,19 @@ const fetchPoliticas = async () => {
                 </Table>
             </TableContainer>
 
-            {/* Diálogo para visualizar el contenido completo de la política */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
                 <DialogTitle>Detalles de la Política de Privacidad</DialogTitle>
                 <DialogContent>
-                    {/* Título de la política */}
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                         Título: {dialogContent?.titulo}
                     </Typography>
-
-                    {/* Número de la política */}
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        Número de Política: {dialogContent?.numero_politica}
-                    </Typography>
-
-                    {/* Contenido de la política */}
                     <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
                         {dialogContent?.contenido}
                     </Typography>
-
-                    {/* Fecha de creación o de vigencia */}
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                         Fecha de Creación: {new Date(dialogContent?.fecha_creacion).toLocaleDateString()}
                     </Typography>
-
                 </DialogContent>
-
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="primary" startIcon={<CloseIcon />}>
                         Cerrar
@@ -323,7 +284,6 @@ const fetchPoliticas = async () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Componente de Notificaciones */}
             <Notificaciones
                 open={notification.open}
                 message={notification.message}

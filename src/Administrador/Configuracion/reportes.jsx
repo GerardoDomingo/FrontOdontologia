@@ -76,7 +76,7 @@ const Reportes = () => {
           sx={{ fontFamily: 'Roboto, sans-serif' }}
         />
         <Tab
-          label="Logs del Sistema"
+          label="Auditoria del Sistema"
           icon={<FaFileAlt />}
           sx={{ fontFamily: 'Roboto, sans-serif' }}
         />

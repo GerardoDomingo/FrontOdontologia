@@ -45,7 +45,7 @@ const LogsReport = () => {
         <Typography color="error">{error}</Typography>
       ) : (
         <>
-          <Typography variant="h5" sx={{ marginBottom: 2 }}>Reporte de Logs del Sistema</Typography>
+          <Typography variant="h5" sx={{ marginBottom: 2 }}>Historial del Sistema</Typography>
           <TableContainer component={Paper}>
             <Table>
               <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
