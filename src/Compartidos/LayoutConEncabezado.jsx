@@ -42,6 +42,7 @@ const LayoutConEncabezado = ({ children }) => {
           backgroundColor: isDarkMode ? '#1d2a38' : '#ffffff', // Cambia el color del padding según el tema
         }}
       >
+        {children}
       </Box>
 
       <Box
