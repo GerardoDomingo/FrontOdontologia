@@ -523,6 +523,7 @@ const Register = () => {
 
       if (response.status === 200) {
         setIsEmailSent(true); // Indica que el correo fue enviado
+        setIsEmailEditable(false); // Bloquea el campo de correo
         setNotificationMessage('Correo de verificación enviado.');
         setNotificationType('success');
         setOpenNotification(true);
@@ -864,7 +865,6 @@ const Register = () => {
               }}
               disabled={!isEmailEditable} // El campo solo será editable si isEmailEditable es true
             />
-
 
             {/* Botón para verificar el correo */}
             {!isEmailVerified && (
