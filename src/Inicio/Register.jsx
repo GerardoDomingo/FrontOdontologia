@@ -53,7 +53,7 @@ const Register = () => {
   const today = new Date().toISOString().split('T')[0];
   const [showChangeEmailConfirmation, setShowChangeEmailConfirmation] = useState(false);
 
-
+  const [isEmailEditable, setIsEmailEditable] = useState(true); // Controlar si el correo es editable
   const [privacyPolicy, setPrivacyPolicy] = useState('');
   const [termsConditions, setTermsConditions] = useState('');
   const [openPrivacyModal, setOpenPrivacyModal] = useState(false);
@@ -474,17 +474,18 @@ const Register = () => {
   };
 
   const handleEmailChange = () => {
-    // Cierra el modal de confirmación
+    // Permitir la edición del correo electrónico
+    setIsEmailEditable(true);
     setShowChangeEmailConfirmation(false);
 
-    // Reinicia los estados relacionados al correo
-    setIsEmailSent(false); // Deshabilita "Correo Enviado"
-    setIsEmailVerified(false); // Marca como no verificado
-    setIsVerifiedComplete(false); // Reinicia el estado de "Verificado completo"
-    setEmailVerificationError(''); // Limpia cualquier error previo
+    // Reinicia los estados relacionados con la verificación
+    setIsEmailSent(false);
+    setIsEmailVerified(false);
+    setIsVerifiedComplete(false);
+    setEmailVerificationError('');
     setFormData((prevFormData) => ({
       ...prevFormData,
-      verificationToken: '', // Limpia el token de verificación
+      verificationToken: '', // Limpia el token
     }));
 
     // Notificación opcional
@@ -492,7 +493,6 @@ const Register = () => {
     setNotificationType('info');
     setOpenNotification(true);
   };
-
 
   const handleVerifyEmail = async () => {
     const trimmedEmail = formData.email.trim(); // Eliminar espacios en blanco
@@ -847,9 +847,9 @@ const Register = () => {
               value={formData.email}
               onChange={(e) => {
                 setFormData({ ...formData, email: e.target.value });
-                setIsEmailSent(false); // Reseteamos el estado para permitir reenviar
-                setIsEmailVerified(false); // El correo no está verificado si se edita
-                setIsVerifiedComplete(false); // El flujo de verificación se reinicia
+                setIsEmailSent(false); // Restablecer estados relacionados con la verificación
+                setIsEmailVerified(false);
+                setIsVerifiedComplete(false);
               }}
               margin="normal"
               required
@@ -862,8 +862,9 @@ const Register = () => {
                   </InputAdornment>
                 ),
               }}
-              disabled={isEmailVerified || isVerifiedComplete} // Deshabilitar si ya está verificado
+              disabled={!isEmailEditable} // El campo solo será editable si isEmailEditable es true
             />
+
 
             {/* Botón para verificar el correo */}
             {!isEmailVerified && (
