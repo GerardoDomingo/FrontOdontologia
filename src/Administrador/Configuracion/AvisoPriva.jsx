@@ -33,7 +33,6 @@ const PoliticasPrivacidad = () => {
             const data = response.data;
 
             const politicasInactivas = data.filter(politica => politica.estado === 'inactivo');
-
             politicasInactivas.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
 
             setPoliticas(politicasInactivas);
@@ -74,7 +73,8 @@ const PoliticasPrivacidad = () => {
 
         if (!validateForm()) return;
 
-        const politicaData = { titulo, contenido, estado: 'inactivo' };
+        // Agregar política con número predeterminado y estado inactivo
+        const politicaData = { numero_politica: 0, titulo, contenido, estado: 'inactivo' };
 
         try {
             if (editingId !== null) {
@@ -248,7 +248,7 @@ const PoliticasPrivacidad = () => {
                                 <TableRow key={index}>
                                     <TableCell>{politica.titulo}</TableCell>
                                     <TableCell>{politica.version}</TableCell>
-                                    <TableCell>Inactivo</TableCell>
+                                    <TableCell>{politica.estado}</TableCell>
                                     <TableCell>{new Date(politica.fecha_creacion).toLocaleDateString()}</TableCell>
                                     <TableCell>{new Date(politica.fecha_actualizacion).toLocaleDateString()}</TableCell>
                                 </TableRow>
