@@ -11,7 +11,6 @@ import axios from 'axios';
 import Notificaciones from '../../Compartidos/Notificaciones';
 
 const TerminosCondiciones = () => {
-    const [numeroTermino, setNumeroTermino] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -34,19 +33,15 @@ const TerminosCondiciones = () => {
             const response = await axios.get('https://backendodontologia.onrender.com/api/termiCondicion/getAllTerminos');
             const data = response.data;
 
-            // Filtrar términos inactivos
-            const terminosInactivos = data.filter(termino => termino.estado === 'inactivo');
-
             // Ordenar por versión en orden descendente (de mayor a menor)
-            terminosInactivos.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
+            data.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
 
             // Establecer los términos ordenados en el estado
-            setTerminos(terminosInactivos);
+            setTerminos(data);
         } catch (error) {
             console.error('Error al cargar términos:', error);
         }
     };
-
 
     const fetchTerminoActivo = async () => {
         try {
@@ -69,7 +64,6 @@ const TerminosCondiciones = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!numeroTermino) newErrors.numeroTermino = "El número de término es obligatorio.";
         if (!titulo) newErrors.titulo = "El título es obligatorio.";
         if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
         setErrors(newErrors);
@@ -81,7 +75,7 @@ const TerminosCondiciones = () => {
 
         if (!validateForm()) return;
 
-        const terminoData = { numero_termino: numeroTermino, titulo, contenido };
+        const terminoData = { titulo, contenido };
 
         try {
             if (editingId !== null) {
@@ -95,7 +89,7 @@ const TerminosCondiciones = () => {
             }
 
             // Actualizar los términos y el activo después de la operación
-            await fetchTerminos(); // Actualizar la lista de términos inactivos
+            await fetchTerminos(); // Actualizar la lista de términos
             await fetchTerminoActivo(); // Actualizar el término activo
             resetForm();
             setIsAddingNewTermino(false);
@@ -105,7 +99,6 @@ const TerminosCondiciones = () => {
     };
 
     const resetForm = () => {
-        setNumeroTermino('');
         setTitulo('');
         setContenido('');
         setEditingId(null); // Reseteamos el ID de edición
@@ -120,7 +113,6 @@ const TerminosCondiciones = () => {
             const termino = response.data;
 
             if (termino) {
-                setNumeroTermino(termino.numero_termino);
                 setTitulo(termino.titulo);
                 setContenido(termino.contenido);
                 setEditingId(id); // Guarda correctamente el ID del término a editar
@@ -157,7 +149,6 @@ const TerminosCondiciones = () => {
 
     return (
         <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
-            {/* Término de Condiciones Vigente */}
             <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" align="center" gutterBottom>
                     Término de Condiciones
@@ -168,7 +159,7 @@ const TerminosCondiciones = () => {
                             <Grid item xs={12} sm={9}>
                                 <Typography variant="h5">Vigente: {terminoActivo.titulo}</Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    Número: {terminoActivo.numero_termino}
+                                    Estado: {terminoActivo.estado}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
                                     Versión: {terminoActivo.version}
@@ -187,33 +178,22 @@ const TerminosCondiciones = () => {
                         </Grid>
                     </Paper>
                 )}
-                {/* Botón Nuevo Término */}
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     sx={{ mt: 3 }}
                     onClick={() => {
-                        resetForm(); // Reiniciar el formulario para nuevo término
+                        resetForm();
                         setIsAddingNewTermino(true);
                     }}
-                    disabled={isAddingNewTermino} // Deshabilitar botón cuando está activo
+                    disabled={isAddingNewTermino}
                 >
                     Nuevo Término
                 </Button>
 
-                {/* Formulario para agregar o actualizar términos */}
                 {isAddingNewTermino && (
                     <form onSubmit={handleSubmit}>
-                        <TextField
-                            label="Número de Término"
-                            value={numeroTermino}
-                            onChange={(e) => setNumeroTermino(e.target.value)}
-                            fullWidth
-                            sx={{ mt: 3 }}
-                            error={!!errors.numeroTermino}
-                            helperText={errors.numeroTermino}
-                        />
                         <TextField
                             label="Título"
                             value={titulo}
@@ -255,7 +235,6 @@ const TerminosCondiciones = () => {
                 )}
             </Paper>
 
-            {/* Historial de Términos */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
                 Historial de Términos por Versión
             </Typography>
@@ -264,9 +243,9 @@ const TerminosCondiciones = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell><Typography fontWeight="bold">Número de Término</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Estado</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Actualización</Typography></TableCell>
                         </TableRow>
@@ -275,9 +254,9 @@ const TerminosCondiciones = () => {
                         {terminos.length > 0 ? (
                             terminos.map((termino, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{termino.numero_termino}</TableCell>
                                     <TableCell>{termino.titulo}</TableCell>
                                     <TableCell>{termino.version}</TableCell>
+                                    <TableCell>{termino.estado}</TableCell>
                                     <TableCell>{new Date(termino.fecha_creacion).toLocaleDateString()}</TableCell>
                                     <TableCell>{new Date(termino.fecha_actualizacion).toLocaleDateString()}</TableCell>
                                 </TableRow>
@@ -285,7 +264,7 @@ const TerminosCondiciones = () => {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={5} align="center">
-                                    No hay términos inactivos.
+                                    No hay términos registrados.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -293,30 +272,18 @@ const TerminosCondiciones = () => {
                 </Table>
             </TableContainer>
 
-            {/* Diálogo para visualizar el contenido completo del término */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Detalles del Término de Condiciones</DialogTitle>
+                <DialogTitle>Detalles del Término</DialogTitle>
                 <DialogContent>
-                    {/* Título del término */}
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                         Título: {dialogContent?.titulo}
                     </Typography>
-
-                    {/* Número del término */}
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        Número de Término: {dialogContent?.numero_termino}
-                    </Typography>
-
-                    {/* Contenido del término */}
                     <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
                         {dialogContent?.contenido}
                     </Typography>
-
-                    {/* Fecha de creación o de vigencia */}
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                         Fecha de Creación: {new Date(dialogContent?.fecha_creacion).toLocaleDateString()}
                     </Typography>
-
                 </DialogContent>
 
                 <DialogActions>
@@ -326,7 +293,6 @@ const TerminosCondiciones = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Componente de Notificaciones */}
             <Notificaciones
                 open={notification.open}
                 message={notification.message}

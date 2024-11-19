@@ -11,7 +11,6 @@ import axios from 'axios';
 import Notificaciones from '../../Compartidos/Notificaciones';
 
 const DeslindeLegal = () => {
-    const [numeroDeslinde, setNumeroDeslinde] = useState('');
     const [titulo, setTitulo] = useState('');
     const [contenido, setContenido] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -25,53 +24,39 @@ const DeslindeLegal = () => {
 
     useEffect(() => {
         fetchDeslindes();
-        fetchDeslindeActivo(); // Cargar deslinde activo
+        fetchDeslindeActivo();
     }, []);
 
-    // Función para obtener todos los deslindes inactivos
+    // Obtener deslindes inactivos
     const fetchDeslindes = async () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getAllDeslindes');
             const data = response.data;
 
-            // Filtrar deslindes inactivos
             const deslindesInactivos = data.filter(deslinde => deslinde.estado === 'inactivo');
-
-            // Ordenar por versión en orden descendente (de mayor a menor)
             deslindesInactivos.sort((a, b) => parseFloat(b.version) - parseFloat(a.version));
 
-            // Establecer los deslindes ordenados en el estado
             setDeslindes(deslindesInactivos);
         } catch (error) {
             console.error('Error al cargar deslindes:', error);
         }
     };
 
-
+    // Obtener deslinde activo
     const fetchDeslindeActivo = async () => {
         try {
             const response = await axios.get('https://backendodontologia.onrender.com/api/deslinde/getdeslinde');
-            if (response.data) {
-                setDeslindeActivo(response.data); // Guardar el deslinde activo
-            } else {
-                setDeslindeActivo(null); // En caso de que no haya un deslinde activo
-            }
+            setDeslindeActivo(response.data || null);
         } catch (error) {
-            if (error.response && error.response.status === 404) {
-                setDeslindeActivo(null); // Establecer deslinde activo a null si no existe
-                console.error('No hay deslindes activos.');
-            } else {
-                console.error('Error al cargar deslinde activo:', error);
-                setDeslindeActivo(null);
-            }
+            console.error('Error al cargar deslinde activo:', error);
+            setDeslindeActivo(null);
         }
     };
 
     const validateForm = () => {
         const newErrors = {};
-        if (!numeroDeslinde) newErrors.numeroDeslinde = "El número de deslinde es obligatorio.";
-        if (!titulo) newErrors.titulo = "El título es obligatorio.";
-        if (!contenido) newErrors.contenido = "El contenido es obligatorio.";
+        if (!titulo) newErrors.titulo = 'El título es obligatorio.';
+        if (!contenido) newErrors.contenido = 'El contenido es obligatorio.';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -81,22 +66,21 @@ const DeslindeLegal = () => {
 
         if (!validateForm()) return;
 
-        const deslindeData = { numero_deslinde: numeroDeslinde, titulo, contenido };
+        const deslindeData = { numero_deslinde: 0, titulo, contenido };
 
         try {
             if (editingId !== null) {
-                // Actualización de un deslinde existente
+                // Actualizar deslinde existente
                 await axios.put(`https://backendodontologia.onrender.com/api/deslinde/update/${editingId}`, deslindeData);
-                setNotification({ open: true, message: `Deslinde actualizado correctamente`, type: 'success' });
+                setNotification({ open: true, message: 'Deslinde actualizado correctamente', type: 'success' });
             } else {
-                // Creación de un nuevo deslinde
+                // Crear nuevo deslinde
                 await axios.post('https://backendodontologia.onrender.com/api/deslinde/insert', deslindeData);
                 setNotification({ open: true, message: 'Deslinde insertado con éxito', type: 'success' });
             }
 
-            // Actualizar los deslindes y el activo después de la operación
-            await fetchDeslindes(); // Actualizar la lista de deslindes inactivos
-            await fetchDeslindeActivo(); // Actualizar el deslinde activo
+            await fetchDeslindes();
+            await fetchDeslindeActivo();
             resetForm();
             setIsAddingNewDeslinde(false);
         } catch (error) {
@@ -105,29 +89,26 @@ const DeslindeLegal = () => {
     };
 
     const resetForm = () => {
-        setNumeroDeslinde('');
         setTitulo('');
         setContenido('');
-        setEditingId(null); // Reseteamos el ID de edición
+        setEditingId(null);
         setErrors({});
-        setIsAddingNewDeslinde(false); // Reactivar el botón "Nuevo Deslinde"
+        setIsAddingNewDeslinde(false);
     };
 
     const handleEdit = async (id) => {
         try {
-            // Cargar el deslinde activo directamente para edición
             const response = await axios.get(`https://backendodontologia.onrender.com/api/deslinde/get/${id}`);
             const deslinde = response.data;
 
             if (deslinde) {
-                setNumeroDeslinde(deslinde.numero_deslinde);
                 setTitulo(deslinde.titulo);
                 setContenido(deslinde.contenido);
-                setEditingId(id); // Guarda correctamente el ID del deslinde a editar
-                setIsAddingNewDeslinde(true); // Abrir el formulario para editar
+                setEditingId(id);
+                setIsAddingNewDeslinde(true);
             }
         } catch (error) {
-            console.error("Error al cargar el deslinde para editar:", error);
+            console.error('Error al cargar el deslinde para editar:', error);
         }
     };
 
@@ -136,14 +117,14 @@ const DeslindeLegal = () => {
             await axios.put(`https://backendodontologia.onrender.com/api/deslinde/deactivate/${id}`, { estado: 'inactivo' });
             setNotification({ open: true, message: 'Deslinde eliminado con éxito', type: 'success' });
             await fetchDeslindes();
-            await fetchDeslindeActivo(); // Refresca el deslinde activo tras eliminar
+            await fetchDeslindeActivo();
         } catch (error) {
             setNotification({ open: true, message: 'Error al eliminar deslinde', type: 'error' });
         }
     };
 
     const handleDialogOpen = (deslinde) => {
-        setDialogContent(deslinde); // Guardamos todo el objeto del deslinde en lugar de solo el contenido
+        setDialogContent(deslinde);
         setOpenDialog(true);
     };
 
@@ -157,22 +138,16 @@ const DeslindeLegal = () => {
 
     return (
         <Box sx={{ padding: '40px', backgroundColor: '#f9fafc', minHeight: '100vh' }}>
-            {/* Deslinde Vigente */}
             <Paper sx={{ padding: '20px', maxWidth: '800px', margin: '0 auto', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)' }}>
                 <Typography variant="h4" align="center" gutterBottom>
-                    Deslinde
+                    Deslinde Legal
                 </Typography>
                 {deslindeActivo && (
                     <Paper sx={{ padding: '20px', mt: 4, backgroundColor: '#e3f2fd' }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={9}>
                                 <Typography variant="h5">Vigente: {deslindeActivo.titulo}</Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Número: {deslindeActivo.numero_deslinde}
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Versión: {deslindeActivo.version}
-                                </Typography>
+                                <Typography variant="body2" color="textSecondary">Versión: {deslindeActivo.version}</Typography>
                             </Grid>
                             <Grid item xs={12} sm={3} sx={{ textAlign: 'right' }}>
                                 <IconButton onClick={() => handleEdit(deslindeActivo.id)}><EditIcon sx={{ color: '#1976d2' }} /></IconButton>
@@ -187,33 +162,22 @@ const DeslindeLegal = () => {
                         </Grid>
                     </Paper>
                 )}
-                {/* Botón Nuevo Deslinde */}
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     sx={{ mt: 3 }}
                     onClick={() => {
-                        resetForm(); // Reiniciar el formulario para nuevo deslinde
+                        resetForm();
                         setIsAddingNewDeslinde(true);
                     }}
-                    disabled={isAddingNewDeslinde} // Deshabilitar botón cuando está activo
+                    disabled={isAddingNewDeslinde}
                 >
                     Nuevo Deslinde
                 </Button>
 
-                {/* Formulario para agregar o actualizar deslindes */}
                 {isAddingNewDeslinde && (
                     <form onSubmit={handleSubmit}>
-                        <TextField
-                            label="Número de Deslinde"
-                            value={numeroDeslinde}
-                            onChange={(e) => setNumeroDeslinde(e.target.value)}
-                            fullWidth
-                            sx={{ mt: 3 }}
-                            error={!!errors.numeroDeslinde}
-                            helperText={errors.numeroDeslinde}
-                        />
                         <TextField
                             label="Título"
                             value={titulo}
@@ -241,12 +205,7 @@ const DeslindeLegal = () => {
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="outlined"
-                                    color="secondary"
-                                    fullWidth
-                                    onClick={resetForm}
-                                >
+                                <Button variant="outlined" color="secondary" fullWidth onClick={resetForm}>
                                     Cancelar
                                 </Button>
                             </Grid>
@@ -255,7 +214,6 @@ const DeslindeLegal = () => {
                 )}
             </Paper>
 
-            {/* Historial de Deslindes */}
             <Typography variant="h5" align="center" sx={{ mt: 6, mb: 4 }}>
                 Historial de Deslindes por Versión
             </Typography>
@@ -264,8 +222,8 @@ const DeslindeLegal = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell><Typography fontWeight="bold">Número de Deslinde</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Título</Typography></TableCell>
+                            <TableCell><Typography fontWeight="bold">Estado</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Versión</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Creación</Typography></TableCell>
                             <TableCell><Typography fontWeight="bold">Fecha de Actualización</Typography></TableCell>
@@ -275,8 +233,8 @@ const DeslindeLegal = () => {
                         {deslindes.length > 0 ? (
                             deslindes.map((deslinde, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{deslinde.numero_deslinde}</TableCell>
                                     <TableCell>{deslinde.titulo}</TableCell>
+                                    <TableCell>{deslinde.estado}</TableCell>
                                     <TableCell>{deslinde.version}</TableCell>
                                     <TableCell>{new Date(deslinde.fecha_creacion).toLocaleDateString()}</TableCell>
                                     <TableCell>{new Date(deslinde.fecha_actualizacion).toLocaleDateString()}</TableCell>
@@ -293,32 +251,19 @@ const DeslindeLegal = () => {
                 </Table>
             </TableContainer>
 
-            {/* Diálogo para visualizar el contenido completo del deslinde */}
             <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
                 <DialogTitle>Detalles del Deslinde</DialogTitle>
                 <DialogContent>
-                    {/* Título del deslinde */}
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                         Título: {dialogContent?.titulo}
                     </Typography>
-
-                    {/* Número del deslinde */}
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        Número de Deslinde: {dialogContent?.numero_deslinde}
-                    </Typography>
-
-                    {/* Contenido del deslinde */}
                     <Typography variant="body1" sx={{ overflowWrap: 'break-word', whiteSpace: 'pre-line', mb: 3 }}>
                         {dialogContent?.contenido}
                     </Typography>
-
-                    {/* Fecha de creación o de vigencia */}
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                         Fecha de Creación: {new Date(dialogContent?.fecha_creacion).toLocaleDateString()}
                     </Typography>
-
                 </DialogContent>
-
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="primary" startIcon={<CloseIcon />}>
                         Cerrar
@@ -326,7 +271,6 @@ const DeslindeLegal = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Componente de Notificaciones */}
             <Notificaciones
                 open={notification.open}
                 message={notification.message}
