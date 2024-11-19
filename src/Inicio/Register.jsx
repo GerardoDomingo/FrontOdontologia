@@ -14,7 +14,8 @@ const Register = () => {
     nombre: '',
     aPaterno: '',
     aMaterno: '',
-    fechaNacimiento: '', // Cambiamos de edad a fecha de nacimiento
+    fechaNacimiento: '',
+    esMayorDeEdad: true, // Campo para reflejar si es mayor de edad
     genero: '',
     lugar: '',
     otroLugar: '',
@@ -22,12 +23,11 @@ const Register = () => {
     email: '',
     alergias: [],
     otraAlergia: '',
-    tipoTutor: '', // Nuevo campo: tipo de tutor
-    nombreTutor: '', // Nuevo campo: nombre del tutor
+    tipoTutor: '',
+    nombreTutor: '',
     password: '',
     confirmPassword: '',
   });
-
 
   const [errors, setErrors] = useState({});
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -253,45 +253,45 @@ const Register = () => {
       }
     }
     // Manejar fecha de nacimiento
+    // Validar fecha de nacimiento
     if (name === 'fechaNacimiento') {
       const hoy = new Date();
       const nacimiento = new Date(value);
       const edad = hoy.getFullYear() - nacimiento.getFullYear();
       const esMenorDeEdad =
-        edad < 18 || (edad === 18 && (hoy.getMonth() < nacimiento.getMonth() || (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate())));
+        edad < 18 ||
+        (edad === 18 &&
+          (hoy.getMonth() < nacimiento.getMonth() ||
+            (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate())));
 
-      // Si es menor de edad, activar campos de tutor
-      if (esMenorDeEdad) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          tipoTutor: formData.tipoTutor ? '' : 'Selecciona el tipo de tutor',
-          nombreTutor: formData.nombreTutor ? '' : 'Especifica el nombre del tutor',
-        }));
-      } else {
-        // Limpiar errores si no es menor de edad
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          tipoTutor: '',
-          nombreTutor: '',
-        }));
+      setFormData((prevData) => ({
+        ...prevData,
+        esMayorDeEdad: !esMenorDeEdad, // Actualizar si es mayor de edad
+      }));
 
-        // Limpiar valores relacionados con el tutor
+      // Limpiar los datos del tutor si es mayor de edad
+      if (!esMenorDeEdad) {
         setFormData((prevData) => ({
           ...prevData,
           tipoTutor: '',
           nombreTutor: '',
         }));
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          tipoTutor: '',
+          nombreTutor: '',
+        }));
       }
     }
-    // Validaciones adicionales para tutor
-    if (name === 'tipoTutor') {
+    // Validar otros campos como tipoTutor y nombreTutor solo si es menor de edad
+    if (name === 'tipoTutor' && !formData.esMayorDeEdad) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         tipoTutor: value ? '' : 'Selecciona el tipo de tutor',
       }));
     }
 
-    if (name === 'nombreTutor') {
+    if (name === 'nombreTutor' && !formData.esMayorDeEdad) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         nombreTutor: value.trim() ? '' : 'Especifica el nombre del tutor',
