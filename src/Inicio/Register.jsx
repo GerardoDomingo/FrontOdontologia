@@ -609,7 +609,7 @@ const Register = () => {
   const validateStep = () => {
     const stepErrors = {};
     const nameRegex = /^[A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]+$/; // Acepta acentos, ñ y espacios.
-  
+
     if (activeStep === 0) {
       // Validación de nombre y apellidos (solo letras, espacios y acentos)
       if (!formData.nombre || !nameRegex.test(formData.nombre)) {
@@ -621,7 +621,7 @@ const Register = () => {
       if (!formData.aMaterno || !nameRegex.test(formData.aMaterno)) {
         stepErrors.aMaterno = 'El apellido materno solo debe contener letras, espacios y acentos.';
       }
-  
+
       // Validación de género y lugar de procedencia
       if (!formData.genero) {
         stepErrors.genero = 'Selecciona un género';
@@ -629,7 +629,7 @@ const Register = () => {
       if (formData.lugar === 'Otro' && !formData.otroLugar) {
         stepErrors.otroLugar = 'Especifica el lugar';
       }
-  
+
       // Validación de campos personales
       if (!formData.fechaNacimiento) {
         stepErrors.fechaNacimiento = 'La fecha de nacimiento es requerida';
@@ -637,14 +637,14 @@ const Register = () => {
       if (formData.tipoTutor === 'Otro' && (!formData.relacionTutor || formData.relacionTutor.trim() === '')) {
         stepErrors.relacionTutor = 'Por favor, especifica la relación con el menor.';
       }
-  
+
       // Validar tutor si es menor de edad
       const hoy = new Date();
       const nacimiento = new Date(formData.fechaNacimiento);
       const edad = hoy.getFullYear() - nacimiento.getFullYear();
       const esMenorDeEdad =
         edad < 18 || (edad === 18 && (hoy.getMonth() < nacimiento.getMonth() || (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate())));
-  
+
       if (esMenorDeEdad) {
         if (!formData.tipoTutor) {
           stepErrors.tipoTutor = 'Selecciona el tipo de tutor';
@@ -654,7 +654,7 @@ const Register = () => {
         }
       }
     }
-  
+
     if (activeStep === 1) {
       if (!formData.telefono) stepErrors.telefono = 'El teléfono es requerido';
       if (!formData.email) stepErrors.email = 'El correo electrónico es requerido';
@@ -662,16 +662,16 @@ const Register = () => {
         stepErrors.otraAlergia = 'Especifica la alergia';
       }
     }
-  
+
     if (activeStep === 2) {
       if (!formData.password) stepErrors.password = 'La contraseña es requerida';
       if (formData.password !== formData.confirmPassword) stepErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
-  
+
     setErrors(stepErrors);
     return Object.keys(stepErrors).length === 0;
   };
-  
+
   const alergiasInfo = {
     Penicilina: 'Antibiótico común.',
     Látex: 'Material en guantes y equipo dental.',
@@ -827,12 +827,30 @@ const Register = () => {
                   label="Nombre completo del Tutor"
                   name="nombreTutor"
                   value={formData.nombreTutor || ''}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const trimmedValue = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, ''); // Solo permite letras, espacios y acentos
+                    setFormData((prevData) => ({
+                      ...prevData,
+                      nombreTutor: trimmedValue,
+                    }));
+                    if (!trimmedValue) {
+                      setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        nombreTutor: 'El nombre del tutor es obligatorio y solo puede contener letras.',
+                      }));
+                    } else {
+                      setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        nombreTutor: '',
+                      }));
+                    }
+                  }}
                   margin="normal"
                   required
                   error={!!errors.nombreTutor}
                   helperText={errors.nombreTutor || 'Solo se permiten letras, espacios y acentos.'}
                 />
+
               </Box>
             )}
 
