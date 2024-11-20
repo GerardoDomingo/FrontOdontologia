@@ -88,35 +88,35 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Incluye las cookies en la solicitud
+        credentials: 'include',
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-  
+
       const data = await response.json();
-  
-      if (response.ok && data.user) {
-        // Redirige según el tipo de usuario
+
+      if (response.ok) {
+        // Inicio de sesión exitoso
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
       } else if (data.lockStatus) {
-        // Cuenta bloqueada - Formatea la fecha antes de mostrarla
+        // Cuenta bloqueada - Formatear fecha antes de mostrarla
         const formattedDate = formatDate(data.lockUntil);
         setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
         setOpenNotification(true);
@@ -127,7 +127,7 @@ const Login = () => {
         setOpenNotification(true);
         setErrorMessage('');
       } else if (data.failedAttempts !== undefined) {
-        // Contraseña incorrecta, muestra notificación
+        // Contraseña incorrecta, mostrar notificación
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
         setOpenNotification(true);
         setErrorMessage('Contraseña incorrecta.');
@@ -136,7 +136,7 @@ const Login = () => {
         setErrorMessage(data.message || 'Error al iniciar sesión.');
         setNotificationMessage('');
       }
-  
+
       recaptchaRef.current.reset();
       setCaptchaValue(null);
     } catch (error) {
@@ -145,7 +145,7 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <Box
       sx={{
