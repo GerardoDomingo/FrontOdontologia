@@ -67,7 +67,6 @@ const Login = () => {
   };
 
   // Manejar el envío del formulario
-  // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -91,18 +90,21 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Successful login, navigate based on user type
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
       } else if (data.lockStatus) {
-        // Cuenta bloqueada
+        // Account is locked
         setErrorMessage(`Tu cuenta está bloqueada hasta ${data.lockUntil}. Inténtalo nuevamente después.`);
         setNotificationMessage('Cuenta bloqueada');
         setOpenNotification(true);
       } else {
-        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts || 0}`);
+        // Handle incorrect credentials
+        setErrorMessage('Correo o contraseña incorrectos.');
+        setNotificationMessage('Advertencia: Credenciales incorrectas.');
         setOpenNotification(true);
       }
 
@@ -114,7 +116,6 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-
 
   return (
     <Box
@@ -304,9 +305,12 @@ const Login = () => {
       <Notificaciones
         open={openNotification}
         message={notificationMessage}
-        type={notificationMessage === 'Cuenta bloqueada' ? 'error' : 'warning'}
+        type={
+          notificationMessage.includes('Cuenta bloqueada') ? 'error' : 'warning'
+        }
         handleClose={handleCloseNotification}
       />
+
     </Box>
   );
 };
