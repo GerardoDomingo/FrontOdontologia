@@ -228,7 +228,7 @@ const Register = () => {
         [name]: trimmedValue, // Guarda el valor limpio en formData
       }));
     }
-    
+
     if (name === 'aPaterno') {
       if (!nameRegex.test(value)) {
         setErrors((prevErrors) => ({
@@ -291,6 +291,25 @@ const Register = () => {
       setErrors((prevErrors) => ({
         ...prevErrors,
         tipoTutor: value ? '' : 'Selecciona el tipo de tutor',
+      }));
+    }
+
+    if (name === 'relacionTutor') {
+      const trimmedValue = value.trim(); // Elimina espacios extra
+      if (!nameRegex.test(trimmedValue)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          relacionTutor: 'La relación solo debe contener letras, espacios y acentos.',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          relacionTutor: '',
+        }));
+      }
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: trimmedValue, // Guarda el valor limpio
       }));
     }
 
@@ -774,10 +793,9 @@ const Register = () => {
                     margin="normal"
                     required
                     error={!!errors.relacionTutor}
-                    helperText={
-                      errors.relacionTutor || 'Por ejemplo, tío, primo, vecino, etc.'
-                    }
+                    helperText={errors.relacionTutor || 'Solo se permiten letras, espacios y acentos.'}
                   />
+
                 )}
 
                 <TextField
