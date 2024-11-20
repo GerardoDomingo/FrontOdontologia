@@ -1,19 +1,17 @@
-import React, { useContext } from 'react';
-import { Route, Navigate } from 'react-router-dom';
-import { AuthContext } from './AuthContext';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const PrivateRoute = ({ children, ...rest }) => {
-  const { user, loading } = useContext(AuthContext);
+const PrivateRoute = ({ children }) => {
+  const navigate = useNavigate();
 
-  if (loading) {
-    return <p>Cargando...</p>; // Mostrar un indicador de carga mientras verificamos la autenticación
-  }
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('loggedIn'); // Revisa si el usuario está logueado
+    if (!isLoggedIn) {
+      navigate('/login'); // Redirige al login si no está logueado
+    }
+  }, [navigate]);
 
-  return user ? (
-    <Route {...rest}>{children}</Route>
-  ) : (
-    <Navigate to="/login" />
-  );
+  return children; // Si está logueado, renderiza el contenido de la ruta protegida
 };
 
 export default PrivateRoute;

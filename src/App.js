@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
+import PrivateRoute from './Compartidos/PrivateRoute.jsx';
 
 //Inicio
 import Home from './Inicio/Home';
@@ -80,18 +81,38 @@ function App() {
         {/* Rutas públicas */}
         <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} />
         <Route path="/register" element={<LayoutConEncabezado><Register /></LayoutConEncabezado>} />
+        <Route path="/login" element={<Login />} />
         <Route path="/recuperacion" element={<Recuperacion />} />
         <Route path="/resetContra" element={<Reset />} />
-        <Route path="/login" element={<Login />} />
 
-        {/* Rutas del paciente */}
-        <Route path="/Paciente/principal" element={<LayoutPaciente><Principal /></LayoutPaciente>} />
+        {/* Rutas protegidas del paciente */}
+        <Route path="/Paciente/principal" element={
+          <PrivateRoute>
+            <LayoutPaciente><Principal /></LayoutPaciente>
+          </PrivateRoute>
+        } />
 
-        {/* Rutas administrativas */}
-        <Route path="/Administrador/principal" element={<LayoutAdmin><PrincipalAdmin /></LayoutAdmin>} />
-        <Route path="/Administrador/configuracion" element={<LayoutAdmin><Configuracion /></LayoutAdmin>} />
-        <Route path="/Administrador/reportes" element={<LayoutAdmin><Reportes /></LayoutAdmin>} />
-        <Route path="/Administrador/PerfilEmpresa" element={<LayoutAdmin><PerfilEmpresa /></LayoutAdmin>} />
+        {/* Rutas protegidas del administrador */}
+        <Route path="/Administrador/principal" element={
+          <PrivateRoute>
+            <LayoutAdmin><PrincipalAdmin /></LayoutAdmin>
+          </PrivateRoute>
+        } />
+        <Route path="/Administrador/configuracion" element={
+          <PrivateRoute>
+            <LayoutAdmin><Configuracion /></LayoutAdmin>
+          </PrivateRoute>
+        } />
+        <Route path="/Administrador/reportes" element={
+          <PrivateRoute>
+            <LayoutAdmin><Reportes /></LayoutAdmin>
+          </PrivateRoute>
+        } />
+        <Route path="/Administrador/PerfilEmpresa" element={
+          <PrivateRoute>
+            <LayoutAdmin><PerfilEmpresa /></LayoutAdmin>
+          </PrivateRoute>
+        } />
       </Routes>
     </Router>
   );
