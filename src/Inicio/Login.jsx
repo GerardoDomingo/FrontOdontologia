@@ -34,15 +34,24 @@ const Login = () => {
     };
   }, []);
 
-  // Eliminar notificación después de 3 segundos
+  // Eliminar notificación después de un tiempo específico
   useEffect(() => {
     if (openNotification) {
+      // Duración predeterminada: 3 segundos
+      let duration = 3000;
+
+      // Extender tiempo si el mensaje es de "Cuenta bloqueada"
+      if (notificationMessage.includes('Cuenta bloqueada')) {
+        duration = 6000; // 10 segundos para mensajes de cuenta bloqueada
+      }
+
       const timer = setTimeout(() => {
         setOpenNotification(false);
-      }, 3000);
+      }, duration);
+
       return () => clearTimeout(timer);
     }
-  }, [openNotification]);
+  }, [openNotification, notificationMessage]);
 
   // Eliminar mensaje de error después de 3 segundos
   useEffect(() => {
