@@ -26,8 +26,6 @@ function App() {
   const [tituloPagina, setTituloPagina] = useState('');
   const [logo, setLogo] = useState('');
   const [fetchErrors, setFetchErrors] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState(''); // 'paciente' o 'administrador'
 
   const fetchTitleAndLogo = async (retries = 3) => {
     try {
@@ -49,11 +47,11 @@ function App() {
       setFetchErrors(0);
     } catch (error) {
       if (error.response) {
-        console.error("Error en la respuesta del servidor:", error.response.status);
+        console.error('Error en la respuesta del servidor:', error.response.status);
       } else if (error.request) {
-        console.error("Error en la solicitud:", error.request);
+        console.error('Error en la solicitud:', error.request);
       } else {
-        console.error("Error desconocido:", error.message);
+        console.error('Error desconocido:', error.message);
       }
 
       if (retries > 0) {
@@ -65,33 +63,14 @@ function App() {
     }
   };
 
-  const checkAuth = async () => {
-    try {
-      const response = await axios.get('https://backendodontologia.onrender.com/api/users/checkAuth', {
-        withCredentials: true, // Send cookies with the request
-      });
-
-      console.log('checkAuth response:', response.data);
-
-      setIsAuthenticated(true);
-      setUserType(response.data.user.tipo); // 'paciente' or 'administrador'
-    } catch (error) {
-      console.error('Error in checkAuth:', error.message);
-      setIsAuthenticated(false);
-      setUserType('');
-    }
-  };
-
-
   useEffect(() => {
     fetchTitleAndLogo();
-    checkAuth();
 
     const interval = setInterval(fetchTitleAndLogo, 15000);
 
     if (fetchErrors >= 5) {
       clearInterval(interval);
-      console.error("Demasiados errores al intentar conectarse con el backend.");
+      console.error('Demasiados errores al intentar conectarse con el backend.');
     }
 
     return () => clearInterval(interval);
@@ -111,7 +90,7 @@ function App() {
         <Route
           path="/Paciente/principal"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'paciente'}>
+            <ProtectedRoute requiredRole="paciente">
               <LayoutPaciente><Principal /></LayoutPaciente>
             </ProtectedRoute>
           }
@@ -121,7 +100,7 @@ function App() {
         <Route
           path="/Administrador/principal"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+            <ProtectedRoute requiredRole="administrador">
               <LayoutAdmin><PrincipalAdmin /></LayoutAdmin>
             </ProtectedRoute>
           }
@@ -129,7 +108,7 @@ function App() {
         <Route
           path="/Administrador/configuracion"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+            <ProtectedRoute requiredRole="administrador">
               <LayoutAdmin><Configuracion /></LayoutAdmin>
             </ProtectedRoute>
           }
@@ -137,7 +116,7 @@ function App() {
         <Route
           path="/Administrador/reportes"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+            <ProtectedRoute requiredRole="administrador">
               <LayoutAdmin><Reportes /></LayoutAdmin>
             </ProtectedRoute>
           }
@@ -145,7 +124,7 @@ function App() {
         <Route
           path="/Administrador/PerfilEmpresa"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+            <ProtectedRoute requiredRole="administrador">
               <LayoutAdmin><PerfilEmpresa /></LayoutAdmin>
             </ProtectedRoute>
           }

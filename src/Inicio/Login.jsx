@@ -5,6 +5,7 @@ import { Email, Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-ma
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useNavigate, Link } from 'react-router-dom';
 import Notificaciones from '../Compartidos/Notificaciones';
+import { checkAuth } from '../Compartidos/ProtectedRoute'; // Cambia esta ruta según tu proyecto
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
