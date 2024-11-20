@@ -18,7 +18,7 @@ const Login = () => {
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
-  // Detectar el tema del sistema
+  // Detect system theme
   useEffect(() => {
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkMode(matchDarkTheme.matches);
@@ -34,7 +34,7 @@ const Login = () => {
     };
   }, []);
 
-  // Eliminar mensaje de error después de 3 segundos
+  // Clear error message after 3 seconds
   useEffect(() => {
     let errorTimeout;
     if (errorMessage) {
@@ -45,28 +45,28 @@ const Login = () => {
     return () => clearTimeout(errorTimeout);
   }, [errorMessage]);
 
-  // Manejar el cambio de los campos del formulario
+  // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Capturar el valor del captcha cuando se completa
+  // Capture CAPTCHA value
   const handleCaptchaChange = (value) => {
     setCaptchaValue(value);
   };
 
-  // Alternar la visibilidad de la contraseña
+  // Toggle password visibility
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // Cerrar la notificación
+  // Close notifications
   const handleCloseNotification = () => {
     setOpenNotification(false);
   };
 
-  // Manejar el envío del formulario
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,7 +90,6 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Successful login, navigate based on user type
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
@@ -98,13 +97,18 @@ const Login = () => {
         }
       } else if (data.lockStatus) {
         // Account is locked
-        setErrorMessage(`Tu cuenta está bloqueada hasta ${data.lockUntil}. Inténtalo nuevamente después.`);
+        setErrorMessage(`Tu cuenta está bloqueada hasta ${data.lockUntil}.`);
         setNotificationMessage('Cuenta bloqueada');
         setOpenNotification(true);
-      } else {
-        // Handle incorrect credentials
-        setErrorMessage('Correo o contraseña incorrectos.');
-        setNotificationMessage('Advertencia: Credenciales incorrectas.');
+      } else if (data.invalidEmail) {
+        // Invalid email
+        setErrorMessage('Advertencia: Correo no válido.');
+        setNotificationMessage('Advertencia: Correo no válido.');
+        setOpenNotification(true);
+      } else if (data.failedAttempts >= 0) {
+        // Invalid password, show remaining attempts
+        setErrorMessage(`Intento ${data.failedAttempts + 1}: Contraseña incorrecta.`);
+        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts + 1}`);
         setOpenNotification(true);
       }
 
@@ -128,7 +132,7 @@ const Login = () => {
         justifyContent: 'center',
         alignItems: 'center',
         padding: '20px',
-        position: 'relative'
+        position: 'relative',
       }}
     >
       <IconButton
@@ -160,7 +164,7 @@ const Login = () => {
           <IconButton sx={{ fontSize: 40, color: isDarkMode ? '#FFFFFF' : '#00bcd4' }}>
             <FaTooth />
           </IconButton>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: isDarkMode ? '#FFFFFF' : '#000000' }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
             Iniciar Sesión
           </Typography>
 
@@ -190,11 +194,6 @@ const Login = () => {
                   },
                   '& .MuiInputLabel-root': {
                     color: isDarkMode ? '#B0BEC5' : '#616161',
-                  },
-                  // Estilos para el autocompletado
-                  '&:-webkit-autofill': {
-                    WebkitBoxShadow: `0 0 0 100px ${isDarkMode ? '#444444' : '#FFFFFF'} inset`,
-                    WebkitTextFillColor: isDarkMode ? '#FFFFFF' : '#000000',
                   },
                 }}
               />
@@ -233,10 +232,6 @@ const Login = () => {
                   },
                   '& .MuiInputLabel-root': {
                     color: isDarkMode ? '#B0BEC5' : '#616161',
-                  },
-                  '&:-webkit-autofill': {
-                    WebkitBoxShadow: `0 0 0 100px ${isDarkMode ? '#444444' : '#FFFFFF'} inset`,
-                    WebkitTextFillColor: isDarkMode ? '#FFFFFF' : '#000000',
                   },
                 }}
               />
@@ -279,7 +274,7 @@ const Login = () => {
                 fontWeight: 'bold',
                 boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                 '&.Mui-disabled': {
-                  color: 'rgba(255, 255, 255, 0.5)', // Texto gris claro cuando está deshabilitado
+                  color: 'rgba(255, 255, 255, 0.5)',
                 },
               }}
               disabled={!captchaValue || isLoading}
@@ -306,11 +301,14 @@ const Login = () => {
         open={openNotification}
         message={notificationMessage}
         type={
-          notificationMessage.includes('Cuenta bloqueada') ? 'error' : 'warning'
+          notificationMessage.includes('Cuenta bloqueada')
+            ? 'error'
+            : notificationMessage.includes('Advertencia')
+            ? 'warning'
+            : 'info'
         }
         handleClose={handleCloseNotification}
       />
-
     </Box>
   );
 };
