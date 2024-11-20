@@ -67,6 +67,7 @@ const Login = () => {
   };
 
   // Manejar el envío del formulario
+  // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -95,13 +96,18 @@ const Login = () => {
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
+      } else if (data.lockStatus) {
+        // Cuenta bloqueada
+        setErrorMessage(`Tu cuenta está bloqueada hasta ${data.lockUntil}. Inténtalo nuevamente después.`);
+        setNotificationMessage('Cuenta bloqueada');
+        setOpenNotification(true);
       } else {
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts || 0}`);
         setOpenNotification(true);
-        recaptchaRef.current.reset();
-        setCaptchaValue(null);
-        setErrorMessage(data.message || 'Error al iniciar sesión');
       }
+
+      recaptchaRef.current.reset();
+      setCaptchaValue(null);
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {
@@ -109,11 +115,12 @@ const Login = () => {
     }
   };
 
+
   return (
     <Box
       sx={{
-        background: isDarkMode 
-          ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)' 
+        background: isDarkMode
+          ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)'
           : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)',
         minHeight: '100vh',
         display: 'flex',
@@ -136,12 +143,12 @@ const Login = () => {
         </Box>
       </IconButton>
 
-      <Card 
-        sx={{ 
-          maxWidth: 400, 
-          width: '100%', 
-          borderRadius: '15px', 
-          boxShadow: 3, 
+      <Card
+        sx={{
+          maxWidth: 400,
+          width: '100%',
+          borderRadius: '15px',
+          boxShadow: 3,
           position: 'relative',
           backgroundColor: isDarkMode ? '#333333' : '#FFFFFF',
           color: isDarkMode ? '#FFFFFF' : '#000000',
@@ -274,7 +281,7 @@ const Login = () => {
                   color: 'rgba(255, 255, 255, 0.5)', // Texto gris claro cuando está deshabilitado
                 },
               }}
-              disabled={!captchaValue || isLoading} 
+              disabled={!captchaValue || isLoading}
             >
               {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}
             </Button>
@@ -294,11 +301,10 @@ const Login = () => {
           </form>
         </CardContent>
       </Card>
-
       <Notificaciones
         open={openNotification}
         message={notificationMessage}
-        type="warning"
+        type={notificationMessage === 'Cuenta bloqueada' ? 'error' : 'warning'}
         handleClose={handleCloseNotification}
       />
     </Box>
