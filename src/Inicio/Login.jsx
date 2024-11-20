@@ -5,18 +5,15 @@ import { Email, Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-ma
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useNavigate, Link } from 'react-router-dom';
 import Notificaciones from '../Compartidos/Notificaciones';
-import Verificacion from '../Compartidos/verificacion'; // Modal de verificación
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [verificationCode, setVerificationCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [captchaValue, setCaptchaValue] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
@@ -91,80 +88,64 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
+        credentials: 'include', // Importante para enviar cookies
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
-        // Código de verificación enviado
-        await fetch('https://backendodontologia.onrender.com/api/users/send-verification-code', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: formData.email }),
-        });
-
-        setIsModalOpen(true); // Abrir modal
+        // Configurar el estado de inicio de sesión en localStorage
+        localStorage.setItem('loggedIn', true);
+  
+        // Redirigir al tipo de usuario correspondiente
+        if (data.user.tipo === 'administrador') {
+          navigate('/Administrador/principal');
+        } else if (data.user.tipo === 'paciente') {
+          navigate('/Paciente/principal');
+        }
       } else if (data.lockStatus) {
-        const formattedDate = formatDate(data.lockUntil); // Usar función formatDate
+        // Cuenta bloqueada
+        const formattedDate = formatDate(data.lockUntil);
         setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
         setOpenNotification(true);
         setErrorMessage('');
+      } else if (data.invalidEmail) {
+        // Correo inválido
+        setNotificationMessage('Advertencia: Correo no válido.');
+        setOpenNotification(true);
+        setErrorMessage('');
+      } else if (data.failedAttempts !== undefined) {
+        // Contraseña incorrecta
+        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
+        setOpenNotification(true);
+        setErrorMessage('Contraseña incorrecta.');
       } else {
+        // Manejo genérico de errores
         setErrorMessage(data.message || 'Error al iniciar sesión.');
         setNotificationMessage('');
       }
+  
+      recaptchaRef.current.reset();
+      setCaptchaValue(null);
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Manejar la verificación del código
-  const handleVerificationSubmit = async () => {
-    try {
-      const response = await fetch('https://backendodontologia.onrender.com/api/users/verify-verification-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formData.email, code: verificationCode }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('loggedIn', true);
-
-        // Redirigir al tipo de usuario correspondiente
-        if (data.userType === 'administrador') {
-          navigate('/Administrador/principal');
-        } else if (data.userType === 'paciente') {
-          navigate('/Paciente/principal');
-        }
-      } else {
-        setErrorMessage(data.message || 'Código incorrecto.');
-      }
-    } catch (error) {
-      setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     }
   };
 
@@ -328,31 +309,22 @@ const Login = () => {
             >
               {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}
             </Button>
+
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="body2" sx={{ color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
+                <Link to="/register" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  ¿No tienes cuenta? Registrarte
+                </Link>
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
+                <Link to="/recuperacion" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </Typography>
+            </Box>
           </form>
-          {/* Links de recuperación y registro */}
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
-              <Link to="/register" style={{ color: 'inherit', textDecoration: 'none' }}>
-                ¿No tienes cuenta? Registrarte
-              </Link>
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1, color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
-              <Link to="/recuperacion" style={{ color: 'inherit', textDecoration: 'none' }}>
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </Typography>
-          </Box>
         </CardContent>
       </Card>
-
-      {/* Modal de Verificación */}
-      <Verificacion
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleVerificationSubmit}
-        setCode={setVerificationCode}
-      />
-
       <Notificaciones
         open={openNotification}
         message={notificationMessage}
@@ -360,8 +332,8 @@ const Login = () => {
           notificationMessage.includes('Cuenta bloqueada')
             ? 'error'
             : notificationMessage.includes('Advertencia')
-              ? 'warning'
-              : 'info'
+            ? 'warning'
+            : 'info'
         }
         handleClose={() => setOpenNotification(false)}
       />
