@@ -690,6 +690,9 @@ const Register = () => {
               name="nombre"
               value={formData.nombre}
               onChange={handleChange}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
+              }}
               margin="normal"
               required
               error={!!errors.nombre}
@@ -790,6 +793,9 @@ const Register = () => {
                     name="relacionTutor"
                     value={formData.relacionTutor || ''}
                     onChange={handleChange}
+                    onInput={(e) => {
+                      e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
+                    }}
                     margin="normal"
                     required
                     error={!!errors.relacionTutor}
