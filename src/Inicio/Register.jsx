@@ -210,12 +210,12 @@ const Register = () => {
       });
     }
 
-    // Validación de nombre y apellidos
     if (name === 'nombre') {
-      if (!nameRegex.test(value)) {
+      const trimmedValue = value.trim(); // Elimina espacios al inicio y final
+      if (!nameRegex.test(trimmedValue)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          nombre: 'El nombre solo debe contener letras.',
+          nombre: 'El nombre solo debe contener letras, espacios y acentos.',
         }));
       } else {
         setErrors((prevErrors) => ({
@@ -223,8 +223,12 @@ const Register = () => {
           nombre: '',
         }));
       }
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: trimmedValue, // Guarda el valor limpio en formData
+      }));
     }
-
+    
     if (name === 'aPaterno') {
       if (!nameRegex.test(value)) {
         setErrors((prevErrors) => ({
@@ -253,7 +257,6 @@ const Register = () => {
       }
     }
     // Manejar fecha de nacimiento
-    // Validar fecha de nacimiento
     if (name === 'fechaNacimiento') {
       const hoy = new Date();
       const nacimiento = new Date(value);
@@ -291,13 +294,19 @@ const Register = () => {
       }));
     }
 
-    if (name === 'nombreTutor' && !formData.esMayorDeEdad) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        nombreTutor: value.trim() ? '' : 'Especifica el nombre del tutor',
-      }));
+    if (name === 'nombreTutor') {
+      if (!nameRegex.test(value)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          nombreTutor: 'El nombre del tutor solo debe contener letras y espacios.',
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          nombreTutor: '',
+        }));
+      }
     }
-
 
     if (name === 'email') {
       if (value !== trimmedValue || !emailRegex.test(trimmedValue)) {
@@ -674,6 +683,7 @@ const Register = () => {
                 ),
               }}
             />
+
             {/* Campo de Apellido Paterno */}
             <TextField
               fullWidth
@@ -779,7 +789,7 @@ const Register = () => {
                   margin="normal"
                   required
                   error={!!errors.nombreTutor}
-                  helperText={errors.nombreTutor || 'Escribe el nombre completo del tutor'}
+                  helperText={errors.nombreTutor || 'Solo se permiten letras, espacios y acentos.'}
                 />
               </Box>
             )}
