@@ -71,8 +71,8 @@ function App() {
         withCredentials: true,
       });
 
-      setIsAuthenticated(response.data.authenticated);
-      setUserType(response.data.userType); // 'paciente' o 'administrador'
+      setIsAuthenticated(true);
+      setUserType(response.data.user.tipo); // Establece 'paciente' o 'administrador'
     } catch (error) {
       setIsAuthenticated(false);
       setUserType('');
