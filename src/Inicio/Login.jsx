@@ -44,6 +44,16 @@ const Login = () => {
     }
   }, [openNotification]);
 
+  // Eliminar mensaje de error después de 3 segundos
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
   // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
