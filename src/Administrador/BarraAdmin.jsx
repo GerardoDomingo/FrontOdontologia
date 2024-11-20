@@ -40,7 +40,7 @@ const BarraAdmin = () => {
     const handleLogout = async () => {
         handleMenuClose(); // Cierra el menú
         setOpenNotification(true); // Activa la notificación
-
+    
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
@@ -49,22 +49,29 @@ const BarraAdmin = () => {
                     'Content-Type': 'application/json',
                 },
             });
-
+    
             if (!response.ok) {
-                throw new Error('Error al cerrar sesión.');
+                // Manejar errores específicos según el código de estado de la respuesta
+                const errorData = await response.json();
+                console.error('Error en el cierre de sesión:', errorData.message || 'Error desconocido');
+                throw new Error(errorData.message || 'Error al cerrar sesión.');
             }
-
+    
+            // Confirmar que la cookie fue eliminada en el servidor
+            console.log('Sesión cerrada exitosamente en el servidor.');
+    
             // Limpiar cualquier estado relacionado con la sesión del cliente
             localStorage.removeItem('loggedIn'); // Elimina el estado de sesión almacenado localmente
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
+            setNotificationMessage('Error al cerrar sesión. Inténtalo nuevamente.');
         } finally {
             setTimeout(() => {
                 navigate('/'); // Redirige después de que la notificación aparezca
-            }, 2000); // Espera 1 segundo antes de redirigir
+            }, 2000); // Espera 2 segundos antes de redirigir
         }
     };
-
+    
     // Cerrar la notificación
     const handleNotificationClose = () => {
         setOpenNotification(false);
