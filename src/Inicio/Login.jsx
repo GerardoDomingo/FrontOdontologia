@@ -108,14 +108,15 @@ const Login = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Inicio de sesión exitoso
+      if (response.ok && data.user) {
+        await checkAuth(); // Re-validate the session
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
-      } else if (data.lockStatus) {
+      }
+      else if (data.lockStatus) {
         // Cuenta bloqueada - Formatear fecha antes de mostrarla
         const formattedDate = formatDate(data.lockUntil);
         setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);

@@ -68,16 +68,20 @@ function App() {
   const checkAuth = async () => {
     try {
       const response = await axios.get('https://backendodontologia.onrender.com/api/users/checkAuth', {
-        withCredentials: true,
+        withCredentials: true, // Send cookies with the request
       });
 
+      console.log('checkAuth response:', response.data);
+
       setIsAuthenticated(true);
-      setUserType(response.data.user.tipo); // Establece 'paciente' o 'administrador'
+      setUserType(response.data.user.tipo); // 'paciente' or 'administrador'
     } catch (error) {
+      console.error('Error in checkAuth:', error.message);
       setIsAuthenticated(false);
       setUserType('');
     }
   };
+
 
   useEffect(() => {
     fetchTitleAndLogo();
