@@ -108,7 +108,7 @@ const Login = () => {
         setOpenNotification(true);
       } else if (data.failedAttempts >= 0) {
         // Contraseña incorrecta, mostrar intentos restantes
-        setErrorMessage(`Intento ${data.failedAttempts + 1}: Contraseña incorrecta.`);
+        setErrorMessage(`Intento ${data.failedAttempts}: Contraseña incorrecta.`);
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts + 1}`);
         setOpenNotification(true);
       } else {
