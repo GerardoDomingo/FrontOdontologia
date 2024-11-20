@@ -744,6 +744,23 @@ const Register = () => {
                 ),
               }}
             />
+
+            {/* Campo de Género */}
+            <FormControl fullWidth margin="normal" required error={!!errors.genero}>
+              <InputLabel>Género del paciente</InputLabel>
+              <Select
+                value={formData.genero}
+                onChange={handleChange}
+                label="Género"
+                name="genero"
+              >
+                <MenuItem value="Masculino">Masculino</MenuItem>
+                <MenuItem value="Femenino">Femenino</MenuItem>
+                <MenuItem value="Prefiero no decirlo">Prefiero no decirlo</MenuItem>
+              </Select>
+              {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
+            </FormControl>
+
             {/* Campo de Fecha de Nacimiento */}
             <TextField
               fullWidth
@@ -817,23 +834,6 @@ const Register = () => {
                 />
               </Box>
             )}
-
-
-            {/* Campo de Género */}
-            <FormControl fullWidth margin="normal" required error={!!errors.genero}>
-              <InputLabel>Género del paciente</InputLabel>
-              <Select
-                value={formData.genero}
-                onChange={handleChange}
-                label="Género"
-                name="genero"
-              >
-                <MenuItem value="Masculino">Masculino</MenuItem>
-                <MenuItem value="Femenino">Femenino</MenuItem>
-                <MenuItem value="Prefiero no decirlo">Prefiero no decirlo</MenuItem>
-              </Select>
-              {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
-            </FormControl>
 
             {/* Campo de Lugar de Procedencia */}
             <FormControl fullWidth margin="normal" required error={!!errors.lugar}>
