@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
+import ProtectedRoute from './Compartidos/ProtectedRoute.jsx';
 
 //Inicio
 import Home from './Inicio/Home';
@@ -25,6 +26,8 @@ function App() {
   const [tituloPagina, setTituloPagina] = useState('');
   const [logo, setLogo] = useState('');
   const [fetchErrors, setFetchErrors] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState(''); // 'paciente' o 'administrador'
 
   const fetchTitleAndLogo = async (retries = 3) => {
     try {
@@ -54,16 +57,32 @@ function App() {
       }
 
       if (retries > 0) {
-        await new Promise((res) => setTimeout(res, 1000)); 
+        await new Promise((res) => setTimeout(res, 1000));
         fetchTitleAndLogo(retries - 1);
       } else {
-        setFetchErrors((prev) => prev + 1); 
+        setFetchErrors((prev) => prev + 1);
       }
+    }
+  };
+
+  const checkAuth = async () => {
+    try {
+      const response = await axios.get('https://backendodontologia.onrender.com/api/users/checkAuth', {
+        withCredentials: true,
+      });
+
+      setIsAuthenticated(response.data.authenticated);
+      setUserType(response.data.userType); // 'paciente' o 'administrador'
+    } catch (error) {
+      setIsAuthenticated(false);
+      setUserType('');
     }
   };
 
   useEffect(() => {
     fetchTitleAndLogo();
+    checkAuth();
+
     const interval = setInterval(fetchTitleAndLogo, 15000);
 
     if (fetchErrors >= 5) {
@@ -85,13 +104,48 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         {/* Rutas del paciente */}
-        <Route path="/Paciente/principal" element={<LayoutPaciente><Principal /></LayoutPaciente>} />
+        <Route
+          path="/Paciente/principal"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'paciente'}>
+              <LayoutPaciente><Principal /></LayoutPaciente>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rutas administrativas */}
-        <Route path="/Administrador/principal" element={<LayoutAdmin><PrincipalAdmin /></LayoutAdmin>} />
-        <Route path="/Administrador/configuracion" element={<LayoutAdmin><Configuracion /></LayoutAdmin>} />
-        <Route path="/Administrador/reportes" element={<LayoutAdmin><Reportes /></LayoutAdmin>} />
-        <Route path="/Administrador/PerfilEmpresa" element={<LayoutAdmin><PerfilEmpresa /></LayoutAdmin>} />
+        <Route
+          path="/Administrador/principal"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+              <LayoutAdmin><PrincipalAdmin /></LayoutAdmin>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Administrador/configuracion"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+              <LayoutAdmin><Configuracion /></LayoutAdmin>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Administrador/reportes"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+              <LayoutAdmin><Reportes /></LayoutAdmin>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Administrador/PerfilEmpresa"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated && userType === 'administrador'}>
+              <LayoutAdmin><PerfilEmpresa /></LayoutAdmin>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
