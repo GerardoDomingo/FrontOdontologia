@@ -37,12 +37,9 @@ const Login = () => {
   // Eliminar notificación después de un tiempo específico
   useEffect(() => {
     if (openNotification) {
-      // Duración predeterminada: 3 segundos
-      let duration = 3000;
-
-      // Extender tiempo si el mensaje es de "Cuenta bloqueada"
+      let duration = 3000; // Duración predeterminada: 3 segundos
       if (notificationMessage.includes('Cuenta bloqueada')) {
-        duration = 6000; // 10 segundos para mensajes de cuenta bloqueada
+        duration = 6000; // 6 segundos para mensajes de cuenta bloqueada
       }
 
       const timer = setTimeout(() => {
@@ -79,6 +76,16 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
+  // Formatear fecha para mostrarla de forma entendible
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const formatter = new Intl.DateTimeFormat('es-ES', {
+      dateStyle: 'long',
+      timeStyle: 'short',
+    });
+    return formatter.format(date).replace(' ', ' a las ');
+  };
+
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,29 +110,25 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Inicio de sesión exitoso
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
       } else if (data.lockStatus) {
-        // Cuenta bloqueada
-        setNotificationMessage(`Cuenta bloqueada hasta ${data.lockUntil}`);
+        const formattedDate = formatDate(data.lockUntil);
+        setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
         setOpenNotification(true);
         setErrorMessage('');
       } else if (data.invalidEmail) {
-        // Correo inválido
         setNotificationMessage('Advertencia: Correo no válido.');
         setOpenNotification(true);
         setErrorMessage('');
       } else if (data.failedAttempts !== undefined) {
-        // Contraseña incorrecta, mostrar notificación
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
         setOpenNotification(true);
         setErrorMessage('Contraseña incorrecta.');
       } else {
-        // Manejo genérico de errores
         setErrorMessage(data.message || 'Error al iniciar sesión.');
         setNotificationMessage('');
       }
@@ -236,7 +239,10 @@ const Login = () => {
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={handleTogglePasswordVisibility} sx={{ color: isDarkMode ? '#FFFFFF' : '#000000' }}>
+                      <IconButton
+                        onClick={handleTogglePasswordVisibility}
+                        sx={{ color: isDarkMode ? '#FFFFFF' : '#000000' }}
+                      >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
@@ -299,19 +305,6 @@ const Login = () => {
             >
               {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}
             </Button>
-
-            <Box sx={{ mt: 3, textAlign: 'center' }}>
-              <Typography variant="body2" sx={{ color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
-                <Link to="/register" style={{ color: 'inherit', textDecoration: 'none' }}>
-                  ¿No tienes cuenta? Registrarte
-                </Link>
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1, color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
-                <Link to="/recuperacion" style={{ color: 'inherit', textDecoration: 'none' }}>
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </Typography>
-            </Box>
           </form>
         </CardContent>
       </Card>
