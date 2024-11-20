@@ -88,35 +88,38 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
+        credentials: 'include', // Importante para enviar cookies
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
-        // Inicio de sesión exitoso
+        // Configurar el estado de inicio de sesión en localStorage
+        localStorage.setItem('loggedIn', true);
+  
+        // Redirigir al tipo de usuario correspondiente
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
       } else if (data.lockStatus) {
-        // Cuenta bloqueada - Formatear fecha antes de mostrarla
+        // Cuenta bloqueada
         const formattedDate = formatDate(data.lockUntil);
         setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
         setOpenNotification(true);
@@ -127,7 +130,7 @@ const Login = () => {
         setOpenNotification(true);
         setErrorMessage('');
       } else if (data.failedAttempts !== undefined) {
-        // Contraseña incorrecta, mostrar notificación
+        // Contraseña incorrecta
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
         setOpenNotification(true);
         setErrorMessage('Contraseña incorrecta.');
@@ -136,7 +139,7 @@ const Login = () => {
         setErrorMessage(data.message || 'Error al iniciar sesión.');
         setNotificationMessage('');
       }
-
+  
       recaptchaRef.current.reset();
       setCaptchaValue(null);
     } catch (error) {
