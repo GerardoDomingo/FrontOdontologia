@@ -225,7 +225,7 @@ const Register = () => {
       }
       setFormData((prevData) => ({
         ...prevData,
-        [name]: trimmedValue, // Guarda el valor limpio en formData
+        [name]: value, // Guarda el valor ingresado (sin modificar espacios internos)
       }));
     }
 
@@ -295,8 +295,8 @@ const Register = () => {
     }
 
     if (name === 'relacionTutor') {
-      const trimmedValue = value.trim(); // Elimina espacios extra
-      if (!nameRegex.test(trimmedValue)) {
+      const trimmedValue = value.trim(); // Elimina espacios en blanco
+      if (!nameRegex.test(trimmedValue) || trimmedValue === '') {
         setErrors((prevErrors) => ({
           ...prevErrors,
           relacionTutor: 'La relación solo debe contener letras, espacios y acentos.',
@@ -309,7 +309,7 @@ const Register = () => {
       }
       setFormData((prevData) => ({
         ...prevData,
-        [name]: trimmedValue, // Guarda el valor limpio
+        [name]: trimmedValue,
       }));
     }
 
@@ -634,6 +634,10 @@ const Register = () => {
       if (!formData.fechaNacimiento) {
         stepErrors.fechaNacimiento = 'La fecha de nacimiento es requerida';
       }
+      if (formData.tipoTutor === 'Otro' && (!formData.relacionTutor || formData.relacionTutor.trim() === '')) {
+        stepErrors.relacionTutor = 'Por favor, especifica la relación con el menor.';
+      }
+      
 
       // Validar tutor si es menor de edad
       const hoy = new Date();
@@ -693,6 +697,7 @@ const Register = () => {
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
               }}
+
               margin="normal"
               required
               error={!!errors.nombre}
@@ -802,7 +807,6 @@ const Register = () => {
                   </Select>
                   {errors.tipoTutor && <FormHelperText>{errors.tipoTutor}</FormHelperText>}
                 </FormControl>
-
                 {formData.tipoTutor === 'Otro' && (
                   <TextField
                     fullWidth
@@ -816,9 +820,8 @@ const Register = () => {
                     margin="normal"
                     required
                     error={!!errors.relacionTutor}
-                    helperText={errors.relacionTutor || 'Solo se permiten letras, espacios y acentos.'}
+                    helperText={errors.relacionTutor || 'Solo letras, espacios y acentos. No puede estar vacío.'}
                   />
-
                 )}
 
                 <TextField
