@@ -34,16 +34,15 @@ const Login = () => {
     };
   }, []);
 
-  // Eliminar mensaje de error después de 3 segundos
+  // Eliminar notificación después de 3 segundos
   useEffect(() => {
-    let errorTimeout;
-    if (errorMessage) {
-      errorTimeout = setTimeout(() => {
-        setErrorMessage('');
+    if (openNotification) {
+      const timer = setTimeout(() => {
+        setOpenNotification(false);
       }, 3000);
+      return () => clearTimeout(timer);
     }
-    return () => clearTimeout(errorTimeout);
-  }, [errorMessage]);
+  }, [openNotification]);
 
   // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
@@ -59,11 +58,6 @@ const Login = () => {
   // Alternar la visibilidad de la contraseña
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  // Cerrar las notificaciones
-  const handleCloseNotification = () => {
-    setOpenNotification(false);
   };
 
   // Manejar el envío del formulario
@@ -98,22 +92,23 @@ const Login = () => {
         }
       } else if (data.lockStatus) {
         // Cuenta bloqueada
-        setErrorMessage(`Tu cuenta está bloqueada hasta ${data.lockUntil}.`);
-        setNotificationMessage('Cuenta bloqueada');
+        setNotificationMessage(`Cuenta bloqueada hasta ${data.lockUntil}`);
         setOpenNotification(true);
+        setErrorMessage('');
       } else if (data.invalidEmail) {
         // Correo inválido
-        setErrorMessage('Advertencia: Correo no válido.');
         setNotificationMessage('Advertencia: Correo no válido.');
         setOpenNotification(true);
-      } else if (data.failedAttempts >= 0) {
-        // Contraseña incorrecta, mostrar intentos restantes
-        setErrorMessage(`Intento ${data.failedAttempts}: Contraseña incorrecta.`);
-        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts + 1}`);
+        setErrorMessage('');
+      } else if (data.failedAttempts !== undefined) {
+        // Contraseña incorrecta, mostrar notificación
+        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
         setOpenNotification(true);
+        setErrorMessage('Contraseña incorrecta.');
       } else {
         // Manejo genérico de errores
         setErrorMessage(data.message || 'Error al iniciar sesión.');
+        setNotificationMessage('');
       }
 
       recaptchaRef.current.reset();
@@ -311,7 +306,7 @@ const Login = () => {
             ? 'warning'
             : 'info'
         }
-        handleClose={handleCloseNotification}
+        handleClose={() => setOpenNotification(false)}
       />
     </Box>
   );
