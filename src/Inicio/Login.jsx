@@ -87,6 +87,7 @@ const Login = () => {
       timeStyle: 'short',
     }).format(date);
   };
+
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,6 +137,7 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
   // Manejar la verificación del código
   const handleVerificationSubmit = async () => {
     try {
@@ -327,6 +329,19 @@ const Login = () => {
               {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}
             </Button>
           </form>
+          {/* Links de recuperación y registro */}
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
+              <Link to="/register" style={{ color: 'inherit', textDecoration: 'none' }}>
+                ¿No tienes cuenta? Registrarte
+              </Link>
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1, color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
+              <Link to="/recuperacion" style={{ color: 'inherit', textDecoration: 'none' }}>
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
 
