@@ -18,7 +18,7 @@ const Login = () => {
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
 
-  // Detect system theme
+  // Detectar el tema del sistema
   useEffect(() => {
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkMode(matchDarkTheme.matches);
@@ -34,7 +34,7 @@ const Login = () => {
     };
   }, []);
 
-  // Clear error message after 3 seconds
+  // Eliminar mensaje de error después de 3 segundos
   useEffect(() => {
     let errorTimeout;
     if (errorMessage) {
@@ -45,28 +45,28 @@ const Login = () => {
     return () => clearTimeout(errorTimeout);
   }, [errorMessage]);
 
-  // Handle form field changes
+  // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Capture CAPTCHA value
+  // Capturar el valor del captcha
   const handleCaptchaChange = (value) => {
     setCaptchaValue(value);
   };
 
-  // Toggle password visibility
+  // Alternar la visibilidad de la contraseña
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // Close notifications
+  // Cerrar las notificaciones
   const handleCloseNotification = () => {
     setOpenNotification(false);
   };
 
-  // Handle form submission
+  // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,26 +90,30 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Inicio de sesión exitoso
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
           navigate('/Paciente/principal');
         }
       } else if (data.lockStatus) {
-        // Account is locked
+        // Cuenta bloqueada
         setErrorMessage(`Tu cuenta está bloqueada hasta ${data.lockUntil}.`);
         setNotificationMessage('Cuenta bloqueada');
         setOpenNotification(true);
       } else if (data.invalidEmail) {
-        // Invalid email
+        // Correo inválido
         setErrorMessage('Advertencia: Correo no válido.');
         setNotificationMessage('Advertencia: Correo no válido.');
         setOpenNotification(true);
       } else if (data.failedAttempts >= 0) {
-        // Invalid password, show remaining attempts
+        // Contraseña incorrecta, mostrar intentos restantes
         setErrorMessage(`Intento ${data.failedAttempts + 1}: Contraseña incorrecta.`);
         setNotificationMessage(`Intentos fallidos: ${data.failedAttempts + 1}`);
         setOpenNotification(true);
+      } else {
+        // Manejo genérico de errores
+        setErrorMessage(data.message || 'Error al iniciar sesión.');
       }
 
       recaptchaRef.current.reset();
