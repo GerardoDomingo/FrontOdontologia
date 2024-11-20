@@ -6,6 +6,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Notificaciones from '../Compartidos/Notificaciones';
 
 const BarraPaciente = () => {
+    const [notificationMessage, setNotificationMessage] = useState(''); // Estado para manejar el mensaje de notificación
     const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [openNotification, setOpenNotification] = useState(false);
