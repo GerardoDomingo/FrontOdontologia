@@ -37,13 +37,32 @@ const BarraAdmin = () => {
         setAnchorEl(null);
     };
 
-    // Función para mostrar la notificación y redirigir al cerrar sesión
-    const handleLogout = () => {
+    const handleLogout = async () => {
         handleMenuClose(); // Cierra el menú
         setOpenNotification(true); // Activa la notificación
-        setTimeout(() => {
-            navigate('/'); // Redirige después de que la notificación aparezca
-        }, 1000); // Espera 1 segundo antes de redirigir
+
+        try {
+            const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
+                method: 'POST',
+                credentials: 'include', // Asegura enviar las cookies con la solicitud
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al cerrar sesión.');
+            }
+
+            // Limpiar cualquier estado relacionado con la sesión del cliente
+            localStorage.removeItem('loggedIn'); // Elimina el estado de sesión almacenado localmente
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+        } finally {
+            setTimeout(() => {
+                navigate('/'); // Redirige después de que la notificación aparezca
+            }, 2000); // Espera 1 segundo antes de redirigir
+        }
     };
 
     // Cerrar la notificación
