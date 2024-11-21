@@ -26,15 +26,15 @@ function App() {
   const [tituloPagina, setTituloPagina] = useState('');
   const [logo, setLogo] = useState('');
   const [fetchErrors, setFetchErrors] = useState(0);
-
   const fetchTitleAndLogo = async (retries = 3) => {
+    
     try {
       const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
-      const { titulo_pagina, logo } = response.data;
-
-      if (titulo_pagina) {
-        document.title = titulo_pagina;
-        setTituloPagina(titulo_pagina);
+      const { nombre_empresa, logo } = response.data; // Actualizado: usamos nombre_empresa en lugar de titulo_pagina
+  
+      if (nombre_empresa) {
+        document.title = nombre_empresa; // Actualizado: establece el título de la página con el nombre de la empresa
+        setTituloPagina(nombre_empresa); // Actualizado: usa nombre_empresa en lugar de titulo_pagina
       }
       if (logo) {
         const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -53,7 +53,7 @@ function App() {
       } else {
         console.error("Error desconocido:", error.message);
       }
-
+  
       if (retries > 0) {
         await new Promise((res) => setTimeout(res, 1000)); 
         fetchTitleAndLogo(retries - 1);
@@ -62,6 +62,7 @@ function App() {
       }
     }
   };
+  
 
   useEffect(() => {
     fetchTitleAndLogo();
