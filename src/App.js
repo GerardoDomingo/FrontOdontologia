@@ -23,18 +23,19 @@ import Reportes from './Administrador/Configuracion/reportes.jsx';
 import PerfilEmpresa from './Administrador/Configuracion/PerfilEmpresa.jsx';
 
 function App() {
-  const [tituloPagina, setTituloPagina] = useState('');
+  const [tituloPagina, setTituloPagina] = useState('Mi Empresa'); // Valor inicial predeterminado
   const [logo, setLogo] = useState('');
   const [fetchErrors, setFetchErrors] = useState(0);
+  const [loading, setLoading] = useState(true); // Estado para gestionar la carga inicial
+
   const fetchTitleAndLogo = async (retries = 3) => {
-    
     try {
       const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
-      const { nombre_empresa, logo } = response.data; // Actualizado: usamos nombre_empresa en lugar de titulo_pagina
-  
+      const { nombre_empresa, logo } = response.data;
+
       if (nombre_empresa) {
-        document.title = nombre_empresa; // Actualizado: establece el título de la página con el nombre de la empresa
-        setTituloPagina(nombre_empresa); // Actualizado: usa nombre_empresa en lugar de titulo_pagina
+        document.title = nombre_empresa; // Cambia dinámicamente el título
+        setTituloPagina(nombre_empresa);
       }
       if (logo) {
         const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -45,6 +46,7 @@ function App() {
         setLogo(`data:image/png;base64,${logo}`);
       }
       setFetchErrors(0);
+      setLoading(false); // Carga completa
     } catch (error) {
       if (error.response) {
         console.error("Error en la respuesta del servidor:", error.response.status);
@@ -53,16 +55,16 @@ function App() {
       } else {
         console.error("Error desconocido:", error.message);
       }
-  
+
       if (retries > 0) {
-        await new Promise((res) => setTimeout(res, 1000)); 
+        await new Promise((res) => setTimeout(res, 1000));
         fetchTitleAndLogo(retries - 1);
       } else {
-        setFetchErrors((prev) => prev + 1); 
+        setFetchErrors((prev) => prev + 1);
+        setLoading(false); // Evita que siga cargando indefinidamente
       }
     }
   };
-  
 
   useEffect(() => {
     fetchTitleAndLogo();
@@ -115,6 +117,7 @@ function App() {
           </PrivateRoute>
         } />
       </Routes>
+      {!loading ? null : <div>Cargando configuración de empresa...</div>} {/* Mensaje de carga opcional */}
     </Router>
   );
 }
