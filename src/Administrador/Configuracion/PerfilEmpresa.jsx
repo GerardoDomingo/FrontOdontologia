@@ -13,8 +13,9 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Modal
 } from '@mui/material';
-import { Save as SaveIcon, Edit as EditIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon } from '@mui/icons-material';
+import { Save as SaveIcon, Edit as EditIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon, ZoomIn as ZoomInIcon } from '@mui/icons-material';
 import axios from 'axios';
 import Notificaciones from '../../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
@@ -32,6 +33,7 @@ const PerfilEmpresa = () => {
         slogan: ''
     });
     const [logoPreview, setLogoPreview] = useState('');
+    const [originalLogo, setOriginalLogo] = useState(''); // Para guardar el logo original
     const [isEditingDatos, setIsEditingDatos] = useState(false);
     const [isEditingLogo, setIsEditingLogo] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
@@ -44,6 +46,7 @@ const PerfilEmpresa = () => {
         type: 'success',
     });
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [openImageModal, setOpenImageModal] = useState(false); // Para controlar el modal de la imagen
 
     useEffect(() => {
         const fetchPerfilEmpresa = async () => {
@@ -68,7 +71,9 @@ const PerfilEmpresa = () => {
                 }
 
                 if (logo) {
-                    setLogoPreview(`data:image/png;base64,${logo}`);
+                    const logoBase64 = `data:image/png;base64,${logo}`;
+                    setLogoPreview(logoBase64);
+                    setOriginalLogo(logoBase64); // Guardamos el logo original
                 }
             } catch (error) {
                 mostrarNotificacion('Error al obtener el perfil de la empresa', 'error');
@@ -103,6 +108,17 @@ const PerfilEmpresa = () => {
                 mostrarNotificacion('Por favor, sube una imagen válida (PNG o JPEG)', 'error');
             }
         }
+    };
+
+    const handleCancelLogo = () => {
+        setOpenConfirmDialog(true); // Abre el diálogo de confirmación
+    };
+
+    const handleConfirmCancelLogo = () => {
+        setLogoPreview(originalLogo); // Restaura el logo original
+        setFormData({ ...formData, logo: null }); // Elimina el archivo cargado
+        setLogoChanged(false); // Marca que no hay cambios en el logo
+        setOpenConfirmDialog(false); // Cierra el diálogo
     };
 
     const validateForm = () => {
@@ -149,6 +165,7 @@ const PerfilEmpresa = () => {
                 mostrarNotificacion('Logo actualizado con éxito', 'success');
                 setLogoChanged(false);
                 setIsEditingLogo(false);
+                setOriginalLogo(logoPreview); // Actualiza el logo original con el nuevo
             } else {
                 mostrarNotificacion('Error al actualizar el logo', 'error');
             }
@@ -157,48 +174,12 @@ const PerfilEmpresa = () => {
         }
     };
 
-    const handleSaveDatos = async (e) => {
-        e.preventDefault();
-        if (!dataFetched) {
-            mostrarNotificacion('No hay información para actualizar', 'error');
-            return;
-        }
-    
-        if (!validateForm()) return;
-    
-        const formDataToSend = {
-            id_empresa: formData.id_empresa,
-            nombre_empresa: formData.nombre_empresa,
-            direccion: formData.direccion,
-            telefono: formData.telefono,
-            correo_electronico: formData.correo_electronico,
-            descripcion: formData.descripcion,
-            slogan: formData.slogan,
-        };
-    
-        try {
-            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/updateDatos', formDataToSend);
-    
-            if (response.status === 200) {
-                mostrarNotificacion('Datos actualizados con éxito', 'success');
-                setHasChanges(false);
-                setIsEditingDatos(false);
-            } else {
-                mostrarNotificacion('Error al actualizar los datos', 'error');
-            }
-        } catch (error) {
-            mostrarNotificacion('Error al actualizar los datos', 'error');
-        }
+    const handleOpenImageModal = () => {
+        setOpenImageModal(true); // Abre el modal de la imagen
     };
 
-    const handleCancelDatos = () => {
-        setOpenConfirmDialog(true);
-    };
-
-    const handleConfirmCancelDatos = () => {
-        setIsEditingDatos(false);
-        setHasChanges(false);
-        setOpenConfirmDialog(false);
+    const handleCloseImageModal = () => {
+        setOpenImageModal(false); // Cierra el modal de la imagen
     };
 
     return (
@@ -226,6 +207,7 @@ const PerfilEmpresa = () => {
                         <Avatar
                             src={logoPreview}
                             alt="Logo de la empresa"
+                            onClick={handleOpenImageModal} // Abre el modal al hacer clic
                             sx={{
                                 width: 100,
                                 height: 100,
@@ -233,8 +215,10 @@ const PerfilEmpresa = () => {
                                 borderRadius: '50%',
                                 objectFit: 'cover',
                                 boxShadow: 2,
+                                cursor: 'pointer',
                             }}
                         />
+
                         <IconButton
                             color="primary"
                             component="label"
@@ -247,7 +231,7 @@ const PerfilEmpresa = () => {
 
                         {logoChanged && (
                             <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                <Button variant="outlined" startIcon={<CloseIcon />} onClick={() => setIsEditingLogo(false)} sx={{ mr: 2 }}>
+                                <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelLogo} sx={{ mr: 2 }}>
                                     Cancelar
                                 </Button>
                                 <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSaveLogo}>
@@ -256,6 +240,32 @@ const PerfilEmpresa = () => {
                             </Box>
                         )}
                     </Box>
+
+                    {/* Modal para la imagen ampliada */}
+                    <Modal open={openImageModal} onClose={handleCloseImageModal}>
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                width: '80%',
+                                bgcolor: 'background.paper',
+                                boxShadow: 24,
+                                p: 4,
+                                textAlign: 'center',
+                            }}
+                        >
+                            <img
+                                src={logoPreview}
+                                alt="Logo ampliado"
+                                style={{ maxWidth: '100%', maxHeight: '100%' }}
+                            />
+                            <Button onClick={handleCloseImageModal} sx={{ mt: 2 }}>
+                                Cerrar
+                            </Button>
+                        </Box>
+                    </Modal>
 
                     <form onSubmit={handleSaveDatos}>
                         <Grid container spacing={2}>
@@ -380,21 +390,19 @@ const PerfilEmpresa = () => {
                 handleClose={handleCloseNotification}
             />
 
-            <Dialog
-                open={openConfirmDialog}
-                onClose={() => setOpenConfirmDialog(false)}
-            >
+            {/* Diálogo de confirmación para cancelar cambios en el logo */}
+            <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)}>
                 <DialogTitle>{"Confirmar cancelación"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        ¿Deseas deshacer los cambios realizados?
+                        ¿Deseas deshacer los cambios realizados en el logo?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenConfirmDialog(false)} color="primary">
                         No
                     </Button>
-                    <Button onClick={handleConfirmCancelDatos} color="primary" autoFocus>
+                    <Button onClick={handleConfirmCancelLogo} color="primary" autoFocus>
                         Sí
                     </Button>
                 </DialogActions>

@@ -68,7 +68,7 @@ function App() {
 
   useEffect(() => {
     fetchTitleAndLogo();
-    const interval = setInterval(fetchTitleAndLogo, 15000);
+    const interval = setInterval(fetchTitleAndLogo, 4500);
 
     if (fetchErrors >= 5) {
       clearInterval(interval);
