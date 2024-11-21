@@ -29,8 +29,7 @@ const PerfilEmpresa = () => {
         correo_electronico: '',
         descripcion: '',
         logo: null,
-        slogan: '',
-        titulo_pagina: ''
+        slogan: ''
     });
     const [logoPreview, setLogoPreview] = useState('');
     const [isEditingDatos, setIsEditingDatos] = useState(false);
@@ -50,7 +49,7 @@ const PerfilEmpresa = () => {
         const fetchPerfilEmpresa = async () => {
             try {
                 const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/get');
-                const { id_empresa, nombre_empresa, direccion, telefono, correo_electronico, descripcion, logo, slogan, titulo_pagina } = response.data;
+                const { id_empresa, nombre_empresa, direccion, telefono, correo_electronico, descripcion, logo, slogan } = response.data;
 
                 if (id_empresa) {
                     setFormData({
@@ -60,8 +59,7 @@ const PerfilEmpresa = () => {
                         telefono,
                         correo_electronico,
                         descripcion,
-                        slogan,
-                        titulo_pagina,
+                        slogan
                     });
                     setDataFetched(true);
                 } else {
@@ -118,7 +116,6 @@ const PerfilEmpresa = () => {
         if (!formData.correo_electronico || !emailRegex.test(formData.correo_electronico)) errors.correo_electronico = "El correo electrónico es inválido.";
         if (!formData.descripcion) errors.descripcion = "La descripción es obligatoria.";
         if (!formData.slogan) errors.slogan = "El slogan es obligatorio.";
-        if (!formData.titulo_pagina) errors.titulo_pagina = "El título de la página es obligatorio.";
 
         setErrorMessages(errors);
         return Object.keys(errors).length === 0;
@@ -160,17 +157,6 @@ const PerfilEmpresa = () => {
         }
     };
 
-    const handleCancelLogo = () => {
-        setOpenConfirmDialog(true); // Abrir diálogo de confirmación
-    };
-
-    const handleConfirmCancelLogo = () => {
-        setIsEditingLogo(false);
-        setLogoChanged(false);
-        setLogoPreview('');
-        setOpenConfirmDialog(false); // Cerrar diálogo
-    };
-
     const handleSaveDatos = async (e) => {
         e.preventDefault();
         if (!dataFetched) {
@@ -188,7 +174,6 @@ const PerfilEmpresa = () => {
             correo_electronico: formData.correo_electronico,
             descripcion: formData.descripcion,
             slogan: formData.slogan,
-            titulo_pagina: formData.titulo_pagina
         };
     
         try {
@@ -205,16 +190,15 @@ const PerfilEmpresa = () => {
             mostrarNotificacion('Error al actualizar los datos', 'error');
         }
     };
-    
 
     const handleCancelDatos = () => {
-        setOpenConfirmDialog(true); // Abrir diálogo de confirmación
+        setOpenConfirmDialog(true);
     };
 
     const handleConfirmCancelDatos = () => {
         setIsEditingDatos(false);
         setHasChanges(false);
-        setOpenConfirmDialog(false); // Cerrar diálogo
+        setOpenConfirmDialog(false);
     };
 
     return (
@@ -263,7 +247,7 @@ const PerfilEmpresa = () => {
 
                         {logoChanged && (
                             <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelLogo} sx={{ mr: 2 }}>
+                                <Button variant="outlined" startIcon={<CloseIcon />} onClick={() => setIsEditingLogo(false)} sx={{ mr: 2 }}>
                                     Cancelar
                                 </Button>
                                 <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSaveLogo}>
@@ -329,32 +313,6 @@ const PerfilEmpresa = () => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Slogan"
-                                    name="slogan"
-                                    value={formData.slogan}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditingDatos}
-                                    error={!!errorMessages.slogan}
-                                    helperText={errorMessages.slogan}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Título de la Página"
-                                    name="titulo_pagina"
-                                    value={formData.titulo_pagina}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditingDatos}
-                                    error={!!errorMessages.titulo_pagina}
-                                    helperText={errorMessages.titulo_pagina}
-                                />
-                            </Grid>
-
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -367,6 +325,19 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditingDatos}
                                     error={!!errorMessages.descripcion}
                                     helperText={errorMessages.descripcion}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Slogan"
+                                    name="slogan"
+                                    value={formData.slogan}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditingDatos}
+                                    error={!!errorMessages.slogan}
+                                    helperText={errorMessages.slogan}
                                 />
                             </Grid>
 
@@ -388,7 +359,7 @@ const PerfilEmpresa = () => {
                                             variant="contained"
                                             startIcon={<SaveIcon />}
                                             onClick={handleSaveDatos}
-                                            disabled={!hasChanges} // Desactiva el botón si no hay cambios
+                                            disabled={!hasChanges}
                                         >
                                             Guardar
                                         </Button>
