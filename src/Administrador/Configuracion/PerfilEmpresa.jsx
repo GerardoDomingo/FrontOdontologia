@@ -114,6 +114,23 @@ const PerfilEmpresa = () => {
         setOpenConfirmDialog(true); // Abre el diálogo de confirmación
     };
 
+    const handleCancelDatos = () => {
+        // Restaura los datos originales cargados desde el backend
+        const originalData = {
+            id_empresa: formData.id_empresa,
+            nombre_empresa: formData.nombre_empresa,
+            direccion: formData.direccion,
+            telefono: formData.telefono,
+            correo_electronico: formData.correo_electronico,
+            descripcion: formData.descripcion,
+            slogan: formData.slogan,
+        };
+    
+        setFormData(originalData); // Restablece los datos originales
+        setHasChanges(false); // Marca que no hay cambios pendientes
+        setIsEditingDatos(false); // Cierra el modo de edición
+    };
+    
     const handleConfirmCancelLogo = () => {
         setLogoPreview(originalLogo); // Restaura el logo original
         setFormData({ ...formData, logo: null }); // Elimina el archivo cargado
