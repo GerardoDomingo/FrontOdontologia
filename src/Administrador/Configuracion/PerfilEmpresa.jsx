@@ -173,6 +173,39 @@ const PerfilEmpresa = () => {
             mostrarNotificacion('Error al actualizar el logo', 'error');
         }
     };
+    const handleSaveDatos = async (e) => {
+        e.preventDefault();
+        if (!dataFetched) {
+            mostrarNotificacion('No hay información para actualizar', 'error');
+            return;
+        }
+    
+        if (!validateForm()) return;
+    
+        const formDataToSend = {
+            id_empresa: formData.id_empresa,
+            nombre_empresa: formData.nombre_empresa,
+            direccion: formData.direccion,
+            telefono: formData.telefono,
+            correo_electronico: formData.correo_electronico,
+            descripcion: formData.descripcion,
+            slogan: formData.slogan,
+        };
+    
+        try {
+            const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/updateDatos', formDataToSend);
+    
+            if (response.status === 200) {
+                mostrarNotificacion('Datos actualizados con éxito', 'success');
+                setHasChanges(false);
+                setIsEditingDatos(false);
+            } else {
+                mostrarNotificacion('Error al actualizar los datos', 'error');
+            }
+        } catch (error) {
+            mostrarNotificacion('Error al actualizar los datos', 'error');
+        }
+    };
 
     const handleOpenImageModal = () => {
         setOpenImageModal(true); // Abre el modal de la imagen
@@ -266,7 +299,6 @@ const PerfilEmpresa = () => {
                             </Button>
                         </Box>
                     </Modal>
-
                     <form onSubmit={handleSaveDatos}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
