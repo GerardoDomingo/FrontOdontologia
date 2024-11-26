@@ -163,10 +163,6 @@ const Login = () => {
     }
   };
 
-  const updateVerificationState = (updates) => {
-    setVerificationState((prev) => ({ ...prev, ...updates }));
-  };
-
   const handleVerifyCode = async () => {
     if (!verificationCode) {
       setErrorMessage('Por favor, ingresa el código de verificación.');
