@@ -17,6 +17,13 @@ const Login = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
+  const [verificationState, setVerificationState] = useState({
+    openModal: false,
+    verificationCode: '',
+    isVerifying: false,
+  });
+  const [isVerifying, setIsVerifying] = useState(false); // Indicador de carga para la verificación
+
 
   // Detectar el tema del sistema
   useEffect(() => {
@@ -88,14 +95,16 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
+      recaptchaRef.current.reset(); // Asegura que el captcha siempre esté listo para el próximo intento
       return;
     }
-  
+
+
     setIsLoading(true);
-  
+
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
@@ -105,18 +114,25 @@ const Login = () => {
         credentials: 'include', // Importante para enviar cookies
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
-        // Configurar el estado de inicio de sesión en localStorage
-        localStorage.setItem('loggedIn', true);
-  
-        // Redirigir al tipo de usuario correspondiente
-        if (data.user.tipo === 'administrador') {
-          navigate('/Administrador/principal');
-        } else if (data.user.tipo === 'paciente') {
-          navigate('/Paciente/principal');
+        // Credenciales correctas, enviar código de verificación
+        const sendCodeResponse = await fetch('https://backendodontologia.onrender.com/api/users/send-verification-code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: formData.email }),
+        });
+
+        if (sendCodeResponse.ok) {
+          setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
+          setOpenNotification(true);
+          setOpenModal(true); // Abrir el modal para ingresar el código
+        } else {
+          setErrorMessage('Error al enviar el código de verificación. Intenta de nuevo.');
         }
       } else if (data.lockStatus) {
         // Cuenta bloqueada
@@ -139,7 +155,7 @@ const Login = () => {
         setErrorMessage(data.message || 'Error al iniciar sesión.');
         setNotificationMessage('');
       }
-  
+
       recaptchaRef.current.reset();
       setCaptchaValue(null);
     } catch (error) {
@@ -149,6 +165,50 @@ const Login = () => {
     }
   };
 
+  const updateVerificationState = (updates) => {
+    setVerificationState((prev) => ({ ...prev, ...updates }));
+  };
+
+  const handleVerifyCode = async () => {
+    if (!verificationState.verificationCode) {
+      setErrorMessage('Por favor, ingresa el código de verificación.');
+      return;
+    }
+  
+    updateVerificationState({ isVerifying: true });
+  
+    try {
+      const response = await fetch('https://backendodontologia.onrender.com/api/users/verify-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          code: verificationState.verificationCode,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        setNotificationMessage('Código verificado correctamente.');
+        setOpenNotification(true);
+        updateVerificationState({ openModal: false });
+        if (data.user.tipo === 'administrador') {
+          navigate('/Administrador/principal');
+        } else if (data.user.tipo === 'paciente') {
+          navigate('/Paciente/principal');
+        }
+      } else {
+        setErrorMessage(data.message || 'Código de verificación incorrecto.');
+      }
+    } catch (error) {
+      setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
+    } finally {
+      updateVerificationState({ isVerifying: false });
+    }
+  };
   return (
     <Box
       sx={{
@@ -332,11 +392,71 @@ const Login = () => {
           notificationMessage.includes('Cuenta bloqueada')
             ? 'error'
             : notificationMessage.includes('Advertencia')
-            ? 'warning'
-            : 'info'
+              ? 'warning'
+              : 'info'
         }
         handleClose={() => setOpenNotification(false)}
       />
+      {/* Modal para Verificación Multifactor */}
+      <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{ timeout: 500 }}
+      >
+        <Fade in={openModal}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 400,
+              bgcolor: 'background.paper',
+              p: 4,
+              borderRadius: 2,
+              boxShadow: 24,
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Verificación Multifactor
+            </Typography>
+            {errorMessage && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'red',
+                  textAlign: 'center',
+                  mb: 3,
+                  backgroundColor: '#ffe5e5',
+                  p: 1,
+                  borderRadius: '15px',
+                }}
+              >
+                {errorMessage}
+              </Typography>
+            )}
+            <TextField
+              fullWidth
+              label="Código de Verificación"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              required
+              sx={{ mb: 3 }}
+            />
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleVerifyCode}
+              disabled={isVerifying}
+            >
+              {isVerifying ? <CircularProgress size={24} /> : 'Verificar Código'}
+            </Button>
+
+          </Box>
+        </Fade>
+      </Modal>
     </Box>
   );
 };
