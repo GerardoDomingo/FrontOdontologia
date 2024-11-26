@@ -168,17 +168,16 @@ const Login = () => {
       setErrorMessage('Por favor, ingresa el código de verificación.');
       return;
     }
+
     setIsVerifying(true);
+
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/verify-verification-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: formData.email,
-          code: verificationCode,
-        }),
+        body: JSON.stringify({ email: formData.email, code: verificationCode }),
       });
 
       const data = await response.json();
@@ -186,7 +185,9 @@ const Login = () => {
       if (response.ok) {
         setNotificationMessage('Código verificado correctamente.');
         setOpenNotification(true);
-        setOpenModal(false);
+        setVerificationCode(''); // Limpiar el campo del código
+        setOpenModal(false); // Cerrar el modal
+
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
