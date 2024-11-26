@@ -183,20 +183,26 @@ const Login = () => {
         const data = await response.json();
 
         if (!response.ok) {
+            console.error('Error desde el servidor:', data); // Depuración adicional
             setErrorMessage(data.message || 'Error al verificar el código.');
             return;
         }
+
+        console.log('Datos recibidos del servidor:', data); // Depuración adicional
 
         setNotificationMessage(data.message || 'Código verificado correctamente.');
         setOpenNotification(true);
         setVerificationCode(''); // Limpiar el campo del código
         setOpenModal(false); // Cerrar el modal
 
-        // Redirigir según el tipo de usuario
+        // Verificar y redirigir según el tipo de usuario
         if (data.userType === 'administradores') {
             navigate('/Administrador/principal');
         } else if (data.userType === 'pacientes') {
             navigate('/Paciente/principal');
+        } else {
+            // Si no se proporciona userType, mostrar un error
+            setErrorMessage('Tipo de usuario desconocido. Por favor, inténtalo nuevamente.');
         }
     } catch (error) {
         console.error('Error de conexión:', error);
@@ -205,6 +211,7 @@ const Login = () => {
         setIsVerifying(false);
     }
 };
+
 
   return (
     <Box
