@@ -170,7 +170,7 @@ const Login = () => {
     }
     setIsVerifying(true);
     try {
-      const response = await fetch('https://backendodontologia.onrender.com/api/verify-code', {
+      const response = await fetch('https://backendodontologia.onrender.com/api/verify-verification-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
