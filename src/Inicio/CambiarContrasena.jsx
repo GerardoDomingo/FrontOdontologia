@@ -95,36 +95,37 @@ const CambiarContraseña = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage(''); // Limpiar mensaje de error antes del submit
-
+    
         if (!token) {
             setErrorMessage('El token es inválido o ha expirado.');
             return;
         }
-
+    
         if (newPassword !== confirmPassword) {
             setErrorMessage('Las contraseñas no coinciden.');
             return;
         }
-
+    
         if (passwordRulesErrors.length > 0) {
             setErrorMessage('Errores: ' + passwordRulesErrors.join(', '));
             return;
         }
-
+    
         if (passwordStrength < 3) {
             setErrorMessage('La contraseña debe ser fuerte o muy fuerte para ser cambiada.');
             return;
         }
-
+    
         try {
             setIsLoading(true); // Activar el loading cuando se presiona el botón
             const response = await axios.post('https://backendodontologia.onrender.com/api/resetPassword', { token, newPassword }, { timeout: 5000 });
+            
             if (response.status === 200) {
                 // Mostrar notificación de éxito
                 setNotificationMessage('Contraseña actualizada correctamente.');
                 setNotificationType('success');
                 setOpenNotification(true); // Mostrar la notificación
-
+    
                 // Redirigir después de 2 segundos
                 setTimeout(() => {
                     navigate('/login');
@@ -132,19 +133,18 @@ const CambiarContraseña = () => {
             }
         } catch (error) {
             if (error.response && error.response.status === 400) {
-                setNotificationMessage('El token ha expirado o es inválido.');
+                // Mostrar error específico del backend
+                setErrorMessage(error.response.data.message || 'Error al actualizar la contraseña.');
             } else if (error.code === 'ECONNABORTED') {
-                setNotificationMessage('La solicitud ha expirado. Inténtalo de nuevo.');
+                setErrorMessage('La solicitud ha expirado. Inténtalo de nuevo.');
             } else {
-                setNotificationMessage('Error al cambiar la contraseña. Inténtalo de nuevo.');
+                setErrorMessage('Error al cambiar la contraseña. Inténtalo de nuevo.');
             }
-            setNotificationType('error');
-            setOpenNotification(true); // Mostrar notificación de error
         } finally {
             setIsLoading(false); // Desactivar el loading después de recibir la respuesta
         }
     };
-
+    
     // Cerrar notificación
     const handleCloseNotification = () => {
         setOpenNotification(false);
