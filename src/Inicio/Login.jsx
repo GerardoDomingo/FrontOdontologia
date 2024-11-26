@@ -1,23 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Card,
-  CardContent,
-  IconButton,
-  InputAdornment,
-  CircularProgress,
-  Modal,
-  Backdrop,
-  Fade,
-} from '@mui/material';
+import { Box, TextField, Button, Typography, Card, CardContent, IconButton, InputAdornment, CircularProgress, Modal, Backdrop, Fade } from '@mui/material';
 import { FaTooth } from 'react-icons/fa';
 import { Email, Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useNavigate, Link } from 'react-router-dom';
 import Notificaciones from '../Compartidos/Notificaciones';
+
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -30,11 +18,8 @@ const Login = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const recaptchaRef = useRef(null);
   const navigate = useNavigate();
-  const [verificationState, setVerificationState] = useState({
-    openModal: false,
-    verificationCode: '',
-    isVerifying: false,
-  });
+  const [openModal, setOpenModal] = useState(false); // Estado para controlar el modal
+  const [verificationCode, setVerificationCode] = useState(''); // Estado para el código de verificación
   const [isVerifying, setIsVerifying] = useState(false); // Indicador de carga para la verificación
 
 
@@ -183,13 +168,11 @@ const Login = () => {
   };
 
   const handleVerifyCode = async () => {
-    if (!verificationState.verificationCode) {
+    if (!verificationCode) {
       setErrorMessage('Por favor, ingresa el código de verificación.');
       return;
     }
-  
-    updateVerificationState({ isVerifying: true });
-  
+    setIsVerifying(true);
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/verify-code', {
         method: 'POST',
@@ -198,16 +181,16 @@ const Login = () => {
         },
         body: JSON.stringify({
           email: formData.email,
-          code: verificationState.verificationCode,
+          code: verificationCode,
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         setNotificationMessage('Código verificado correctamente.');
         setOpenNotification(true);
-        updateVerificationState({ openModal: false });
+        setOpenModal(false);
         if (data.user.tipo === 'administrador') {
           navigate('/Administrador/principal');
         } else if (data.user.tipo === 'paciente') {
@@ -219,7 +202,7 @@ const Login = () => {
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {
-      updateVerificationState({ isVerifying: false });
+      setIsVerifying(false);
     }
   };
   return (
