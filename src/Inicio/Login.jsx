@@ -165,43 +165,47 @@ const Login = () => {
 
   const handleVerifyCode = async () => {
     if (!verificationCode) {
-      setErrorMessage('Por favor, ingresa el código de verificación.');
-      return;
+        setErrorMessage('Por favor, ingresa el código de verificación.');
+        return;
     }
 
     setIsVerifying(true);
 
     try {
-      const response = await fetch('https://backendodontologia.onrender.com/api/verify-verification-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formData.email, code: verificationCode }),
-      });
+        const response = await fetch('https://backendodontologia.onrender.com/api/verify-verification-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: formData.email, code: verificationCode }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-        setNotificationMessage('Código verificado correctamente.');
+        if (!response.ok) {
+            setErrorMessage(data.message || 'Error al verificar el código.');
+            return;
+        }
+
+        setNotificationMessage(data.message || 'Código verificado correctamente.');
         setOpenNotification(true);
         setVerificationCode(''); // Limpiar el campo del código
         setOpenModal(false); // Cerrar el modal
 
-        if (data.user.tipo === 'administrador') {
-          navigate('/Administrador/principal');
-        } else if (data.user.tipo === 'paciente') {
-          navigate('/Paciente/principal');
+        // Redirigir según el tipo de usuario
+        if (data.userType === 'administradores') {
+            navigate('/Administrador/principal');
+        } else if (data.userType === 'pacientes') {
+            navigate('/Paciente/principal');
         }
-      } else {
-        setErrorMessage(data.message || 'Código de verificación incorrecto.');
-      }
     } catch (error) {
-      setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
+        console.error('Error de conexión:', error);
+        setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {
-      setIsVerifying(false);
+        setIsVerifying(false);
     }
-  };
+};
+
   return (
     <Box
       sx={{
