@@ -25,6 +25,7 @@ const CambiarContraseña = () => {
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationType, setNotificationType] = useState(''); // Tipo de notificación (success o error)
     const navigate = useNavigate();
+    const [passwordsMatch, setPasswordsMatch] = useState(true); // Indica si las contraseñas coinciden
 
     const token = searchParams.get('token');
 
@@ -39,10 +40,17 @@ const CambiarContraseña = () => {
             await checkPasswordSafety(value);
             const errors = checkPasswordRules(value);
             setPasswordRulesErrors(errors);
-        } else {
+
+            // Verificar si las contraseñas coinciden en tiempo real
+            setPasswordsMatch(value === confirmPassword);
+        } else if (name === 'confirmPassword') {
             setConfirmPassword(value);
+
+            // Verificar si las contraseñas coinciden en tiempo real
+            setPasswordsMatch(newPassword === value);
         }
     };
+
 
     const toggleShowNewPassword = () => setShowNewPassword(!showNewPassword);
     const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
@@ -95,37 +103,37 @@ const CambiarContraseña = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage(''); // Limpiar mensaje de error antes del submit
-    
+
         if (!token) {
             setErrorMessage('El token es inválido o ha expirado.');
             return;
         }
-    
+
         if (newPassword !== confirmPassword) {
             setErrorMessage('Las contraseñas no coinciden.');
             return;
         }
-    
+
         if (passwordRulesErrors.length > 0) {
             setErrorMessage('Errores: ' + passwordRulesErrors.join(', '));
             return;
         }
-    
+
         if (passwordStrength < 3) {
             setErrorMessage('La contraseña debe ser fuerte o muy fuerte para ser cambiada.');
             return;
         }
-    
+
         try {
             setIsLoading(true); // Activar el loading cuando se presiona el botón
             const response = await axios.post('https://backendodontologia.onrender.com/api/resetPassword', { token, newPassword }, { timeout: 5000 });
-            
+
             if (response.status === 200) {
                 // Mostrar notificación de éxito
                 setNotificationMessage('Contraseña actualizada correctamente.');
                 setNotificationType('success');
                 setOpenNotification(true); // Mostrar la notificación
-    
+
                 // Redirigir después de 2 segundos
                 setTimeout(() => {
                     navigate('/login');
@@ -144,7 +152,7 @@ const CambiarContraseña = () => {
             setIsLoading(false); // Desactivar el loading después de recibir la respuesta
         }
     };
-    
+
     // Cerrar notificación
     const handleCloseNotification = () => {
         setOpenNotification(false);
@@ -186,7 +194,7 @@ const CambiarContraseña = () => {
                             <TextField
                                 fullWidth
                                 label="Nueva Contraseña"
-                                type={showNewPassword ? 'text' : 'password'} 
+                                type={showNewPassword ? 'text' : 'password'}
                                 name="newPassword"
                                 value={newPassword}
                                 onChange={handleChange}
@@ -233,7 +241,13 @@ const CambiarContraseña = () => {
                                     ),
                                 }}
                             />
+                            {!passwordsMatch && (
+                                <Typography variant="body2" sx={{ color: 'red', fontSize: '0.8rem', mt: 1 }}>
+                                    Las contraseñas no coinciden.
+                                </Typography>
+                            )}
                         </Box>
+
 
                         {passwordError && <Typography variant="body2" sx={{ color: 'red', fontSize: '0.8rem', mb: 1 }}>{passwordError}</Typography>}
                         {isPasswordFiltered && <Typography variant="body2" sx={{ color: 'red', fontSize: '0.8rem', mb: 1 }}>Contraseña filtrada. Elige otra.</Typography>}
@@ -290,10 +304,11 @@ const CambiarContraseña = () => {
                             variant="contained"
                             color="primary"
                             sx={{ mt: 2, width: '100%' }}
-                            disabled={isLoading} // El botón sólo debe estar deshabilitado si isLoading es true
+                            disabled={isLoading || !passwordsMatch || passwordRulesErrors.length > 0}
                         >
                             {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Cambiar Contraseña'}
                         </Button>
+
 
                         {errorMessage && <Typography variant="body2" sx={{ color: 'red', mt: 2 }}>{errorMessage}</Typography>}
                     </form>
