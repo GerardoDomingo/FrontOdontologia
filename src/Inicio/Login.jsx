@@ -117,7 +117,7 @@ const Login = () => {
 
       if (response.ok) {
         // Credenciales correctas, enviar código de verificación
-        const sendCodeResponse = await fetch('https://backendodontologia.onrender.com/api/users/send-verification-code', {
+        const sendCodeResponse = await fetch('https://backendodontologia.onrender.com/api/send-verification-code', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ const Login = () => {
     }
     setIsVerifying(true);
     try {
-      const response = await fetch('https://backendodontologia.onrender.com/api/users/verify-code', {
+      const response = await fetch('https://backendodontologia.onrender.com/api/verify-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
