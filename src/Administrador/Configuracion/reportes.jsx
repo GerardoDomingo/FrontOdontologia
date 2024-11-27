@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Tab, Tabs, Card, CardContent, IconButton, CircularProgress } from '@mui/material';
-import { FaSignInAlt, FaFileAlt, FaBuilding } from 'react-icons/fa'; // Íconos
-import LoginAttemptsReport from './LoginAttemptsReport'; // Importar el reporte de intentos de login
-import LogsReport from './LogsReport'; // Importar el reporte de logs
+import { FaSignInAlt, FaFileAlt, FaUserFriends } from 'react-icons/fa'; // Íconos
+import LoginAttemptsReport from './LoginAttemptsReport'; // Reporte de intentos de login
+import LogsReport from './LogsReport'; // Reporte de logs
+import PatientsReport from './PatientsReport.jsx'; // Reporte de pacientes (nuevo)
 import { Link } from 'react-router-dom';
 
 const Reportes = () => {
@@ -76,8 +77,13 @@ const Reportes = () => {
           sx={{ fontFamily: 'Roboto, sans-serif' }}
         />
         <Tab
-          label="Auditoria del Sistema"
+          label="Auditoría del Sistema"
           icon={<FaFileAlt />}
+          sx={{ fontFamily: 'Roboto, sans-serif' }}
+        />
+        <Tab
+          label="Modulo de Pacientes" // Nueva pestaña
+          icon={<FaUserFriends />}
           sx={{ fontFamily: 'Roboto, sans-serif' }}
         />
       </Tabs>
@@ -106,6 +112,7 @@ const Reportes = () => {
             <>
               {selectedTab === 0 && <LoginAttemptsReport />}
               {selectedTab === 1 && <LogsReport />}
+              {selectedTab === 2 && <PatientsReport />} {/* Nuevo contenido para Pacientes */}
             </>
           )}
         </CardContent>
