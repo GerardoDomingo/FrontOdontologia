@@ -185,12 +185,15 @@ const Login = () => {
       setOpenModal(false);
 
       if (data.userType === 'administradores') {
+        localStorage.setItem('loggedIn', true); // Establecer usuario como logueado
         navigate('/Administrador/principal');
       } else if (data.userType === 'pacientes') {
+        localStorage.setItem('loggedIn', true); // Establecer usuario como logueado
         navigate('/Paciente/principal');
       } else {
         setErrorMessage('Tipo de usuario desconocido. Inténtalo nuevamente.');
       }
+      
     } catch (error) {
       setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
     } finally {

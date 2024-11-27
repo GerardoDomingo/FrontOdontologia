@@ -62,7 +62,7 @@ const BarraAdmin = () => {
             console.log('Sesión cerrada exitosamente en el servidor.');
     
             // Limpiar cualquier estado relacionado con la sesión del cliente
-            localStorage.removeItem('loggedIn'); // Elimina el estado de sesión almacenado localmente
+            localStorage.removeItem('loggedIn');
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
             setNotificationMessage('Error al cerrar sesión. Inténtalo nuevamente.');
