@@ -6,6 +6,7 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { useNavigate } from 'react-router-dom';
 import Notificaciones from '../Compartidos/Notificaciones'
+import ErrorBoundary from '../Compartidos/ErrorBoundary.jsx';
 
 
 const Register = () => {
@@ -1294,7 +1295,7 @@ const Register = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 6, mb: 14 }}> {/* Aquí agregamos marginTop y marginBottoom */}
+    <ErrorBoundary> <Container maxWidth="md" sx={{ mt: 6, mb: 14 }}> {/* Aquí agregamos marginTop y marginBottoom */}
       <Notificaciones
         open={openNotification}
         message={notificationMessage}
@@ -1476,6 +1477,8 @@ const Register = () => {
         </CardContent>
       </Card>
     </Container>
+    </ErrorBoundary>
+
   );
 
 };
