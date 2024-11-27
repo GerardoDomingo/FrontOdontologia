@@ -2,98 +2,100 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
+  Card,
+  CardContent,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Button,
   Modal,
-  Card,
-  CardContent,
   IconButton,
+  Paper,
 } from '@mui/material';
-import { FaInfoCircle } from 'react-icons/fa'; // Ícono para "Más información"
+import { Info as InfoIcon } from '@mui/icons-material';
+import { FaUser, FaCalendarAlt, FaPhone, FaEnvelope, FaVenusMars, FaMapMarkerAlt, FaSyringe, FaUserCheck } from 'react-icons/fa';
 import axios from 'axios';
 
 const PatientsReport = () => {
-  const [patients, setPatients] = useState([]); // Estado para los datos de los pacientes
-  const [selectedPatient, setSelectedPatient] = useState(null); // Paciente seleccionado para mostrar en el modal
-  const [openModal, setOpenModal] = useState(false); // Estado para abrir/cerrar el modal
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  // Obtener datos de pacientes desde el backend
   useEffect(() => {
     const fetchPatients = async () => {
       try {
         const response = await axios.get('https://backendodontologia.onrender.com/api/reportes/pacientes');
         setPatients(response.data);
       } catch (error) {
-        console.error('Error al obtener los pacientes:', error);
+        console.error('Error fetching patients:', error);
       }
     };
-
     fetchPatients();
   }, []);
 
-  // Manejar la apertura del modal
-  const handleOpenModal = (patient) => {
-    setSelectedPatient(patient);
-    setOpenModal(true);
+  const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(date).toLocaleDateString('es-ES', options);
   };
 
-  // Manejar el cierre del modal
+  const handleOpenModal = (patient) => {
+    setSelectedPatient(patient);
+    setModalOpen(true);
+  };
+
   const handleCloseModal = () => {
     setSelectedPatient(null);
-    setOpenModal(false);
+    setModalOpen(false);
   };
 
   return (
-    <Box sx={{ p: 4, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
+    <Box
+      sx={{
+        p: 4,
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #e3f2fd 30%, #f9f9f9 100%)',
+      }}
+    >
       {/* Título */}
       <Typography
         variant="h4"
         sx={{
-          fontWeight: 'bold',
           mb: 4,
+          fontWeight: 'bold',
           color: '#1976d2',
-          fontFamily: 'Roboto, sans-serif',
           textAlign: 'center',
         }}
       >
-        Reporte de Pacientes
+        Lista de Pacientes
       </Typography>
 
       {/* Tabla */}
-      <TableContainer component={Paper} sx={{ boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', borderRadius: '12px' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 4, boxShadow: 3 }}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell><strong>ID</strong></TableCell>
-              <TableCell><strong>Nombre Completo</strong></TableCell>
-              <TableCell><strong>Email</strong></TableCell>
-              <TableCell><strong>Teléfono</strong></TableCell>
-              <TableCell><strong>Estado</strong></TableCell>
-              <TableCell><strong>Más Información</strong></TableCell>
+            <TableRow sx={{ backgroundColor: '#1976d2' }}>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>#</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>Nombre</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>Correo</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>Teléfono</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>Estado</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 'bold' }}>Más Información</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {patients.map((patient) => (
-              <TableRow key={patient.id}>
-                <TableCell>{patient.id}</TableCell>
-                <TableCell>
-                  {`${patient.nombre} ${patient.aPaterno} ${patient.aMaterno}`}
-                </TableCell>
+            {patients.map((patient, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{`${patient.nombre} ${patient.aPaterno} ${patient.aMaterno}`}</TableCell>
                 <TableCell>{patient.email}</TableCell>
                 <TableCell>{patient.telefono}</TableCell>
                 <TableCell>{patient.estado}</TableCell>
                 <TableCell>
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleOpenModal(patient)}
-                  >
-                    <FaInfoCircle />
+                  <IconButton color="primary" onClick={() => handleOpenModal(patient)}>
+                    <InfoIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -102,64 +104,88 @@ const PatientsReport = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal para mostrar detalles del paciente */}
-      <Modal open={openModal} onClose={handleCloseModal}>
-        <Card
+      {/* Modal */}
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Box
           sx={{
-            maxWidth: 600,
-            margin: 'auto',
-            mt: 8,
-            borderRadius: '16px',
-            boxShadow: '0px 6px 20px rgba(0, 0, 0, 0.2)',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
           }}
         >
-          <CardContent>
-            {selectedPatient ? (
-              <>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-                  Información Detallada del Paciente
+          {selectedPatient && (
+            <>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 'bold', mb: 3, textAlign: 'center', color: '#1976d2' }}
+              >
+                Información Detallada del Paciente
+              </Typography>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaUser style={{ marginRight: 8, color: '#1976d2' }} />
+                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                  {selectedPatient.nombre} {selectedPatient.aPaterno} {selectedPatient.aMaterno}
                 </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaCalendarAlt style={{ marginRight: 8, color: '#1976d2' }} />
+                <Typography variant="body1">{formatDate(selectedPatient.fechaNacimiento)}</Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaPhone style={{ marginRight: 8, color: '#1976d2' }} />
+                <Typography variant="body1">{selectedPatient.telefono}</Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaEnvelope style={{ marginRight: 8, color: '#1976d2' }} />
+                <Typography variant="body1">{selectedPatient.email}</Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaVenusMars style={{ marginRight: 8, color: '#1976d2' }} />
+                <Typography variant="body1">{selectedPatient.genero}</Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaMapMarkerAlt style={{ marginRight: 8, color: '#1976d2' }} />
+                <Typography variant="body1">{selectedPatient.lugar}</Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaSyringe style={{ marginRight: 8, color: '#1976d2' }} />
                 <Typography variant="body1">
-                  <strong>ID:</strong> {selectedPatient.id}
+                  {selectedPatient.alergias && selectedPatient.alergias.length > 0
+                    ? selectedPatient.alergias
+                    : 'Ninguna alergia'}
                 </Typography>
-                <Typography variant="body1">
-                  <strong>Nombre:</strong> {`${selectedPatient.nombre} ${selectedPatient.aPaterno} ${selectedPatient.aMaterno}`}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Fecha de Nacimiento:</strong> {selectedPatient.fechaNacimiento}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Teléfono:</strong> {selectedPatient.telefono}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Correo Electrónico:</strong> {selectedPatient.email}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Género:</strong> {selectedPatient.genero}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Lugar:</strong> {selectedPatient.lugar}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Alergias:</strong> {selectedPatient.alergias}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Estado:</strong> {selectedPatient.estado}
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  sx={{ mt: 4 }}
-                  onClick={handleCloseModal}
-                >
-                  Cerrar
-                </Button>
-              </>
-            ) : (
-              <Typography variant="body1">Cargando datos...</Typography>
-            )}
-          </CardContent>
-        </Card>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FaUserCheck style={{ marginRight: 8, color: '#1976d2' }} />
+                <Typography variant="body1">{selectedPatient.estado}</Typography>
+              </Box>
+
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mt: 3 }}
+                onClick={handleCloseModal}
+              >
+                Cerrar
+              </Button>
+            </>
+          )}
+        </Box>
       </Modal>
     </Box>
   );
