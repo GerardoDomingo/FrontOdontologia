@@ -8,6 +8,7 @@ import {
   CardContent,
   CardMedia,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 import { CleaningServices, MedicalServices, LocalHospital, Phone, Email } from '@mui/icons-material';
 
@@ -18,6 +19,9 @@ import img3 from '../img/img3_1.png';
 
 const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [empresa, setEmpresa] = useState(null); // Estado para guardar los datos de la empresa
+  const [isLoading, setIsLoading] = useState(true); // Estado de carga
+  const [error, setError] = useState(null); // Estado para manejar errores
 
   // Detectar el tema del sistema
   useEffect(() => {
@@ -35,17 +39,66 @@ const Home = () => {
     };
   }, []);
 
+  // Obtener los datos de la empresa desde el backend
+  useEffect(() => {
+    const fetchEmpresaData = async () => {
+      try {
+        const response = await fetch('https://backendodontologia.onrender.com/api/perfilEmpresa/empresa');
+        if (!response.ok) {
+          throw new Error('Error al obtener los datos de la empresa');
+        }
+        const data = await response.json();
+        setEmpresa(data); // Guardar los datos en el estado
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false); // Cambiar el estado de carga
+      }
+    };
+
+    fetchEmpresaData();
+  }, []);
+
   const colors = {
-    background: isDarkMode 
-      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)'  // Gradiente en modo oscuro
+    background: isDarkMode
+      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)' // Gradiente en modo oscuro
       : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Gradiente en modo claro
-    primaryText: isDarkMode ? '#82B1FF' : '#1976d2',          // Azul brillante en oscuro
-    secondaryText: isDarkMode ? '#B0BEC5' : '#616161',        // Gris claro en oscuro
-    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF',       // Fondo de tarjeta oscuro en modo oscuro
-    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD',            // Fondo de tarjeta al pasar el ratón
+    primaryText: isDarkMode ? '#82B1FF' : '#1976d2', // Azul brillante en oscuro
+    secondaryText: isDarkMode ? '#B0BEC5' : '#616161', // Gris claro en oscuro
+    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF', // Fondo de tarjeta oscuro en modo oscuro
+    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD', // Fondo de tarjeta al pasar el ratón
   };
-  
-  
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -67,7 +120,7 @@ const Home = () => {
               fontFamily: 'Roboto, sans-serif',
             }}
           >
-            Odontología Carol
+            {empresa?.nombre_empresa || 'Odontología'}
           </Typography>
           <Typography
             variant="subtitle1"
@@ -77,7 +130,7 @@ const Home = () => {
               fontFamily: 'Roboto, sans-serif',
             }}
           >
-            Cuidando tu sonrisa con pasión y profesionalismo
+            {empresa?.slogan || 'Cuidando tu sonrisa con pasión y profesionalismo'}
           </Typography>
         </Box>
 
@@ -196,7 +249,7 @@ const Home = () => {
               <Phone />
             </IconButton>
             <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
-              <strong>Teléfonos:</strong> 5582758840, 7713339456
+              <strong>Teléfonos:</strong> {empresa?.telefono || 'No disponible'}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 2 }}>
@@ -204,11 +257,11 @@ const Home = () => {
               <Email />
             </IconButton>
             <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
-              <strong>Email:</strong> e_gr@hotmail.com
+              <strong>Email:</strong> {empresa?.correo_electronico || 'No disponible'}
             </Typography>
           </Box>
           <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 3 }}>
-            <strong>Ubicación:</strong> Ixcatlán, Huejutla de Reyes, Hidalgo, México
+            <strong>Ubicación:</strong> {empresa?.direccion || 'No disponible'}
           </Typography>
           <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 1 }}>
             <strong>Dueño:</strong> Hugo Gómez Ramírez
