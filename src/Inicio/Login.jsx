@@ -95,15 +95,15 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       recaptchaRef.current.reset();
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
@@ -113,9 +113,9 @@ const Login = () => {
         credentials: 'include',
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-  
       const data = await response.json();
-  
+      console.log('Respuesta del servidor:', data);
+
       if (response.ok) {
         const sendCodeResponse = await fetch('https://backendodontologia.onrender.com/api/send-verification-code', {
           method: 'POST',
@@ -124,7 +124,7 @@ const Login = () => {
           },
           body: JSON.stringify({ email: formData.email }),
         });
-  
+
         if (sendCodeResponse.ok) {
           setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
           setOpenNotification(true);
@@ -144,7 +144,7 @@ const Login = () => {
       } else {
         setErrorMessage(data.message || 'Error al iniciar sesión.');
       }
-  
+
       recaptchaRef.current.reset();
       setCaptchaValue(null);
     } catch (error) {
@@ -153,7 +153,7 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-  
+
   // Manejar la verificación del código
   const handleVerifyCode = async () => {
     if (!verificationCode.trim()) {
@@ -223,7 +223,7 @@ const Login = () => {
           </Typography>
         </Box>
       </IconButton>
-  
+
       <Card
         sx={{
           maxWidth: 400,
@@ -243,7 +243,7 @@ const Login = () => {
           <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
             Iniciar Sesión
           </Typography>
-  
+
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 3 }}>
               <TextField
@@ -274,7 +274,7 @@ const Login = () => {
                 }}
               />
             </Box>
-  
+
             <Box sx={{ mb: 3 }}>
               <TextField
                 fullWidth
@@ -312,7 +312,7 @@ const Login = () => {
                 }}
               />
             </Box>
-  
+
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
               <ReCAPTCHA
                 ref={recaptchaRef}
@@ -320,7 +320,7 @@ const Login = () => {
                 onChange={handleCaptchaChange}
               />
             </Box>
-  
+
             {errorMessage && (
               <Typography
                 variant="body2"
@@ -336,7 +336,7 @@ const Login = () => {
                 {errorMessage}
               </Typography>
             )}
-  
+
             <Button
               fullWidth
               type="submit"
@@ -357,7 +357,7 @@ const Login = () => {
             >
               {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Iniciar Sesión'}
             </Button>
-  
+
             {openModal && (
               <Box sx={{ mt: 3 }}>
                 <Typography
@@ -392,7 +392,7 @@ const Login = () => {
                 </Button>
               </Box>
             )}
-  
+
             <Box sx={{ mt: 3, textAlign: 'center' }}>
               <Typography variant="body2" sx={{ color: isDarkMode ? '#82B1FF' : '#00bcd4' }}>
                 <Link to="/register" style={{ color: 'inherit', textDecoration: 'none' }}>
@@ -408,7 +408,7 @@ const Login = () => {
           </form>
         </CardContent>
       </Card>
-  
+
       <Notificaciones
         open={openNotification}
         message={notificationMessage}
@@ -416,13 +416,13 @@ const Login = () => {
           notificationMessage.includes('Cuenta bloqueada')
             ? 'error'
             : notificationMessage.includes('Advertencia')
-            ? 'warning'
-            : 'info'
+              ? 'warning'
+              : 'info'
         }
         handleClose={() => setOpenNotification(false)}
       />
     </Box>
-  );  
+  );
 };
 
 export default Login;
