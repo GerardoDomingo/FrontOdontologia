@@ -95,15 +95,15 @@ const Login = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!captchaValue) {
       setErrorMessage('Por favor, completa el captcha.');
       recaptchaRef.current.reset();
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
       const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
         method: 'POST',
@@ -113,9 +113,9 @@ const Login = () => {
         credentials: 'include',
         body: JSON.stringify({ ...formData, captchaValue }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         const sendCodeResponse = await fetch('https://backendodontologia.onrender.com/api/send-verification-code', {
           method: 'POST',
@@ -124,7 +124,7 @@ const Login = () => {
           },
           body: JSON.stringify({ email: formData.email }),
         });
-
+  
         if (sendCodeResponse.ok) {
           setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
           setOpenNotification(true);
@@ -132,6 +132,11 @@ const Login = () => {
         } else {
           setErrorMessage('Error al enviar el código de verificación. Intenta de nuevo.');
         }
+      } else if (data.failedAttempts !== undefined) {
+        // Mostrar el número de intentos fallidos
+        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
+        setOpenNotification(true);
+        setErrorMessage('Contraseña incorrecta.');
       } else if (data.lockStatus) {
         const formattedDate = new Date(data.lockUntil).toLocaleString('es-ES');
         setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
@@ -139,7 +144,7 @@ const Login = () => {
       } else {
         setErrorMessage(data.message || 'Error al iniciar sesión.');
       }
-
+  
       recaptchaRef.current.reset();
       setCaptchaValue(null);
     } catch (error) {
@@ -148,7 +153,7 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-
+  
   // Manejar la verificación del código
   const handleVerifyCode = async () => {
     if (!verificationCode.trim()) {
