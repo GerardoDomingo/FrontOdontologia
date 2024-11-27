@@ -23,10 +23,10 @@ import Reportes from './Administrador/Configuracion/reportes.jsx';
 import PerfilEmpresa from './Administrador/Configuracion/PerfilEmpresa.jsx';
 
 function App() {
-  const [tituloPagina, setTituloPagina] = useState('Mi Empresa'); // Valor inicial predeterminado
+  const [tituloPagina, setTituloPagina] = useState('Mi Empresa'); 
   const [logo, setLogo] = useState('');
   const [fetchErrors, setFetchErrors] = useState(0);
-  const [loading, setLoading] = useState(true); // Estado para gestionar la carga inicial
+  const [loading, setLoading] = useState(true); 
 
   const fetchTitleAndLogo = async (retries = 3) => {
     try {
@@ -34,7 +34,7 @@ function App() {
       const { nombre_empresa, logo } = response.data;
 
       if (nombre_empresa) {
-        document.title = nombre_empresa; // Cambia dinámicamente el título
+        document.title = nombre_empresa; 
         setTituloPagina(nombre_empresa);
       }
       if (logo) {
