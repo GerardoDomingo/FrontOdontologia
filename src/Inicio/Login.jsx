@@ -182,26 +182,29 @@ const Login = () => {
 
         const data = await response.json();
 
+        // Depuración para verificar la respuesta del backend
+        console.log('Respuesta del servidor:', data);
+
         if (!response.ok) {
-            console.error('Error desde el servidor:', data); // Depuración adicional
+            console.error('Error desde el servidor:', data);
             setErrorMessage(data.message || 'Error al verificar el código.');
             return;
         }
 
-        console.log('Datos recibidos del servidor:', data); // Depuración adicional
-
+        // Establecer notificación y limpiar campos
         setNotificationMessage(data.message || 'Código verificado correctamente.');
         setOpenNotification(true);
         setVerificationCode(''); // Limpiar el campo del código
         setOpenModal(false); // Cerrar el modal
 
-        // Verificar y redirigir según el tipo de usuario
+        // Redirigir según el tipo de usuario
         if (data.userType === 'administradores') {
+            console.log('Redirigiendo al panel de administradores...');
             navigate('/Administrador/principal');
         } else if (data.userType === 'pacientes') {
+            console.log('Redirigiendo al panel de pacientes...');
             navigate('/Paciente/principal');
         } else {
-            // Si no se proporciona userType, mostrar un error
             setErrorMessage('Tipo de usuario desconocido. Por favor, inténtalo nuevamente.');
         }
     } catch (error) {
@@ -211,7 +214,6 @@ const Login = () => {
         setIsVerifying(false);
     }
 };
-
 
   return (
     <Box
