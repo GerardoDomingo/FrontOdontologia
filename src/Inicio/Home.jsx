@@ -9,40 +9,64 @@ import {
   CardMedia,
   IconButton,
   CircularProgress,
-  Fade,
 } from '@mui/material';
-import { 
-  CleaningServices, 
-  MedicalServices, 
-  LocalHospital, 
-  Phone, 
-  Email, 
-  StarBorder,
-  CheckCircleOutline 
-} from '@mui/icons-material';
+import { CleaningServices, MedicalServices, LocalHospital, Phone, Email } from '@mui/icons-material';
 
-// Local image imports
+// Importar las imágenes locales
 import img1 from '../img/img1_1.jpeg';
 import img2 from '../img/img2_1.jpg';
 import img3 from '../img/img3_1.png';
 
 const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [empresa, setEmpresa] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [empresa, setEmpresa] = useState(null); // Estado para guardar los datos de la empresa
+  const [isLoading, setIsLoading] = useState(true); // Estado de carga
+  const [error, setError] = useState(null); // Estado para manejar errores
 
-  // Theme and data fetching logic remains the same as in the original component
+  // Detectar el tema del sistema
+  useEffect(() => {
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(matchDarkTheme.matches);
+
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    matchDarkTheme.addEventListener('change', handleThemeChange);
+
+    return () => {
+      matchDarkTheme.removeEventListener('change', handleThemeChange);
+    };
+  }, []);
+
+  // Obtener los datos de la empresa desde el backend
+  useEffect(() => {
+    const fetchEmpresaData = async () => {
+      try {
+        const response = await fetch('https://backendodontologia.onrender.com/api/perfilEmpresa/empresa');
+        if (!response.ok) {
+          throw new Error('Error al obtener los datos de la empresa');
+        }
+        const data = await response.json();
+        setEmpresa(data); // Guardar los datos en el estado
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false); // Cambiar el estado de carga
+      }
+    };
+
+    fetchEmpresaData();
+  }, []);
 
   const colors = {
     background: isDarkMode
-      ? 'linear-gradient(135deg, #121620 0%, #1A2A3A 100%)' // Deep, rich dark gradient
-      : 'linear-gradient(135deg, #F0F4F8 0%, #FFFFFF 100%)', // Soft, clean light gradient
-    primaryText: isDarkMode ? '#4FC3F7' : '#0288D1', // Vibrant, yet softer blue
-    secondaryText: isDarkMode ? '#B0BEC5' : '#37474F', // Sophisticated gray
-    cardBackground: isDarkMode ? '#1E2633' : '#FFFFFF', // Deeper card backgrounds
-    cardHover: isDarkMode ? '#263238' : '#E1F5FE', // Refined hover effect
-    accentColor: isDarkMode ? '#00BCD4' : '#03A9F4', // Accent for highlights
+      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)' // Gradiente en modo oscuro
+      : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Gradiente en modo claro
+    primaryText: isDarkMode ? '#82B1FF' : '#1976d2', // Azul brillante en oscuro
+    secondaryText: isDarkMode ? '#B0BEC5' : '#616161', // Gris claro en oscuro
+    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF', // Fondo de tarjeta oscuro en modo oscuro
+    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD', // Fondo de tarjeta al pasar el ratón
   };
 
   if (isLoading) {
@@ -53,12 +77,9 @@ const Home = () => {
           justifyContent: 'center',
           alignItems: 'center',
           height: '100vh',
-          background: colors.background,
         }}
       >
-        <Fade in={true}>
-          <CircularProgress color="primary" size={60} thickness={4} />
-        </Fade>
+        <CircularProgress />
       </Box>
     );
   }
@@ -68,25 +89,12 @@ const Home = () => {
       <Box
         sx={{
           display: 'flex',
-          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           height: '100vh',
-          background: colors.background,
-          textAlign: 'center',
-          p: 3,
         }}
       >
-        <Typography 
-          color="error" 
-          variant="h4" 
-          sx={{ mb: 2, fontWeight: 'bold' }}
-        >
-          Ups, algo salió mal
-        </Typography>
-        <Typography variant="body1" sx={{ color: colors.secondaryText }}>
-          {error || 'No pudimos cargar la información'}
-        </Typography>
+        <Typography color="error">{error}</Typography>
       </Box>
     );
   }
@@ -98,48 +106,35 @@ const Home = () => {
         minHeight: '100vh',
         margin: 0,
         padding: 0,
-        overflowX: 'hidden',
       }}
     >
-      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 10 } }}>
-        {/* Enhanced Header */}
-        <Box 
-          sx={{ 
-            textAlign: 'center', 
-            mb: 10, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center' 
-          }}
-        >
+      <Container maxWidth="lg" sx={{ py: 10 }} disableGutters>
+        {/* Encabezado principal */}
+        <Box sx={{ textAlign: 'center', mb: 8 }}>
           <Typography
-            variant="h2"
+            variant="h3"
             component="h1"
             sx={{
-              fontWeight: 900,
+              fontWeight: 'bold',
               color: colors.primaryText,
-              fontFamily: 'Montserrat, sans-serif',
-              mb: 2,
-              letterSpacing: -1,
-              maxWidth: 600,
+              fontFamily: 'Roboto, sans-serif',
             }}
           >
-            {empresa?.nombre_empresa || 'Clínica Odontológica'}
+            {empresa?.nombre_empresa || 'Odontología'}
           </Typography>
           <Typography
-            variant="h5"
+            variant="subtitle1"
             sx={{
               color: colors.secondaryText,
+              mt: 2,
               fontFamily: 'Roboto, sans-serif',
-              maxWidth: 500,
-              textAlign: 'center',
             }}
           >
-            {empresa?.slogan || 'Transformando sonrisas con cuidado profesional'}
+            {empresa?.slogan || 'Cuidando tu sonrisa con pasión y profesionalismo'}
           </Typography>
         </Box>
 
-        {/* Services Section with Enhanced Design */}
+        {/* Sección de servicios */}
         <Box component="section" sx={{ mb: 12 }}>
           <Typography
             variant="h4"
@@ -147,98 +142,73 @@ const Home = () => {
               color: colors.primaryText,
               fontWeight: 'bold',
               textAlign: 'center',
-              mb: 8,
+              mb: 6,
               fontFamily: 'Montserrat, sans-serif',
             }}
           >
-            Nuestros Servicios Especializados
+            Nuestros Servicios
           </Typography>
           <Grid container spacing={4} justifyContent="center">
             {[
               {
-                title: 'Limpieza Dental Profunda',
-                icon: <CleaningServices sx={{ fontSize: 50, color: colors.accentColor }} />,
+                title: 'Limpieza Dental',
+                icon: <CleaningServices sx={{ fontSize: 40, color: colors.primaryText }} />,
                 img: img1,
-                description: 'Limpieza meticulosa que garantiza una sonrisa brillante y saludable.',
+                description: 'Mantenemos tu sonrisa limpia y saludable.',
               },
               {
-                title: 'Ortodoncia Personalizada',
-                icon: <MedicalServices sx={{ fontSize: 50, color: colors.accentColor }} />,
+                title: 'Ortodoncia',
+                icon: <MedicalServices sx={{ fontSize: 40, color: colors.primaryText }} />,
                 img: img2,
-                description: 'Tratamientos de ortodoncia adaptados a tu anatomía única.',
+                description: 'Corrige la posición de tus dientes.',
               },
               {
-                title: 'Implantes de Precisión',
-                icon: <LocalHospital sx={{ fontSize: 50, color: colors.accentColor }} />,
+                title: 'Implantes Dentales',
+                icon: <LocalHospital sx={{ fontSize: 40, color: colors.primaryText }} />,
                 img: img3,
-                description: 'Implantes de última generación para una sonrisa natural y duradera.',
+                description: 'Reemplaza tus dientes faltantes con implantes de calidad.',
               },
             ].map((service, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card
                   sx={{
-                    height: '100%',
+                    boxShadow: 3,
+                    borderRadius: '16px',
                     display: 'flex',
                     flexDirection: 'column',
-                    borderRadius: '16px',
-                    boxShadow: isDarkMode 
-                      ? '0 8px 32px rgba(0,0,0,0.4)' 
-                      : '0 8px 32px rgba(0,0,0,0.1)',
-                    transition: 'all 0.3s ease',
+                    height: '100%',
+                    transition: 'transform 0.3s ease',
                     backgroundColor: colors.cardBackground,
                     '&:hover': {
-                      transform: 'translateY(-10px)',
-                      boxShadow: isDarkMode 
-                        ? '0 12px 40px rgba(0,0,0,0.5)' 
-                        : '0 12px 40px rgba(0,0,0,0.2)',
+                      boxShadow: 6,
+                      transform: 'scale(1.05)', // Animación de zoom al pasar el ratón
                     },
                   }}
                 >
-                  <Box 
-                    sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'center', 
-                      alignItems: 'center', 
-                      p: 3,
-                      background: isDarkMode 
-                        ? 'linear-gradient(145deg, #1E2633, #17202A)' 
-                        : 'linear-gradient(145deg, #F0F4F8, #FFFFFF)' 
-                    }}
-                  >
-                    {service.icon}
-                  </Box>
-                  
+                  <Box sx={{ textAlign: 'center', mt: 2 }}>{service.icon}</Box>
                   <CardMedia
                     component="img"
                     alt={service.title}
                     image={service.img}
                     sx={{
-                      height: 220,
+                      height: 180,
                       width: '100%',
                       objectFit: 'cover',
-                      filter: isDarkMode ? 'brightness(0.8)' : 'none',
                     }}
                   />
-                  
-                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                  <CardContent sx={{ flexGrow: 1 }}>
                     <Typography
                       variant="h5"
                       sx={{
                         fontWeight: 'bold',
-                        color: colors.primaryText,
+                        color: colors.secondaryText,
                         mb: 2,
                         fontFamily: 'Montserrat, sans-serif',
                       }}
                     >
                       {service.title}
                     </Typography>
-                    <Typography 
-                      variant="body1" 
-                      sx={{ 
-                        color: colors.secondaryText,
-                        lineHeight: 1.6,
-                      }}
-                    >
+                    <Typography variant="body2" sx={{ color: colors.secondaryText }}>
                       {service.description}
                     </Typography>
                   </CardContent>
@@ -248,17 +218,15 @@ const Home = () => {
           </Grid>
         </Box>
 
-        {/* Contact Section with Improved Layout */}
+        {/* Sección de contacto */}
         <Box
           component="section"
           sx={{
             backgroundColor: colors.cardBackground,
+            py: 8,
             borderRadius: '16px',
-            boxShadow: isDarkMode 
-              ? '0 12px 40px rgba(0,0,0,0.3)' 
-              : '0 12px 40px rgba(0,0,0,0.1)',
-            p: { xs: 3, md: 6 },
-            textAlign: 'center',
+            boxShadow: 3,
+            mb: 5,
           }}
         >
           <Typography
@@ -266,47 +234,38 @@ const Home = () => {
             sx={{
               color: colors.primaryText,
               fontWeight: 'bold',
-              mb: 4,
+              textAlign: 'center',
+              mb: 6,
               fontFamily: 'Montserrat, sans-serif',
             }}
           >
             Contáctanos
           </Typography>
-          
-          <Grid container spacing={3} justifyContent="center" alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Phone sx={{ color: colors.accentColor, fontSize: 32 }} />
-                  <Typography variant="h6" sx={{ color: colors.secondaryText }}>
-                    {empresa?.telefono || 'No disponible'}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Email sx={{ color: colors.accentColor, fontSize: 32 }} />
-                  <Typography variant="h6" sx={{ color: colors.secondaryText }}>
-                    {empresa?.correo_electronico || 'No disponible'}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <CheckCircleOutline sx={{ color: colors.accentColor, fontSize: 32 }} />
-                  <Typography variant="h6" sx={{ color: colors.secondaryText }}>
-                    {empresa?.direccion || 'No disponible'}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <StarBorder sx={{ color: colors.accentColor, fontSize: 32 }} />
-                  <Typography variant="h6" sx={{ color: colors.secondaryText }}>
-                    Dr. Hugo Gómez Ramírez
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+          <Typography variant="body1" sx={{ color: colors.secondaryText, textAlign: 'center', mb: 3 }}>
+            Visítanos en nuestra clínica o llámanos para agendar tu cita.
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+            <IconButton color="primary" sx={{ fontSize: 40 }}>
+              <Phone />
+            </IconButton>
+            <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
+              <strong>Teléfonos:</strong> {empresa?.telefono || 'No disponible'}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 2 }}>
+            <IconButton color="primary" sx={{ fontSize: 40 }}>
+              <Email />
+            </IconButton>
+            <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
+              <strong>Email:</strong> {empresa?.correo_electronico || 'No disponible'}
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 3 }}>
+            <strong>Ubicación:</strong> {empresa?.direccion || 'No disponible'}
+          </Typography>
+          <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 1 }}>
+            <strong>Dueño:</strong> Hugo Gómez Ramírez
+          </Typography>
         </Box>
       </Container>
     </Box>
