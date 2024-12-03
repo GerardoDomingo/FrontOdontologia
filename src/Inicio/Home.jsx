@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Box,
   Typography,
@@ -19,9 +20,41 @@ import img3 from '../img/img3_1.png';
 
 const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [empresa, setEmpresa] = useState(null); // Estado para guardar los datos de la empresa
-  const [isLoading, setIsLoading] = useState(true); // Estado de carga
-  const [error, setError] = useState(null); // Estado para manejar errores
+  const [empresa, setEmpresa] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Animación de variantes
+  const imageVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        type: "spring",
+        stiffness: 120
+      }
+    },
+    hover: { 
+      scale: 1.05,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const serviceCardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: (index) => ({
+      opacity: 1, 
+      y: 0,
+      transition: {
+        delay: index * 0.2,
+        duration: 0.5,
+        type: "spring",
+        stiffness: 120
+      }
+    })
+  };
 
   // Detectar el tema del sistema
   useEffect(() => {
@@ -48,11 +81,11 @@ const Home = () => {
           throw new Error('Error al obtener los datos de la empresa');
         }
         const data = await response.json();
-        setEmpresa(data); // Guardar los datos en el estado
+        setEmpresa(data);
       } catch (error) {
         setError(error.message);
       } finally {
-        setIsLoading(false); // Cambiar el estado de carga
+        setIsLoading(false);
       }
     };
 
@@ -61,12 +94,12 @@ const Home = () => {
 
   const colors = {
     background: isDarkMode
-      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)' // Gradiente en modo oscuro
-      : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)', // Gradiente en modo claro
-    primaryText: isDarkMode ? '#82B1FF' : '#1976d2', // Azul brillante en oscuro
-    secondaryText: isDarkMode ? '#B0BEC5' : '#616161', // Gris claro en oscuro
-    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF', // Fondo de tarjeta oscuro en modo oscuro
-    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD', // Fondo de tarjeta al pasar el ratón
+      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)'
+      : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)',
+    primaryText: isDarkMode ? '#82B1FF' : '#1976d2',
+    secondaryText: isDarkMode ? '#B0BEC5' : '#616161',
+    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF',
+    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD',
   };
 
   if (isLoading) {
@@ -109,32 +142,38 @@ const Home = () => {
       }}
     >
       <Container maxWidth="lg" sx={{ py: 10 }} disableGutters>
-        {/* Encabezado principal */}
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
-          <Typography
-            variant="h3"
-            component="h1"
-            sx={{
-              fontWeight: 'bold',
-              color: colors.primaryText,
-              fontFamily: 'Roboto, sans-serif',
-            }}
-          >
-            {empresa?.nombre_empresa || 'Odontología'}
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              color: colors.secondaryText,
-              mt: 2,
-              fontFamily: 'Roboto, sans-serif',
-            }}
-          >
-            {empresa?.slogan || 'Cuidando tu sonrisa con pasión y profesionalismo'}
-          </Typography>
-        </Box>
+        {/* Encabezado principal con animación */}
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Box sx={{ textAlign: 'center', mb: 8 }}>
+            <Typography
+              variant="h3"
+              component="h1"
+              sx={{
+                fontWeight: 'bold',
+                color: colors.primaryText,
+                fontFamily: 'Roboto, sans-serif',
+              }}
+            >
+              {empresa?.nombre_empresa || 'Odontología'}
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: colors.secondaryText,
+                mt: 2,
+                fontFamily: 'Roboto, sans-serif',
+              }}
+            >
+              {empresa?.slogan || 'Cuidando tu sonrisa con pasión y profesionalismo'}
+            </Typography>
+          </Box>
+        </motion.div>
 
-        {/* Sección de servicios */}
+        {/* Sección de servicios con animaciones */}
         <Box component="section" sx={{ mb: 12 }}>
           <Typography
             variant="h4"
@@ -170,103 +209,119 @@ const Home = () => {
               },
             ].map((service, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card
-                  sx={{
-                    boxShadow: 3,
-                    borderRadius: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: '100%',
-                    transition: 'transform 0.3s ease',
-                    backgroundColor: colors.cardBackground,
-                    '&:hover': {
-                      boxShadow: 6,
-                      transform: 'scale(1.05)', // Animación de zoom al pasar el ratón
-                    },
-                  }}
+                <motion.div
+                  variants={serviceCardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  custom={index}
+                  whileHover="hover"
                 >
-                  <Box sx={{ textAlign: 'center', mt: 2 }}>{service.icon}</Box>
-                  <CardMedia
-                    component="img"
-                    alt={service.title}
-                    image={service.img}
+                  <Card
                     sx={{
-                      height: 180,
-                      width: '100%',
-                      objectFit: 'cover',
+                      boxShadow: 3,
+                      borderRadius: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      height: '100%',
+                      backgroundColor: colors.cardBackground,
                     }}
-                  />
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        fontWeight: 'bold',
-                        color: colors.secondaryText,
-                        mb: 2,
-                        fontFamily: 'Montserrat, sans-serif',
-                      }}
+                  >
+                    <Box sx={{ textAlign: 'center', mt: 2 }}>{service.icon}</Box>
+                    <motion.div
+                      variants={imageVariants}
+                      initial="hidden"
+                      animate="visible"
+                      whileHover="hover"
                     >
-                      {service.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: colors.secondaryText }}>
-                      {service.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                      <CardMedia
+                        component="img"
+                        alt={service.title}
+                        image={service.img}
+                        sx={{
+                          height: 180,
+                          width: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    </motion.div>
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 'bold',
+                          color: colors.secondaryText,
+                          mb: 2,
+                          fontFamily: 'Montserrat, sans-serif',
+                        }}
+                      >
+                        {service.title}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: colors.secondaryText }}>
+                        {service.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </Grid>
             ))}
           </Grid>
         </Box>
 
-        {/* Sección de contacto */}
-        <Box
-          component="section"
-          sx={{
-            backgroundColor: colors.cardBackground,
-            py: 8,
-            borderRadius: '16px',
-            boxShadow: 3,
-            mb: 5,
-          }}
+        {/* Sección de contacto con animación */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <Typography
-            variant="h4"
+          <Box
+            component="section"
             sx={{
-              color: colors.primaryText,
-              fontWeight: 'bold',
-              textAlign: 'center',
-              mb: 6,
-              fontFamily: 'Montserrat, sans-serif',
+              backgroundColor: colors.cardBackground,
+              py: 8,
+              borderRadius: '16px',
+              boxShadow: 3,
+              mb: 5,
             }}
           >
-            Contáctanos
-          </Typography>
-          <Typography variant="body1" sx={{ color: colors.secondaryText, textAlign: 'center', mb: 3 }}>
-            Visítanos en nuestra clínica o llámanos para agendar tu cita.
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
-            <IconButton color="primary" sx={{ fontSize: 40 }}>
-              <Phone />
-            </IconButton>
-            <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
-              <strong>Teléfonos:</strong> {empresa?.telefono || 'No disponible'}
+            <Typography
+              variant="h4"
+              sx={{
+                color: colors.primaryText,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                mb: 6,
+                fontFamily: 'Montserrat, sans-serif',
+              }}
+            >
+              Contáctanos
+            </Typography>
+            <Typography variant="body1" sx={{ color: colors.secondaryText, textAlign: 'center', mb: 3 }}>
+              Visítanos en nuestra clínica o llámanos para agendar tu cita.
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+              <IconButton color="primary" sx={{ fontSize: 40 }}>
+                <Phone />
+              </IconButton>
+              <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
+                <strong>Teléfonos:</strong> {empresa?.telefono || 'No disponible'}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 2 }}>
+              <IconButton color="primary" sx={{ fontSize: 40 }}>
+                <Email />
+              </IconButton>
+              <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
+                <strong>Email:</strong> {empresa?.correo_electronico || 'No disponible'}
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 3 }}>
+              <strong>Ubicación:</strong> {empresa?.direccion || 'No disponible'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 1 }}>
+              <strong>Dueño:</strong> Hugo Gómez Ramírez
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 2 }}>
-            <IconButton color="primary" sx={{ fontSize: 40 }}>
-              <Email />
-            </IconButton>
-            <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
-              <strong>Email:</strong> {empresa?.correo_electronico || 'No disponible'}
-            </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 3 }}>
-            <strong>Ubicación:</strong> {empresa?.direccion || 'No disponible'}
-          </Typography>
-          <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 1 }}>
-            <strong>Dueño:</strong> Hugo Gómez Ramírez
-          </Typography>
-        </Box>
+        </motion.div>
       </Container>
     </Box>
   );
