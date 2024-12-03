@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { FaTooth, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
+import { motion } from 'framer-motion';
 
 const BarraNav = () => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -33,34 +34,81 @@ const BarraNav = () => {
     setDrawerOpen(open);
   };
 
+  // Animaciones para el Drawer
+  const drawerVariants = {
+    closed: { x: '100%', opacity: 0 },
+    open: { x: '0', opacity: 1 },
+  };
+
+  const itemVariants = {
+    closed: { y: 20, opacity: 0 },
+    open: { y: 0, opacity: 1 },
+  };
+
   // Lista de enlaces en el Drawer
   const drawerList = (
-    <Box
-      sx={{ width: 250 }}
-      role="presentation"
-      onClick={toggleDrawer(false)}
-      onKeyDown={toggleDrawer(false)}
+    <motion.div
+      variants={drawerVariants}
+      initial="closed"
+      animate={drawerOpen ? 'open' : 'closed'}
+      transition={{ duration: 0.3 }}
     >
-      <List>
-        <ListItem button component={Link} to="/">
-          <FaTooth style={{ marginRight: '10px' }} />
-          <ListItemText primary="Odontología Carol" />
-        </ListItem>
-        <ListItem button component={Link} to="/login">
-          <FaSignInAlt style={{ marginRight: '10px' }} />
-          <ListItemText primary="Iniciar sesión" />
-        </ListItem>
-        <ListItem button component={Link} to="/register">
-          <FaUserPlus style={{ marginRight: '10px' }} />
-          <ListItemText primary="Registrarte" />
-        </ListItem>
-      </List>
-    </Box>
+      <Box
+        sx={{
+          width: 250,
+          backgroundColor: isDarkTheme ? '#2A3A4A' : '#f0f0f0',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}
+        role="presentation"
+        onClick={toggleDrawer(false)}
+        onKeyDown={toggleDrawer(false)}
+      >
+        <List>
+          <motion.div
+            variants={itemVariants}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <ListItem button component={Link} to="/">
+              <FaTooth style={{ marginRight: '10px', fontSize: '1.5rem' }} />
+              <ListItemText primary="Odontología Carol" />
+            </ListItem>
+          </motion.div>
+          <motion.div
+            variants={itemVariants}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
+            <ListItem button component={Link} to="/login">
+              <FaSignInAlt style={{ marginRight: '10px', fontSize: '1.5rem' }} />
+              <ListItemText primary="Iniciar sesión" />
+            </ListItem>
+          </motion.div>
+          <motion.div
+            variants={itemVariants}
+            transition={{ duration: 0.3, delay: 0.3 }}
+          >
+            <ListItem button component={Link} to="/register">
+              <FaUserPlus style={{ marginRight: '10px', fontSize: '1.5rem' }} />
+              <ListItemText primary="Registrarte" />
+            </ListItem>
+          </motion.div>
+        </List>
+      </Box>
+    </motion.div>
   );
 
   return (
     <>
-      <AppBar position="static" sx={{ backgroundColor: isDarkTheme ? '#2A3A4A' : '#f0f0f0' }}>
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: isDarkTheme ? '#2A3A4A' : '#f0f0f0',
+          boxShadow: 'none',
+          borderBottom: `1px solid ${isDarkTheme ? '#3A4A5A' : '#e0e0e0'}`,
+        }}
+      >
         <Toolbar>
           {/* Logo y nombre de la empresa */}
           <Typography
@@ -73,6 +121,9 @@ const BarraNav = () => {
               display: 'flex',
               alignItems: 'center',
               flexGrow: 1,
+              '&:hover': {
+                color: isDarkTheme ? '#82B1FF' : '#0066cc',
+              },
             }}
           >
             <FaTooth style={{ fontSize: '1.5rem', marginRight: '8px' }} />
@@ -117,9 +168,11 @@ const BarraNav = () => {
       </AppBar>
 
       {/* Drawer para el menú en pantallas pequeñas */}
-      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-        {drawerList}
-      </Drawer>
+      {drawerOpen && (
+        <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+          {drawerList}
+        </Drawer>
+      )}
     </>
   );
 };
