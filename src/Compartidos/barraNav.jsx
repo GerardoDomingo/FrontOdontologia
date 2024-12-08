@@ -1,14 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, IconButton, Typography, Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
-import { FaTooth, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import axios from 'axios';
+import { AppBar, Toolbar, Button, Typography, Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { FaSignInAlt, FaCalendarAlt } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
 import { motion } from 'framer-motion';
 
 const BarraNav = () => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [logo, setLogo] = useState(null);
+  const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [fetchErrors, setFetchErrors] = useState(0);
+
   const navigate = useNavigate();
+
+  // Función para obtener logo y nombre de la empresa
+  const fetchTitleAndLogo = async (retries = 3) => {
+    try {
+      const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
+      const { nombre_empresa, logo } = response.data;
+      
+      if (nombre_empresa) {
+        document.title = nombre_empresa;
+        setNombreEmpresa(nombre_empresa);
+      }
+
+      if (logo) {
+        setLogo(`data:image/png;base64,${logo}`);
+      }
+
+      setFetchErrors(0);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching logo and title:', error);
+      
+      if (retries > 0) {
+        await new Promise((res) => setTimeout(res, 1000));
+        fetchTitleAndLogo(retries - 1);
+      } else {
+        setFetchErrors((prev) => prev + 1);
+        setLoading(false);
+      }
+    }
+  };
 
   // Detectar el tema del sistema
   useEffect(() => {
@@ -20,11 +56,14 @@ const BarraNav = () => {
     };
 
     matchDarkTheme.addEventListener('change', handleThemeChange);
+    fetchTitleAndLogo();
 
     return () => {
       matchDarkTheme.removeEventListener('change', handleThemeChange);
     };
   }, []);
+
+  // Resto del código de la barra de navegación (toggleDrawer, drawerVariants, etc.) se mantiene igual
 
   // Función para abrir/cerrar el Drawer
   const toggleDrawer = (open) => (event) => {
@@ -72,8 +111,8 @@ const BarraNav = () => {
             transition={{ duration: 0.3, delay: 0.1 }}
           >
             <ListItem button component={Link} to="/">
-              <FaTooth style={{ marginRight: '10px', fontSize: '1.5rem' }} />
-              <ListItemText primary="Odontología Carol" />
+              {logo && <img src={logo} alt="Logo" style={{ marginRight: '10px', width: '30px', height: '30px' }} />}
+              <ListItemText primary={nombreEmpresa || "Inicio"} />
             </ListItem>
           </motion.div>
           <motion.div
@@ -85,19 +124,14 @@ const BarraNav = () => {
               <ListItemText primary="Iniciar sesión" />
             </ListItem>
           </motion.div>
-          <motion.div
-            variants={itemVariants}
-            transition={{ duration: 0.3, delay: 0.3 }}
-          >
-            <ListItem button component={Link} to="/register">
-              <FaUserPlus style={{ marginRight: '10px', fontSize: '1.5rem' }} />
-              <ListItemText primary="Registrarte" />
-            </ListItem>
-          </motion.div>
         </List>
       </Box>
     </motion.div>
   );
+
+  if (loading) {
+    return null; // O un spinner de carga
+  }
 
   return (
     <>
@@ -109,61 +143,107 @@ const BarraNav = () => {
           borderBottom: `1px solid ${isDarkTheme ? '#3A4A5A' : '#e0e0e0'}`,
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Logo y nombre de la empresa */}
-          <Typography
-            variant="h6"
-            component={Link}
-            to="/"
-            sx={{
-              color: isDarkTheme ? 'white' : '#333',
+          <Box 
+            component={Link} 
+            to="/" 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
               textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              flexGrow: 1,
+              color: isDarkTheme ? 'white' : '#333',
               '&:hover': {
                 color: isDarkTheme ? '#82B1FF' : '#0066cc',
               },
             }}
           >
-            <FaTooth style={{ fontSize: '1.5rem', marginRight: '8px' }} />
-            Odontología Carol
-          </Typography>
-
-          {/* Links de Login y Registro, con responsividad */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-            <IconButton
-              component={Link}
-              to="/login"
+            {logo && (
+              <img 
+                src={logo} 
+                alt="Logo" 
+                style={{ 
+                  marginRight: '12px', 
+                  width: '40px', 
+                  height: '40px',
+                  borderRadius: '50%' 
+                }} 
+              />
+            )}
+            <Typography
+              variant="h5"
               sx={{
-                color: isDarkTheme ? 'white' : '#333',
-                '&:hover': { color: '#0066cc' },
+                fontFamily: '"Montserrat", "Roboto", sans-serif',
+                fontWeight: 600,
+                letterSpacing: '-0.5px',
               }}
             >
-              <FaSignInAlt />
-              <Typography sx={{ marginLeft: '8px' }}>Iniciar sesión</Typography>
-            </IconButton>
-            <IconButton
-              component={Link}
-              to="/register"
-              sx={{
-                color: isDarkTheme ? 'white' : '#333',
-                '&:hover': { color: '#0066cc' },
-              }}
-            >
-              <FaUserPlus />
-              <Typography sx={{ marginLeft: '8px' }}>Registrarte</Typography>
-            </IconButton>
+              {nombreEmpresa || 'Mi Empresa'}
+            </Typography>
           </Box>
 
-          {/* Menú en pantallas pequeñas */}
-          <IconButton
-            edge="end"
-            sx={{ display: { xs: 'block', md: 'none' }, color: isDarkTheme ? 'white' : '#333' }}
-            onClick={toggleDrawer(true)}
-          >
-            <MenuIcon />
-          </IconButton>
+          {/* Links de navegación, con responsividad */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
+              <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Typography 
+                  sx={{ 
+                    color: isDarkTheme ? 'white' : '#333',
+                    fontFamily: '"Montserrat", sans-serif',
+                    '&:hover': { color: '#0066cc' }
+                  }}
+                >
+                  Inicio
+                </Typography>
+              </Link>
+
+              <Button
+                variant="contained"
+                color="primary"
+                component={Link}
+                to="/agendar-cita"
+                startIcon={<FaCalendarAlt />}
+                sx={{
+                  fontFamily: '"Montserrat", sans-serif',
+                  backgroundColor: '#0066cc',
+                  '&:hover': { 
+                    backgroundColor: '#0052a3',
+                  },
+                  textTransform: 'none',
+                }}
+              >
+                Agenda una Cita
+              </Button>
+
+              <Button
+                variant="outlined"
+                component={Link}
+                to="/login"
+                startIcon={<FaSignInAlt />}
+                sx={{
+                  fontFamily: '"Montserrat", sans-serif',
+                  color: isDarkTheme ? 'white' : '#0066cc',
+                  borderColor: isDarkTheme ? 'white' : '#0066cc',
+                  '&:hover': { 
+                    backgroundColor: isDarkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,102,204,0.1)',
+                    borderColor: isDarkTheme ? 'white' : '#0052a3',
+                  },
+                  textTransform: 'none',
+                }}
+              >
+                Iniciar sesión
+              </Button>
+            </Box>
+
+            {/* Menú en pantallas pequeñas */}
+            <IconButton
+              edge="end"
+              sx={{ display: { xs: 'block', md: 'none' }, color: isDarkTheme ? 'white' : '#333' }}
+              onClick={toggleDrawer(true)}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
 
