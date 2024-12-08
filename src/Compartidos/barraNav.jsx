@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AppBar, Toolbar, Button, Typography, Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { AppBar, Toolbar, Button, Typography, Box, Drawer, List, ListItem, ListItemText, IconButton } from '@mui/material'; // IconButton incluido aquí
 import { FaSignInAlt, FaCalendarAlt } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
 import { motion } from 'framer-motion';
