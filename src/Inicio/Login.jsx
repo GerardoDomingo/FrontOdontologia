@@ -186,10 +186,10 @@ const Login = () => {
 
       if (data.userType === 'administradores') {
         localStorage.setItem('loggedIn', true); // Establecer usuario como logueado
-        navigate('/Usuarios/Administrador/principal');
+        navigate('/Administrador/principal');
       } else if (data.userType === 'pacientes') {
         localStorage.setItem('loggedIn', true); // Establecer usuario como logueado
-        navigate('/Usuarios/Paciente/principal');
+        navigate('/Paciente/principal');
       } else {
         setErrorMessage('Tipo de usuario desconocido. Inténtalo nuevamente.');
       }
