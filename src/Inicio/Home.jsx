@@ -23,6 +23,9 @@ import Contactanos from './Contactanos';
 const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isContactLoading, setIsContactLoading] = useState(true);
+  const [empresa, setEmpresa] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const colors = {
     background: isDarkMode
@@ -49,7 +52,27 @@ const Home = () => {
     };
   }, []);
 
-  // Variantes de animación para servicios
+  // Obtener datos de la empresa desde el backend
+  useEffect(() => {
+    const fetchEmpresaData = async () => {
+      try {
+        const response = await fetch('https://backendodontologia.onrender.com/api/perfilEmpresa/empresa');
+        if (!response.ok) {
+          throw new Error('Error al obtener los datos de la empresa');
+        }
+        const data = await response.json();
+        setEmpresa(data); // Guardar los datos de la empresa en el estado
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false); // Dejar de mostrar el indicador de carga
+      }
+    };
+
+    fetchEmpresaData();
+  }, []);
+
+  // Variantes de animación para servicioss
   const serviceCardVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: (index) => ({
@@ -63,6 +86,36 @@ const Home = () => {
       },
     }),
   };
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -90,7 +143,17 @@ const Home = () => {
                 fontFamily: 'Roboto, sans-serif',
               }}
             >
-              Odontología
+              {empresa?.nombre_empresa || 'Odontología'}
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: colors.secondaryText,
+                mt: 2,
+                fontFamily: 'Roboto, sans-serif',
+              }}
+            >
+              {empresa?.slogan || 'Cuidando tu sonrisa con pasión y profesionalismo'}
             </Typography>
           </Box>
         </motion.div>
