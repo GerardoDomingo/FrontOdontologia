@@ -12,15 +12,15 @@ import Recuperacion from './Inicio/Recuperacion.jsx';
 import Reset from './Inicio/CambiarContrasena.jsx';
 
 //Paciente
-import Principal from './Paciente/Principal.jsx';
-import LayoutPaciente from './Paciente/LayoutPaciente';
+import Principal from './Usuarios/Paciente/Principal.jsx';
+import LayoutPaciente from './Usuarios/Paciente/LayoutPaciente';
 
 //Administrador
-import LayoutAdmin from './Administrador/LayoutAdmin.jsx';
-import PrincipalAdmin from './Administrador/Principal.jsx';
-import Configuracion from './Administrador/Configuracion.jsx';
-import Reportes from './Administrador/Configuracion/reportes.jsx';
-import PerfilEmpresa from './Administrador/Configuracion/PerfilEmpresa.jsx';
+import LayoutAdmin from './Usuarios/Administrador/LayoutAdmin.jsx';
+import PrincipalAdmin from './Usuarios/Administrador/Principal.jsx';
+import Configuracion from './Usuarios/Administrador/Configuracion.jsx';
+import Reportes from './Usuarios/Administrador/Configuracion/reportes.jsx';
+import PerfilEmpresa from './Usuarios/Administrador/Configuracion/PerfilEmpresa.jsx';
 
 function App() {
   const [tituloPagina, setTituloPagina] = useState('Mi Empresa'); 
@@ -89,33 +89,13 @@ function App() {
         <Route path="/resetContra" element={<Reset />} />
 
         {/* Rutas protegidas del paciente */}
-        <Route path="/Paciente/principal" element={
-          <PrivateRoute>
-            <LayoutPaciente><Principal /></LayoutPaciente>
-          </PrivateRoute>
-        } />
+        <Route path="/Paciente/principal" element={<PrivateRoute><LayoutPaciente><Principal /></LayoutPaciente></PrivateRoute>} />
 
         {/* Rutas protegidas del administrador */}
-        <Route path="/Administrador/principal" element={
-          <PrivateRoute>
-            <LayoutAdmin><PrincipalAdmin /></LayoutAdmin>
-          </PrivateRoute>
-        } />
-        <Route path="/Administrador/configuracion" element={
-          <PrivateRoute>
-            <LayoutAdmin><Configuracion /></LayoutAdmin>
-          </PrivateRoute>
-        } />
-        <Route path="/Administrador/reportes" element={
-          <PrivateRoute>
-            <LayoutAdmin><Reportes /></LayoutAdmin>
-          </PrivateRoute>
-        } />
-        <Route path="/Administrador/PerfilEmpresa" element={
-          <PrivateRoute>
-            <LayoutAdmin><PerfilEmpresa /></LayoutAdmin>
-          </PrivateRoute>
-        } />
+        <Route path="/Administrador/principal" element={<PrivateRoute><LayoutAdmin><PrincipalAdmin /></LayoutAdmin></PrivateRoute>} />
+        <Route path="/Administrador/configuracion" element={<PrivateRoute><LayoutAdmin><Configuracion /></LayoutAdmin></PrivateRoute>} />
+        <Route path="/Administrador/reportes" element={<PrivateRoute><LayoutAdmin><Reportes /></LayoutAdmin></PrivateRoute>} />
+        <Route path="/Administrador/PerfilEmpresa" element={<PrivateRoute><LayoutAdmin><PerfilEmpresa /></LayoutAdmin></PrivateRoute>} />
       </Routes>
       {!loading ? null : <div>Cargando configuración de empresa...</div>} {/* Mensaje de carga opcional */}
     </Router>

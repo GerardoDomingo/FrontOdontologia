@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { Save as SaveIcon, Edit as EditIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon, ZoomIn as ZoomInIcon } from '@mui/icons-material';
 import axios from 'axios';
-import Notificaciones from '../../Compartidos/Notificaciones';
+import Notificaciones from '../../../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
 import RedesSociales from './RedesSociales';
 
@@ -237,7 +237,7 @@ const PerfilEmpresa = () => {
             <Container maxWidth="md">
                 <IconButton
                     component={Link}
-                    to="/Administrador/principal"
+                    to="/Usuarios/Administrador/principal"
                     sx={{
                         position: 'absolute',
                         top: 24,

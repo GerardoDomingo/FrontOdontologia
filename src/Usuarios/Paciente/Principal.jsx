@@ -64,7 +64,7 @@ const Principal = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
-                onClick={() => navigate('/Paciente/citas')}
+                onClick={() => navigate('/Usuarios/Paciente/citas')}
                 sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px' }}
               >
                 Ver Citas
@@ -100,7 +100,7 @@ const Principal = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
-                onClick={() => navigate('/Paciente/tratamientos')}
+                onClick={() => navigate('/Usuarios/Paciente/tratamientos')}
                 sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px' }}
               >
                 Ver Tratamientos
@@ -136,7 +136,7 @@ const Principal = () => {
                 variant="contained"
                 color="primary"
                 fullWidth
-                onClick={() => navigate('/Paciente/historial')}
+                onClick={() => navigate('/Usuarios/Paciente/historial')}
                 sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px' }}
               >
                 Ver Historial
