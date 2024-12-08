@@ -73,7 +73,7 @@ const Principal = () => {
                 color="primary"
                 fullWidth
                 sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px', fontSize: { xs: '0.85rem', sm: '1rem' } }}
-                onClick={() => navigate('/Usuarios/Administrador/configuracion')}
+                onClick={() => navigate('/Administrador/configuracion')}
               >
                 Ir a Configuración
               </Button>
@@ -118,7 +118,7 @@ const Principal = () => {
                 color="primary"
                 fullWidth
                 sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px', fontSize: { xs: '0.85rem', sm: '1rem' } }}
-                onClick={() => navigate('/Usuarios/Administrador/reportes')}
+                onClick={() => navigate('/Administrador/reportes')}
               >
                 Ver Reportes
               </Button>
@@ -163,7 +163,7 @@ const Principal = () => {
                 color="primary"
                 fullWidth
                 sx={{ fontWeight: 'bold', borderRadius: '0 0 16px 16px', fontSize: { xs: '0.85rem', sm: '1rem' } }}
-                onClick={() => navigate('/Usuarios/Administrador/PerfilEmpresa')}
+                onClick={() => navigate('/Administrador/PerfilEmpresa')}
               >
                 Ver Perfil
               </Button>

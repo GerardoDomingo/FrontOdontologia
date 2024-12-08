@@ -237,7 +237,7 @@ const PerfilEmpresa = () => {
             <Container maxWidth="md">
                 <IconButton
                     component={Link}
-                    to="/Usuarios/Administrador/principal"
+                    to="/Administrador/principal"
                     sx={{
                         position: 'absolute',
                         top: 24,
