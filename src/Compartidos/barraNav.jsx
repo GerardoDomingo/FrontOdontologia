@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AppBar, Toolbar, Button, Typography, Box, Drawer, List, ListItem, ListItemText, IconButton } from '@mui/material'; // IconButton incluido aquí
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Typography,
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+} from '@mui/material';
 import { FaSignInAlt, FaCalendarAlt } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
 import { motion } from 'framer-motion';
@@ -21,7 +32,7 @@ const BarraNav = () => {
     try {
       const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/getTitleAndLogo');
       const { nombre_empresa, logo } = response.data;
-      
+
       if (nombre_empresa) {
         document.title = nombre_empresa;
         setNombreEmpresa(nombre_empresa);
@@ -35,7 +46,7 @@ const BarraNav = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching logo and title:', error);
-      
+
       if (retries > 0) {
         await new Promise((res) => setTimeout(res, 1000));
         fetchTitleAndLogo(retries - 1);
@@ -63,8 +74,6 @@ const BarraNav = () => {
     };
   }, []);
 
-  // Resto del código de la barra de navegación (toggleDrawer, drawerVariants, etc.) se mantiene igual
-
   // Función para abrir/cerrar el Drawer
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -73,60 +82,41 @@ const BarraNav = () => {
     setDrawerOpen(open);
   };
 
-  // Animaciones para el Drawer
-  const drawerVariants = {
-    closed: { x: '100%', opacity: 0 },
-    open: { x: '0', opacity: 1 },
-  };
-
-  const itemVariants = {
-    closed: { y: 20, opacity: 0 },
-    open: { y: 0, opacity: 1 },
-  };
-
   // Lista de enlaces en el Drawer
   const drawerList = (
-    <motion.div
-      variants={drawerVariants}
-      initial="closed"
-      animate={drawerOpen ? 'open' : 'closed'}
-      transition={{ duration: 0.3 }}
+    <Box
+      sx={{
+        width: 250,
+        backgroundColor: isDarkTheme ? '#2A3A4A' : '#f0f0f0',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+      role="presentation"
+      onClick={toggleDrawer(false)}
+      onKeyDown={toggleDrawer(false)}
     >
-      <Box
-        sx={{
-          width: 250,
-          backgroundColor: isDarkTheme ? '#2A3A4A' : '#f0f0f0',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-        }}
-        role="presentation"
-        onClick={toggleDrawer(false)}
-        onKeyDown={toggleDrawer(false)}
-      >
-        <List>
-          <motion.div
-            variants={itemVariants}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
-            <ListItem button component={Link} to="/">
-              {logo && <img src={logo} alt="Logo" style={{ marginRight: '10px', width: '30px', height: '30px' }} />}
-              <ListItemText primary={nombreEmpresa || "Inicio"} />
-            </ListItem>
-          </motion.div>
-          <motion.div
-            variants={itemVariants}
-            transition={{ duration: 0.3, delay: 0.2 }}
-          >
-            <ListItem button component={Link} to="/login">
-              <FaSignInAlt style={{ marginRight: '10px', fontSize: '1.5rem' }} />
-              <ListItemText primary="Iniciar sesión" />
-            </ListItem>
-          </motion.div>
-        </List>
-      </Box>
-    </motion.div>
+      <List>
+        <ListItem button component={Link} to="/">
+          {logo && (
+            <img
+              src={logo}
+              alt="Logo"
+              style={{ marginRight: '10px', width: '40px', height: '40px' }}
+            />
+          )}
+          <ListItemText primary={nombreEmpresa || 'Inicio'} />
+        </ListItem>
+        <ListItem button component={Link} to="/about">
+          <ListItemText primary="Acerca de" />
+        </ListItem>
+        <ListItem button component={Link} to="/login">
+          <FaSignInAlt style={{ marginRight: '10px', fontSize: '1.5rem' }} />
+          <ListItemText primary="Iniciar sesión" />
+        </ListItem>
+      </List>
+    </Box>
   );
 
   if (loading) {
@@ -145,12 +135,12 @@ const BarraNav = () => {
       >
         <Toolbar sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Logo y nombre de la empresa */}
-          <Box 
-            component={Link} 
-            to="/" 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
+          <Box
+            component={Link}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
               textDecoration: 'none',
               color: isDarkTheme ? 'white' : '#333',
               '&:hover': {
@@ -159,15 +149,15 @@ const BarraNav = () => {
             }}
           >
             {logo && (
-              <img 
-                src={logo} 
-                alt="Logo" 
-                style={{ 
-                  marginRight: '12px', 
-                  width: '40px', 
-                  height: '40px',
-                  borderRadius: '50%' 
-                }} 
+              <img
+                src={logo}
+                alt="Logo"
+                style={{
+                  marginRight: '12px',
+                  width: '50px', // Tamaño ajustado del ícono del logo
+                  height: '50px',
+                  borderRadius: '50%',
+                }}
               />
             )}
             <Typography
@@ -186,14 +176,26 @@ const BarraNav = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
               <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <Typography 
-                  sx={{ 
+                <Typography
+                  sx={{
                     color: isDarkTheme ? 'white' : '#333',
                     fontFamily: '"Montserrat", sans-serif',
-                    '&:hover': { color: '#0066cc' }
+                    '&:hover': { color: '#0066cc' },
                   }}
                 >
                   Inicio
+                </Typography>
+              </Link>
+
+              <Link to="/about" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Typography
+                  sx={{
+                    color: isDarkTheme ? 'white' : '#333',
+                    fontFamily: '"Montserrat", sans-serif',
+                    '&:hover': { color: '#0066cc' },
+                  }}
+                >
+                  Acerca de
                 </Typography>
               </Link>
 
@@ -206,7 +208,7 @@ const BarraNav = () => {
                 sx={{
                   fontFamily: '"Montserrat", sans-serif',
                   backgroundColor: '#0066cc',
-                  '&:hover': { 
+                  '&:hover': {
                     backgroundColor: '#0052a3',
                   },
                   textTransform: 'none',
@@ -224,8 +226,10 @@ const BarraNav = () => {
                   fontFamily: '"Montserrat", sans-serif',
                   color: isDarkTheme ? 'white' : '#0066cc',
                   borderColor: isDarkTheme ? 'white' : '#0066cc',
-                  '&:hover': { 
-                    backgroundColor: isDarkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,102,204,0.1)',
+                  '&:hover': {
+                    backgroundColor: isDarkTheme
+                      ? 'rgba(255,255,255,0.1)'
+                      : 'rgba(0,102,204,0.1)',
                     borderColor: isDarkTheme ? 'white' : '#0052a3',
                   },
                   textTransform: 'none',
@@ -238,7 +242,10 @@ const BarraNav = () => {
             {/* Menú en pantallas pequeñas */}
             <IconButton
               edge="end"
-              sx={{ display: { xs: 'block', md: 'none' }, color: isDarkTheme ? 'white' : '#333' }}
+              sx={{
+                display: { xs: 'block', md: 'none' },
+                color: isDarkTheme ? 'white' : '#333',
+              }}
               onClick={toggleDrawer(true)}
             >
               <MenuIcon />
@@ -248,11 +255,9 @@ const BarraNav = () => {
       </AppBar>
 
       {/* Drawer para el menú en pantallas pequeñas */}
-      {drawerOpen && (
-        <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-          {drawerList}
-        </Drawer>
-      )}
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+        {drawerList}
+      </Drawer>
     </>
   );
 };
