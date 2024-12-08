@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, Dialog, DialogTitle, DialogContent, Grid, IconButton, Card, CardContent, Avatar, TextField } from '@mui/material';
 import { FaInfoCircle, FaTimes, FaIdCard, FaCalendarAlt, FaPhone, FaEnvelope } from 'react-icons/fa'; // Íconos
 import { format } from 'date-fns';
-import Notificaciones from '../../Compartidos/Notificaciones'; // Importar Notificaciones
+import Notificaciones from '../../../Compartidos/Notificaciones'; // Importar Notificaciones
 
 const LoginAttemptsReport = () => {
   const [loginAttempts, setLoginAttempts] = useState([]);

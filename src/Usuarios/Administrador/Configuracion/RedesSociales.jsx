@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import axios from 'axios';
-import Notificaciones from '../../Compartidos/Notificaciones';  // Importar el componente de notificaciones
+import Notificaciones from '../../../Compartidos/Notificaciones'; 
 
 // Redes sociales disponibles
 const availableSocials = [

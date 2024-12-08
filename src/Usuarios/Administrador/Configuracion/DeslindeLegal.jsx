@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
-import Notificaciones from '../../Compartidos/Notificaciones';
+import Notificaciones from '../../../Compartidos/Notificaciones';
 
 const DeslindeLegal = () => {
     const [titulo, setTitulo] = useState('');

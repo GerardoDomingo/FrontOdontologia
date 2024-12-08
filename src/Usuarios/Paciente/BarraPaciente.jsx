@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Divider }
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaBell, FaTooth } from 'react-icons/fa';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Notificaciones from '../Compartidos/Notificaciones';
+import Notificaciones from '../../Compartidos/Notificaciones';
 
 const BarraPaciente = () => {
     const [notificationMessage, setNotificationMessage] = useState(''); // Estado para manejar el mensaje de notificación
