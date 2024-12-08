@@ -372,17 +372,6 @@ const Register = () => {
 
   };
 
-  const calcularEdad = (fechaNacimiento) => {
-    const hoy = new Date();
-    const nacimiento = new Date(fechaNacimiento);
-    let edad = hoy.getFullYear() - nacimiento.getFullYear();
-    const mes = hoy.getMonth() - nacimiento.getMonth();
-    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-      edad--;
-    }
-    return edad;
-  };
-
 
   const handleNext = () => {
     if (validateStep()) {
@@ -751,7 +740,7 @@ const Register = () => {
 
             {/* Campo de Género */}
             <FormControl fullWidth margin="normal" required error={!!errors.genero}>
-              <InputLabel>Género del paciente</InputLabel>
+              <InputLabel>Género</InputLabel>
               <Select
                 value={formData.genero}
                 onChange={handleChange}
@@ -764,7 +753,6 @@ const Register = () => {
               </Select>
               {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
             </FormControl>
-
             {/* Campo de Fecha de Nacimiento */}
             <TextField
               fullWidth
