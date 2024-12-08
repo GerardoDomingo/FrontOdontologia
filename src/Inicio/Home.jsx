@@ -8,52 +8,29 @@ import {
   Card,
   CardContent,
   CardMedia,
-  IconButton,
   CircularProgress,
 } from '@mui/material';
-import { CleaningServices, MedicalServices, LocalHospital, Phone, Email } from '@mui/icons-material';
+import { CleaningServices, MedicalServices, LocalHospital } from '@mui/icons-material';
 
-// Importar las imágenes locales
+// Importar imágenes locales
 import img1 from '../img/img1_1.jpeg';
 import img2 from '../img/img2_1.jpg';
 import img3 from '../img/img3_1.png';
 
+// Importar componente Contactanos
+import Contactanos from './Contactanos';
+
 const Home = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [empresa, setEmpresa] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isContactLoading, setIsContactLoading] = useState(true);
 
-  // Animación de variantes
-  const imageVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        type: "spring",
-        stiffness: 120
-      }
-    },
-    hover: { 
-      scale: 1.05,
-      transition: { duration: 0.3 }
-    }
-  };
-
-  const serviceCardVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: (index) => ({
-      opacity: 1, 
-      y: 0,
-      transition: {
-        delay: index * 0.2,
-        duration: 0.5,
-        type: "spring",
-        stiffness: 120
-      }
-    })
+  const colors = {
+    background: isDarkMode
+      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)'
+      : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)',
+    primaryText: isDarkMode ? '#82B1FF' : '#1976d2',
+    secondaryText: isDarkMode ? '#B0BEC5' : '#616161',
+    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF',
   };
 
   // Detectar el tema del sistema
@@ -72,65 +49,20 @@ const Home = () => {
     };
   }, []);
 
-  // Obtener los datos de la empresa desde el backend
-  useEffect(() => {
-    const fetchEmpresaData = async () => {
-      try {
-        const response = await fetch('https://backendodontologia.onrender.com/api/perfilEmpresa/empresa');
-        if (!response.ok) {
-          throw new Error('Error al obtener los datos de la empresa');
-        }
-        const data = await response.json();
-        setEmpresa(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchEmpresaData();
-  }, []);
-
-  const colors = {
-    background: isDarkMode
-      ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)'
-      : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)',
-    primaryText: isDarkMode ? '#82B1FF' : '#1976d2',
-    secondaryText: isDarkMode ? '#B0BEC5' : '#616161',
-    cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF',
-    cardHover: isDarkMode ? '#3A4A5A' : '#E3F2FD',
+  // Variantes de animación para servicios
+  const serviceCardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: (index) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: index * 0.2,
+        duration: 0.5,
+        type: 'spring',
+        stiffness: 120,
+      },
+    }),
   };
-
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
-      >
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box
@@ -142,7 +74,7 @@ const Home = () => {
       }}
     >
       <Container maxWidth="lg" sx={{ py: 10 }} disableGutters>
-        {/* Encabezado principal con animación */}
+        {/* Encabezado */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -158,22 +90,12 @@ const Home = () => {
                 fontFamily: 'Roboto, sans-serif',
               }}
             >
-              {empresa?.nombre_empresa || 'Odontología'}
-            </Typography>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                color: colors.secondaryText,
-                mt: 2,
-                fontFamily: 'Roboto, sans-serif',
-              }}
-            >
-              {empresa?.slogan || 'Cuidando tu sonrisa con pasión y profesionalismo'}
+              Odontología
             </Typography>
           </Box>
         </motion.div>
 
-        {/* Sección de servicios con animaciones */}
+        {/* Sección de servicios */}
         <Box component="section" sx={{ mb: 12 }}>
           <Typography
             variant="h4"
@@ -214,46 +136,24 @@ const Home = () => {
                   initial="hidden"
                   animate="visible"
                   custom={index}
-                  whileHover="hover"
                 >
                   <Card
                     sx={{
                       boxShadow: 3,
                       borderRadius: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
                       height: '100%',
                       backgroundColor: colors.cardBackground,
                     }}
                   >
                     <Box sx={{ textAlign: 'center', mt: 2 }}>{service.icon}</Box>
-                    <motion.div
-                      variants={imageVariants}
-                      initial="hidden"
-                      animate="visible"
-                      whileHover="hover"
-                    >
-                      <CardMedia
-                        component="img"
-                        alt={service.title}
-                        image={service.img}
-                        sx={{
-                          height: 180,
-                          width: '100%',
-                          objectFit: 'cover',
-                        }}
-                      />
-                    </motion.div>
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 'bold',
-                          color: colors.secondaryText,
-                          mb: 2,
-                          fontFamily: 'Montserrat, sans-serif',
-                        }}
-                      >
+                    <CardMedia
+                      component="img"
+                      alt={service.title}
+                      image={service.img}
+                      sx={{ height: 180, objectFit: 'cover' }}
+                    />
+                    <CardContent>
+                      <Typography variant="h5" sx={{ color: colors.secondaryText, mb: 2 }}>
                         {service.title}
                       </Typography>
                       <Typography variant="body2" sx={{ color: colors.secondaryText }}>
@@ -267,61 +167,15 @@ const Home = () => {
           </Grid>
         </Box>
 
-        {/* Sección de contacto con animación */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <Box
-            component="section"
-            sx={{
-              backgroundColor: colors.cardBackground,
-              py: 8,
-              borderRadius: '16px',
-              boxShadow: 3,
-              mb: 5,
-            }}
-          >
-            <Typography
-              variant="h4"
-              sx={{
-                color: colors.primaryText,
-                fontWeight: 'bold',
-                textAlign: 'center',
-                mb: 6,
-                fontFamily: 'Montserrat, sans-serif',
-              }}
-            >
-              Contáctanos
-            </Typography>
-            <Typography variant="body1" sx={{ color: colors.secondaryText, textAlign: 'center', mb: 3 }}>
-              Visítanos en nuestra clínica o llámanos para agendar tu cita.
-            </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
-              <IconButton color="primary" sx={{ fontSize: 40 }}>
-                <Phone />
-              </IconButton>
-              <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
-                <strong>Teléfonos:</strong> {empresa?.telefono || 'No disponible'}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 2 }}>
-              <IconButton color="primary" sx={{ fontSize: 40 }}>
-                <Email />
-              </IconButton>
-              <Typography variant="body2" sx={{ color: colors.secondaryText, fontFamily: 'Roboto, sans-serif' }}>
-                <strong>Email:</strong> {empresa?.correo_electronico || 'No disponible'}
-              </Typography>
-            </Box>
-            <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 3 }}>
-              <strong>Ubicación:</strong> {empresa?.direccion || 'No disponible'}
-            </Typography>
-            <Typography variant="body2" sx={{ color: colors.secondaryText, textAlign: 'center', mt: 1 }}>
-              <strong>Dueño:</strong> Hugo Gómez Ramírez
-            </Typography>
+        {/* Indicador de carga mientras Contactanos.jsx obtiene los datos */}
+        {isContactLoading && (
+          <Box sx={{ textAlign: 'center', mb: 5 }}>
+            <CircularProgress />
           </Box>
-        </motion.div>
+        )}
+
+        {/* Sección Contáctanos */}
+        <Contactanos colors={colors} onLoading={setIsContactLoading} />
       </Container>
     </Box>
   );
