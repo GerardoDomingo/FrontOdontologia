@@ -99,7 +99,7 @@ function App() {
         <Route path="/Administrador/reportes" element={<PrivateRoute><LayoutAdmin><Reportes /></LayoutAdmin></PrivateRoute>} />
         <Route path="/Administrador/PerfilEmpresa" element={<PrivateRoute><LayoutAdmin><PerfilEmpresa /></LayoutAdmin></PrivateRoute>} />
       </Routes>
-      {!loading ? null : <div>Cargando configuración de empresa...</div>} {/* Mensaje de carga opcional */}
+      {!loading ? null : <div>Cargando configuración de empresa...</div>} {/* Mensaje de carga opcionall */}
     </Router>
   );
 }
