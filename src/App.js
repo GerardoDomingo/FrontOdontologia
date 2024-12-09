@@ -10,6 +10,7 @@ import Login from './Inicio/Login';
 import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';
 import Recuperacion from './Inicio/Recuperacion.jsx';
 import Reset from './Inicio/CambiarContrasena.jsx';
+import Agendar from './Inicio/Agendar.jsx';
 
 //Paciente
 import Principal from './Usuarios/Paciente/Principal.jsx';
@@ -85,6 +86,7 @@ function App() {
         <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} />
         <Route path="/register" element={<LayoutConEncabezado><Register /></LayoutConEncabezado>} />
         <Route path="/login" element={<Login />} />
+        <Route path="/agendar-cita" element={<Agendar />} />
         <Route path="/recuperacion" element={<Recuperacion />} />
         <Route path="/resetContra" element={<Reset />} />
 
