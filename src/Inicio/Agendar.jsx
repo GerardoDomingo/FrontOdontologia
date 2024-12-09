@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Typography, Button, MenuItem, Checkbox, FormControlLabel, Modal, Backdrop, Fade, Link } from '@mui/material';
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  Modal,
+  Backdrop,
+  Fade,
+  Link,
+  Stepper,
+  Step,
+  StepLabel,
+} from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+
+const steps = ['Identificación', 'Profesional', 'Disponibilidad', 'Confirmación'];
 
 const ReservaCitas = () => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -13,7 +31,9 @@ const ReservaCitas = () => {
     genero: '',
     fechaNacimiento: '',
     ciudad: '',
+    estadoCivil: '',
     telefono: '',
+    ocupacion: '',
     aceptaTerminos: false,
   });
   const [selectedDate, setSelectedDate] = useState('');
@@ -93,18 +113,18 @@ const ReservaCitas = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
       }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Typography variant="h3" sx={{ mb: 6, textAlign: 'center' }}>
-          {step === 1 ? 'Identificación del Paciente' : 'Reserva de Cita'}
-        </Typography>
-      </motion.div>
+      {/* Barra de progreso */}
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <Stepper activeStep={step - 1} alternativeLabel>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
 
       {step === 1 && (
         <motion.div
@@ -122,6 +142,9 @@ const ReservaCitas = () => {
               backgroundColor: isDarkTheme ? '#2A3A4A' : '#FFFFFF',
             }}
           >
+            <Typography variant="h4" sx={{ mb: 3, textAlign: 'center' }}>
+              Identificación del Paciente
+            </Typography>
             <TextField
               fullWidth
               label="Email"
@@ -138,7 +161,69 @@ const ReservaCitas = () => {
               onChange={handleChange}
               sx={{ mb: 2 }}
             />
-            {/* Campos restantes */}
+            <TextField
+              fullWidth
+              label="Apellidos"
+              name="apellidos"
+              value={formData.apellidos}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              select
+              fullWidth
+              label="Género"
+              name="genero"
+              value={formData.genero}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            >
+              <MenuItem value="Masculino">Masculino</MenuItem>
+              <MenuItem value="Femenino">Femenino</MenuItem>
+              <MenuItem value="Otro">Otro</MenuItem>
+            </TextField>
+            <TextField
+              fullWidth
+              type="date"
+              label="Fecha de nacimiento"
+              name="fechaNacimiento"
+              value={formData.fechaNacimiento}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Ciudad"
+              name="ciudad"
+              value={formData.ciudad}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Estado civil"
+              name="estadoCivil"
+              value={formData.estadoCivil}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Teléfono móvil"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Ocupación"
+              name="ocupacion"
+              value={formData.ocupacion}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
               <FormControlLabel
                 control={
@@ -173,16 +258,25 @@ const ReservaCitas = () => {
                 }
               />
             </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={() => setStep(2)}
-              disabled={!formData.aceptaTerminos}
-              sx={{ textTransform: 'none', fontWeight: 600 }}
-            >
-              Continuar
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<ArrowBack />}
+                disabled={step === 1}
+                onClick={() => setStep((prev) => prev - 1)}
+              >
+                Atrás
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() => setStep(2)}
+                disabled={!formData.aceptaTerminos}
+              >
+                Continuar
+              </Button>
+            </Box>
           </Box>
         </motion.div>
       )}
@@ -212,16 +306,6 @@ const ReservaCitas = () => {
                   key={date}
                   variant={selectedDate === date ? 'contained' : 'outlined'}
                   onClick={() => handleDateClick(date)}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    backgroundColor: selectedDate === date ? 'primary.main' : 'transparent',
-                    color: selectedDate === date ? '#FFFFFF' : 'inherit',
-                    '&:hover': {
-                      backgroundColor: 'primary.main',
-                      color: '#FFFFFF',
-                    },
-                  }}
                 >
                   {`Día ${date}`}
                 </Button>
@@ -233,27 +317,13 @@ const ReservaCitas = () => {
                   key={time}
                   variant={selectedTime === time ? 'contained' : 'outlined'}
                   onClick={() => handleTimeClick(time)}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    backgroundColor: selectedTime === time ? 'primary.main' : 'transparent',
-                    color: selectedTime === time ? '#FFFFFF' : 'inherit',
-                    '&:hover': {
-                      backgroundColor: 'primary.main',
-                      color: '#FFFFFF',
-                    },
-                  }}
                 >
                   {time}
                 </Button>
               ))}
             </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={() => setStep(1)}
-                sx={{ textTransform: 'none', fontWeight: 600 }}
-              >
+              <Button variant="outlined" onClick={() => setStep(1)}>
                 Volver
               </Button>
               <Button
@@ -262,7 +332,6 @@ const ReservaCitas = () => {
                 fullWidth
                 onClick={handleReservar}
                 disabled={!selectedDate || !selectedTime}
-                sx={{ textTransform: 'none', fontWeight: 600 }}
               >
                 Reservar
               </Button>
@@ -270,42 +339,6 @@ const ReservaCitas = () => {
           </Box>
         </motion.div>
       )}
-
-      {/* Modal de políticas de privacidad */}
-      <Modal
-        open={openPrivacyModal}
-        onClose={handleClosePrivacyModal}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{ timeout: 500 }}
-      >
-        <Fade in={openPrivacyModal}>
-          <Box
-            sx={{
-              maxWidth: 500,
-              margin: 'auto',
-              mt: '20%',
-              p: 4,
-              backgroundColor: isDarkTheme ? '#2A3A4A' : '#FFFFFF',
-              borderRadius: 2,
-              color: isDarkTheme ? '#FFFFFF' : '#000000',
-            }}
-          >
-            <Typography variant="h5" sx={{ mb: 2 }}>
-              Política de Privacidad
-            </Typography>
-            <Typography variant="body1">{privacyPolicy}</Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2, textTransform: 'none', fontWeight: 600 }}
-              onClick={handleClosePrivacyModal}
-            >
-              Cerrar
-            </Button>
-          </Box>
-        </Fade>
-      </Modal>
 
       {/* Modal de términos y condiciones */}
       <Modal
@@ -334,8 +367,44 @@ const ReservaCitas = () => {
             <Button
               variant="contained"
               color="primary"
-              sx={{ mt: 2, textTransform: 'none', fontWeight: 600 }}
+              sx={{ mt: 2 }}
               onClick={handleCloseTermsModal}
+            >
+              Cerrar
+            </Button>
+          </Box>
+        </Fade>
+      </Modal>
+
+      {/* Modal de políticas de privacidad */}
+      <Modal
+        open={openPrivacyModal}
+        onClose={handleClosePrivacyModal}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{ timeout: 500 }}
+      >
+        <Fade in={openPrivacyModal}>
+          <Box
+            sx={{
+              maxWidth: 500,
+              margin: 'auto',
+              mt: '20%',
+              p: 4,
+              backgroundColor: isDarkTheme ? '#2A3A4A' : '#FFFFFF',
+              borderRadius: 2,
+              color: isDarkTheme ? '#FFFFFF' : '#000000',
+            }}
+          >
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Política de Privacidad
+            </Typography>
+            <Typography variant="body1">{privacyPolicy}</Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={handleClosePrivacyModal}
             >
               Cerrar
             </Button>
