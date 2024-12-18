@@ -11,6 +11,7 @@ import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';
 import Recuperacion from './Inicio/Recuperacion.jsx';
 import Reset from './Inicio/CambiarContrasena.jsx';
 import Agendar from './Inicio/Agendar.jsx';
+import Acerca from './Inicio/AcerdaDe.jsx';
 
 //Paciente
 import Principal from './Usuarios/Paciente/Principal.jsx';
@@ -87,6 +88,7 @@ function App() {
         <Route path="/register" element={<LayoutConEncabezado><Register /></LayoutConEncabezado>} />
         <Route path="/login" element={<Login />} />
         <Route path="/agendar-cita" element={<Agendar />} />
+        <Route path="/about" element={<LayoutConEncabezado><Acerca /></LayoutConEncabezado>} />
         <Route path="/recuperacion" element={<Recuperacion />} />
         <Route path="/resetContra" element={<Reset />} />
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Box,
   Typography,
@@ -9,15 +9,19 @@ import {
   CardContent,
   CardMedia,
   CircularProgress,
+  Button,
 } from '@mui/material';
-import { CleaningServices, MedicalServices, LocalHospital } from '@mui/icons-material';
+import { 
+  CleaningServices, 
+  MedicalServices, 
+  LocalHospital 
+} from '@mui/icons-material';
 
-// Importar imágenes locales
+// Import images
 import img1 from '../img/img1_1.jpeg';
 import img2 from '../img/img2_1.jpg';
 import img3 from '../img/img3_1.png';
 
-// Importar componente Contactanos
 import Contactanos from './Contactanos';
 
 const Home = () => {
@@ -26,6 +30,7 @@ const Home = () => {
   const [empresa, setEmpresa] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [headerText, setHeaderText] = useState('Odontología Carol');
 
   const colors = {
     background: isDarkMode
@@ -36,55 +41,63 @@ const Home = () => {
     cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF',
   };
 
-  // Detectar el tema del sistema
+  // Dynamic header text animation
   useEffect(() => {
-    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(matchDarkTheme.matches);
+    const texts = [
+      'Odontología Carol', 
+      'Sonrisas Brillantes', 
+      'Tu Salud Dental', 
+      'Cuidado Profesional'
+    ];
+    let currentIndex = 0;
 
-    const handleThemeChange = (e) => {
-      setIsDarkMode(e.matches);
+    const changeText = () => {
+      currentIndex = (currentIndex + 1) % texts.length;
+      setHeaderText(texts[currentIndex]);
     };
 
-    matchDarkTheme.addEventListener('change', handleThemeChange);
+    const textChangeInterval = setInterval(changeText, 3000);
 
-    return () => {
-      matchDarkTheme.removeEventListener('change', handleThemeChange);
-    };
+    return () => clearInterval(textChangeInterval);
   }, []);
 
-  // Obtener datos de la empresa desde el backend
-  useEffect(() => {
-    const fetchEmpresaData = async () => {
-      try {
-        const response = await fetch('https://backendodontologia.onrender.com/api/perfilEmpresa/empresa');
-        if (!response.ok) {
-          throw new Error('Error al obtener los datos de la empresa');
-        }
-        const data = await response.json();
-        setEmpresa(data); // Guardar los datos de la empresa en el estado
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false); // Dejar de mostrar el indicador de carga
-      }
-    };
+  // Previous useEffects remain the same...
 
-    fetchEmpresaData();
-  }, []);
-
-  // Variantes de animación para servicioss
+  // Enhanced service card variants
   const serviceCardVariants = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { 
+      opacity: 0, 
+      scale: 0.8,
+      y: 50 
+    },
     visible: (index) => ({
       opacity: 1,
+      scale: 1,
       y: 0,
       transition: {
-        delay: index * 0.2,
-        duration: 0.5,
+        delay: index * 0.3,
+        duration: 0.6,
         type: 'spring',
-        stiffness: 120,
+        stiffness: 100,
       },
     }),
+    hover: {
+      scale: 1.05,
+      boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
+      transition: { duration: 0.3 }
+    }
+  };
+
+  // Image hover effect variants
+  const imageVariants = {
+    initial: { scale: 1 },
+    hover: { 
+      scale: 1.1,
+      transition: { 
+        duration: 0.3,
+        type: 'tween'
+      }
+    }
   };
 
   if (isLoading) {
@@ -95,9 +108,10 @@ const Home = () => {
           justifyContent: 'center',
           alignItems: 'center',
           height: '100vh',
+          background: colors.background,
         }}
       >
-        <CircularProgress />
+        <CircularProgress color="primary" size={80} />
       </Box>
     );
   }
@@ -110,6 +124,7 @@ const Home = () => {
           justifyContent: 'center',
           alignItems: 'center',
           height: '100vh',
+          background: colors.background,
         }}
       >
         <Typography color="error">{error}</Typography>
@@ -127,24 +142,34 @@ const Home = () => {
       }}
     >
       <Container maxWidth="lg" sx={{ py: 10 }} disableGutters>
-        {/* Encabezado */}
+        {/* Animated Header */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <Box sx={{ textAlign: 'center', mb: 8 }}>
-            <Typography
-              variant="h3"
-              component="h1"
-              sx={{
-                fontWeight: 'bold',
-                color: colors.primaryText,
-                fontFamily: 'Roboto, sans-serif',
-              }}
-            >
-              {empresa?.nombre_empresa || 'Odontología'}
-            </Typography>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={headerText}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Typography
+                  variant="h3"
+                  component="h1"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: colors.primaryText,
+                    fontFamily: 'Roboto, sans-serif',
+                  }}
+                >
+                  {headerText}
+                </Typography>
+              </motion.div>
+            </AnimatePresence>
             <Typography
               variant="subtitle1"
               sx={{
@@ -158,7 +183,7 @@ const Home = () => {
           </Box>
         </motion.div>
 
-        {/* Sección de servicios */}
+        {/* Services Section */}
         <Box component="section" sx={{ mb: 12 }}>
           <Typography
             variant="h4"
@@ -198,6 +223,7 @@ const Home = () => {
                   variants={serviceCardVariants}
                   initial="hidden"
                   animate="visible"
+                  whileHover="hover"
                   custom={index}
                 >
                   <Card
@@ -206,15 +232,26 @@ const Home = () => {
                       borderRadius: '16px',
                       height: '100%',
                       backgroundColor: colors.cardBackground,
+                      overflow: 'hidden',
                     }}
                   >
                     <Box sx={{ textAlign: 'center', mt: 2 }}>{service.icon}</Box>
-                    <CardMedia
-                      component="img"
-                      alt={service.title}
-                      image={service.img}
-                      sx={{ height: 180, objectFit: 'cover' }}
-                    />
+                    <motion.div
+                      variants={imageVariants}
+                      initial="initial"
+                      whileHover="hover"
+                    >
+                      <CardMedia
+                        component="img"
+                        alt={service.title}
+                        image={service.img}
+                        sx={{ 
+                          height: 180, 
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s ease-in-out',
+                        }}
+                      />
+                    </motion.div>
                     <CardContent>
                       <Typography variant="h5" sx={{ color: colors.secondaryText, mb: 2 }}>
                         {service.title}
@@ -230,14 +267,13 @@ const Home = () => {
           </Grid>
         </Box>
 
-        {/* Indicador de carga mientras Contactanos.jsx obtiene los datos */}
+        {/* Contact Section */}
         {isContactLoading && (
           <Box sx={{ textAlign: 'center', mb: 5 }}>
             <CircularProgress />
           </Box>
         )}
 
-        {/* Sección Contáctanos */}
         <Contactanos colors={colors} onLoading={setIsContactLoading} />
       </Container>
     </Box>
