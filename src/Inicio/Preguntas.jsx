@@ -5,12 +5,30 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EmailIcon from "@mui/icons-material/Email";
 
 const FAQ = () => {
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [expandedPanel, setExpandedPanel] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    question: "",
+  });
 
   // System Theme Detection
   useEffect(() => {
@@ -30,6 +48,19 @@ const FAQ = () => {
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpandedPanel(isExpanded ? panel : false);
+  };
+
+  const handleFormChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = () => {
+    console.log("Formulario enviado:", formData);
+    setFormData({ name: "", email: "", question: "" });
+    setOpenModal(false);
   };
 
   const faqs = [
@@ -65,54 +96,101 @@ const FAQ = () => {
     },
   ];
 
-  const backgroundStyle = {
-    background: isDarkTheme
-      ? "linear-gradient(135deg, #1a2a3a, #2A3A4A)"
-      : "linear-gradient(135deg, #e6f2ff, #ffffff)",
-    minHeight: "55vh",
-    color: isDarkTheme ? "#ffffff" : "#333333",
-    transition: "all 0.3s ease",
-    padding: "2rem",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "flex-start",
-  };
-
-  const cardStyle = {
-    background: "lightblue",
-    borderRadius: "12px",
-    boxShadow: isDarkTheme
-      ? "0 4px 6px rgba(0,0,0,0.5)"
-      : "0 4px 6px rgba(0,0,0,0.1)",
-    transition: "all 0.3s ease",
-    margin: "0.5rem 0",
-    width: "100%",
-    maxWidth: "800px", // Ajusta el ancho máximo para que sea más ancho
-  };
-
-  const titleStyle = {
-    marginBottom: "1.5rem",
-    color: isDarkTheme ? "#90CAF9" : "#0077CC",
-    fontSize: "1.75rem",
-    fontWeight: "bold",
-    textAlign: "center",
-  };
-
-  const accordionSummaryStyle = {
-    fontSize: "1rem",
-    fontWeight: 500,
-  };
-
-  const accordionDetailsStyle = {
-    fontSize: "0.95rem",
-    color: isDarkTheme ? "#333333" : "#555555", // Contraste para detalles
-    lineHeight: 1.5,
+  const styles = {
+    container: {
+      background: isDarkTheme
+        ? "linear-gradient(135deg, #1a2a3a, #2A3A4A)"
+        : "linear-gradient(135deg, #e6f2ff, #ffffff)",
+      minHeight: "55vh",
+      padding: isMobile ? "1rem" : "2rem",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "flex-start",
+    },
+    title: {
+      marginBottom: "1.5rem",
+      color: isDarkTheme ? "#90CAF9" : "#0077CC",
+      fontSize: isMobile ? "1.5rem" : "1.75rem",
+      fontWeight: "bold",
+      textAlign: "center",
+      fontFamily: "Montserrat, sans-serif",
+    },
+    accordion: {
+      background: isDarkTheme ? "#2d3748" : "white",
+      borderRadius: "12px",
+      boxShadow: isDarkTheme
+        ? "0 4px 6px rgba(0,0,0,0.3)"
+        : "0 4px 6px rgba(0,0,0,0.1)",
+      margin: "0.5rem 0",
+      width: "100%",
+      maxWidth: "800px",
+    },
+    question: {
+      fontFamily: "Montserrat, sans-serif",
+      fontSize: isMobile ? "0.9rem" : "1rem",
+      fontWeight: 500,
+      color: isDarkTheme ? "#ffffff" : "#000000",
+    },
+    answer: {
+      fontFamily: "Montserrat, sans-serif",
+      fontSize: isMobile ? "0.85rem" : "0.95rem",
+      color: isDarkTheme ? "#cbd5e0" : "#555555",
+      lineHeight: 1.5,
+    },
+    askButton: {
+      marginTop: "2rem",
+      background: isDarkTheme ? "#90CAF9" : "#0077CC",
+      color: isDarkTheme ? "#000000" : "white",
+      fontFamily: "Montserrat, sans-serif",
+      "&:hover": {
+        background: isDarkTheme ? "#63a4ff" : "#005fa3",
+      },
+    },
+    modal: {
+      "& .MuiDialog-paper": {
+        borderRadius: "12px",
+        padding: "1rem",
+        backgroundColor: isDarkTheme ? "#2d3748" : "white",
+      },
+    },
+    modalTitle: {
+      fontFamily: "Montserrat, sans-serif",
+      color: isDarkTheme ? "#90CAF9" : "#0077CC",
+    },
+    textField: {
+      marginBottom: "1rem",
+      "& label": {
+        fontFamily: "Montserrat, sans-serif",
+        color: isDarkTheme ? "#cbd5e0" : undefined,
+      },
+      "& input": {
+        fontFamily: "Montserrat, sans-serif",
+        color: isDarkTheme ? "#ffffff" : undefined,
+      },
+      "& textarea": {
+        fontFamily: "Montserrat, sans-serif",
+        color: isDarkTheme ? "#ffffff" : undefined,
+      },
+      "& .MuiOutlinedInput-root": {
+        "& fieldset": {
+          borderColor: isDarkTheme ? "rgba(255, 255, 255, 0.23)" : undefined,
+        },
+        "&:hover fieldset": {
+          borderColor: isDarkTheme ? "rgba(255, 255, 255, 0.5)" : undefined,
+        },
+      },
+    },
+    dialogActions: {
+      "& .MuiButton-text": {
+        color: isDarkTheme ? "#90CAF9" : undefined,
+      },
+    },
   };
 
   return (
-    <Box sx={backgroundStyle}>
-      <Typography variant="h5" component="h1" sx={titleStyle}>
+    <Box sx={styles.container}>
+      <Typography variant="h5" component="h1" sx={styles.title}>
         Preguntas Frecuentes
       </Typography>
 
@@ -121,19 +199,95 @@ const FAQ = () => {
           key={index}
           expanded={expandedPanel === `panel${index}`}
           onChange={handleChange(`panel${index}`)}
-          sx={cardStyle}
+          sx={styles.accordion}
         >
           <AccordionSummary
-            expandIcon={<ExpandMoreIcon sx={{ color: isDarkTheme ? "#90CAF9" : "#0077CC" }} />}
-            sx={accordionSummaryStyle}
+            expandIcon={
+              <ExpandMoreIcon
+                sx={{ color: isDarkTheme ? "#90CAF9" : "#0077CC" }}
+              />
+            }
           >
-            {faq.question}
+            <Typography sx={styles.question}>{faq.question}</Typography>
           </AccordionSummary>
-          <AccordionDetails sx={accordionDetailsStyle}>
-            {faq.answer}
+          <AccordionDetails>
+            <Typography sx={styles.answer}>{faq.answer}</Typography>
           </AccordionDetails>
         </Accordion>
       ))}
+
+      <Button
+        variant="contained"
+        startIcon={<EmailIcon />}
+        onClick={() => setOpenModal(true)}
+        sx={styles.askButton}
+      >
+        Hacer una pregunta
+      </Button>
+
+      <Dialog
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        maxWidth="sm"
+        fullWidth
+        sx={styles.modal}
+      >
+        <DialogTitle sx={styles.modalTitle}>Hacer una pregunta</DialogTitle>
+        <DialogContent>
+          <TextField
+            name="name"
+            label="Nombre"
+            fullWidth
+            value={formData.name}
+            onChange={handleFormChange}
+            sx={styles.textField}
+            required
+          />
+          <TextField
+            name="email"
+            label="Correo electrónico"
+            fullWidth
+            value={formData.email}
+            onChange={handleFormChange}
+            sx={styles.textField}
+            required
+            type="email"
+          />
+          <TextField
+            name="question"
+            label="Tu pregunta"
+            fullWidth
+            value={formData.question}
+            onChange={handleFormChange}
+            sx={styles.textField}
+            required
+            multiline
+            rows={4}
+          />
+        </DialogContent>
+        <DialogActions sx={styles.dialogActions}>
+          <Button 
+            onClick={() => setOpenModal(false)} 
+            sx={{ fontFamily: "Montserrat, sans-serif" }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            sx={{
+              background: isDarkTheme ? "#90CAF9" : "#0077CC",
+              color: isDarkTheme ? "#000000" : "white",
+              fontFamily: "Montserrat, sans-serif",
+              "&:hover": {
+                background: isDarkTheme ? "#63a4ff" : "#005fa3",
+              },
+            }}
+          >
+            Enviar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
