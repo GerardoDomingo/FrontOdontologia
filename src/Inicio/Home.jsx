@@ -27,6 +27,8 @@ import img3 from '../img/img3_1.png';
 
 // Importar componente Contactanos
 import Contactanos from './Contactanos';
+import Preguntas from './Preguntas';
+
 
 const Home = () => {
   const theme = useTheme();
@@ -295,7 +297,7 @@ const Home = () => {
           </Box>
         )}
         <Contactanos colors={colors} onLoading={setIsContactLoading} />
-      </Container>
+        </Container>
     </Box>
   );
 };

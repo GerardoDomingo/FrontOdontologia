@@ -12,6 +12,8 @@ import Recuperacion from './Inicio/Recuperacion.jsx';
 import Reset from './Inicio/CambiarContrasena.jsx';
 import Agendar from './Inicio/Agendar.jsx';
 import Acerca from './Inicio/AcerdaDe.jsx';
+import Preguntas from './Inicio/Preguntas.jsx';
+
 
 //Paciente
 import Principal from './Usuarios/Paciente/Principal.jsx';
@@ -84,7 +86,7 @@ function App() {
     <Router>
       <Routes>
         {/* Rutas públicas */}
-        <Route path="/" element={<LayoutConEncabezado><Home /></LayoutConEncabezado>} />
+        <Route path="/" element={<LayoutConEncabezado><Home /> <Preguntas/></LayoutConEncabezado>} />
         <Route path="/register" element={<LayoutConEncabezado><Register /></LayoutConEncabezado>} />
         <Route path="/login" element={<Login />} />
         <Route path="/agendar-cita" element={<Agendar />} />
