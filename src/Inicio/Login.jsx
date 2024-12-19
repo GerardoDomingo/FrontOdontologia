@@ -36,20 +36,19 @@ const Login = () => {
 
   // Detectar el tema del sistema
   useEffect(() => {
-    setIsDarkMode(false);
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    
     setIsDarkMode(matchDarkTheme.matches);
-
+  
     const handleThemeChange = (e) => {
       setIsDarkMode(e.matches);
     };
-
+  
     matchDarkTheme.addEventListener('change', handleThemeChange);
-
-    return () => {
-      matchDarkTheme.removeEventListener('change', handleThemeChange);
-    };
+  
+    return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
   }, []);
+  
 
   // Eliminar notificación después de un tiempo específico
   useEffect(() => {
