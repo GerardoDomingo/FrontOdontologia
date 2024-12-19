@@ -54,24 +54,28 @@ const ResponsiveNavbar = () => {
     }
   };
 
-  // Detectar el tema del sistema
-  useEffect(() => {
-    setIsDarkTheme(false);
-    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+// Detectar el tema del sistema
+useEffect(() => {
+  setIsDarkTheme(false);
 
-    // Listener para detectar cambios de tema
-    if (matchDarkTheme.matches) {
-      setIsDarkTheme(true);
-    }
+  const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
 
-    matchDarkTheme.addEventListener('change', handleThemeChange);
+  if (matchDarkTheme.matches) {
+    setIsDarkTheme(true);
+  }
 
-    fetchTitleAndLogo();
+  const handleThemeChange = (e) => {
+    setIsDarkTheme(e.matches);
+  };
 
-    return () => {
-      matchDarkTheme.removeEventListener('change', handleThemeChange);
-    };
-  }, []);
+  matchDarkTheme.addEventListener('change', handleThemeChange);
+
+  fetchTitleAndLogo();
+
+  return () => {
+    matchDarkTheme.removeEventListener('change', handleThemeChange);
+  };
+}, []);
 
   // Función para abrir/cerrar el Drawer
   const toggleDrawer = (open) => (event) => {
