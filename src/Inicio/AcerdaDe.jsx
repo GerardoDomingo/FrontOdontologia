@@ -120,7 +120,7 @@ const AboutPage = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <Card elevation={0} sx={cardStyle} style={{ marginBottom: 24 }}>
-            <CardContent>
+            <CardContent style={{background: 'powderblue'}}>
               <Typography variant="h5" gutterBottom>
                 Nuestra Historia
               </Typography>
@@ -147,7 +147,7 @@ const AboutPage = () => {
                 elevation={0} 
                 sx={cardStyle}
               >
-                <CardContent>
+                <CardContent style={{background: 'powderblue'}}>
                   <Typography variant="h6" gutterBottom>
                     Dr. Hugo Gómez Ramírez
                   </Typography>
@@ -208,7 +208,7 @@ const AboutPage = () => {
                   height: '100%'
                 }}
               >
-                <CardContent>
+                <CardContent style={{background: 'powderblue'}}>
                   <Typography variant="h6" gutterBottom>
                     Nuestros Servicios
                   </Typography>
@@ -241,7 +241,7 @@ const AboutPage = () => {
           <Grid container spacing={4} sx={{ mt: 2 }}>
             <Grid item xs={12} md={6}>
               <Card elevation={0} sx={cardStyle}>
-                <CardContent>
+                <CardContent style={{background: 'powderblue'}}>
                   <Typography variant="h5" gutterBottom>
                     Misión
                   </Typography>
@@ -256,7 +256,7 @@ const AboutPage = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Card elevation={0} sx={cardStyle}>
-                <CardContent>
+                <CardContent style={{background: 'powderblue'}}>
                   <Typography variant="h5" gutterBottom>
                     Visión
                   </Typography>
