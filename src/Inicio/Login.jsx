@@ -36,6 +36,7 @@ const Login = () => {
 
   // Detectar el tema del sistema
   useEffect(() => {
+    setIsDarkMode(false);
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkMode(matchDarkTheme.matches);
 

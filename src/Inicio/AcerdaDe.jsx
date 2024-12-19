@@ -30,6 +30,7 @@ const AboutPage = () => {
 
   // System Theme Detection
   useEffect(() => {
+    setIsDarkTheme(false);
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkTheme(matchDarkTheme.matches);
 

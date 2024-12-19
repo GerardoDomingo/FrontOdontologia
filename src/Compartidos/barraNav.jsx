@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  AppBar, 
-  Toolbar, 
-  Button, 
-  Typography, 
-  Box, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  IconButton 
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Typography,
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton
 } from '@mui/material';
 import { FaSignInAlt, FaCalendarAlt } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -56,6 +56,7 @@ const ResponsiveNavbar = () => {
 
   // Detectar el tema del sistema
   useEffect(() => {
+    setIsDarkTheme(false);
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkTheme(matchDarkTheme.matches);
 
@@ -93,31 +94,31 @@ const ResponsiveNavbar = () => {
       onClick={toggleDrawer(false)}
       onKeyDown={toggleDrawer(false)}
     >
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         p: 2,
-        borderBottom: `1px solid ${isDarkTheme ? '#3A4A5A' : '#e0e0e0'}` 
+        borderBottom: `1px solid ${isDarkTheme ? '#3A4A5A' : '#e0e0e0'}`
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {logo && (
             <img
               src={logo}
               alt="Logo"
-              style={{ 
-                marginRight: '10px', 
-                width: '40px', 
+              style={{
+                marginRight: '10px',
+                width: '40px',
                 height: '40px',
                 borderRadius: '50%'
               }}
             />
           )}
-          <Typography 
-            variant="h6" 
-            sx={{ 
+          <Typography
+            variant="h6"
+            sx={{
               color: isDarkTheme ? 'white' : '#333',
-              fontWeight: 600 
+              fontWeight: 600
             }}
           >
             {companyName || 'Odontología Carol'}
@@ -160,9 +161,9 @@ const ResponsiveNavbar = () => {
           borderBottom: `1px solid ${isDarkTheme ? '#3A4A5A' : '#e0e0e0'}`,
         }}
       >
-        <Toolbar 
-          sx={{ 
-            justifyContent: 'space-between', 
+        <Toolbar
+          sx={{
+            justifyContent: 'space-between',
             alignItems: 'center',
             px: { xs: 2, md: 4 }, // Añadir padding horizontal
           }}
@@ -287,9 +288,9 @@ const ResponsiveNavbar = () => {
       </AppBar>
 
       {/* Drawer para el menú en pantallas pequeñas */}
-      <Drawer 
-        anchor="right" 
-        open={drawerOpen} 
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
         onClose={toggleDrawer(false)}
       >
         {drawerList}

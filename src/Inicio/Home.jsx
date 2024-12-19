@@ -43,7 +43,6 @@ const Home = () => {
   const titles = [
     "Odontología Carol",
     "Sonrisas Perfectas",
-    "Expertos Dentales",
     "Tu Clínica de Confianza"
   ];
 
@@ -94,6 +93,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    setIsDarkMode(false);
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkMode(matchDarkTheme.matches);
 

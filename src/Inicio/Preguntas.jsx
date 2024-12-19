@@ -32,6 +32,7 @@ const FAQ = () => {
 
   // System Theme Detection
   useEffect(() => {
+    setIsDarkMode(false);
     const matchDarkTheme = window.matchMedia("(prefers-color-scheme: dark)");
     setIsDarkTheme(matchDarkTheme.matches);
 
