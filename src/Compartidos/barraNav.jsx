@@ -58,13 +58,14 @@ const ResponsiveNavbar = () => {
   useEffect(() => {
     setIsDarkTheme(false);
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkTheme(matchDarkTheme.matches);
 
-    const handleThemeChange = (e) => {
-      setIsDarkTheme(e.matches);
-    };
+    // Listener para detectar cambios de tema
+    if (matchDarkTheme.matches) {
+      setIsDarkTheme(true);
+    }
 
     matchDarkTheme.addEventListener('change', handleThemeChange);
+
     fetchTitleAndLogo();
 
     return () => {
