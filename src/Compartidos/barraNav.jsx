@@ -13,7 +13,7 @@ import {
   ListItemText,
   IconButton
 } from '@mui/material';
-import { FaSignInAlt, FaCalendarAlt } from 'react-icons/fa';
+import { FaSignInAlt, FaCalendarAlt, FaPhoneAlt  } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 

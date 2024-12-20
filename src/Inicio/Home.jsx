@@ -12,12 +12,12 @@ import {
   IconButton,
   useTheme,
 } from '@mui/material';
-import { 
-  CleaningServices, 
-  MedicalServices, 
+import {
+  CleaningServices,
+  MedicalServices,
   LocalHospital,
   NavigateBefore,
-  NavigateNext 
+  NavigateNext
 } from '@mui/icons-material';
 
 // Importar imágenes locales
@@ -26,14 +26,12 @@ import img2 from '../img/img2_1.jpg';
 import img3 from '../img/img3_1.png';
 
 // Importar componente Contactanos
-import Contactanos from './Contactanos';
-import Preguntas from './Preguntas';
+import Ubicacion from './Ubicacion';
 
 
 const Home = () => {
   const theme = useTheme();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isContactLoading, setIsContactLoading] = useState(true);
   const [empresa, setEmpresa] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -94,18 +92,18 @@ const Home = () => {
 
   useEffect(() => {
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     setIsDarkMode(matchDarkTheme.matches);
-  
+
     const handleThemeChange = (e) => {
       setIsDarkMode(e.matches);
     };
-  
+
     matchDarkTheme.addEventListener('change', handleThemeChange);
-  
+
     return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
   }, []);
-  
+
 
   useEffect(() => {
     const fetchEmpresaData = async () => {
@@ -291,15 +289,9 @@ const Home = () => {
             </AnimatePresence>
           </Box>
         </Box>
-
-        {/* Sección de contacto */}
-        {isContactLoading && (
-          <Box sx={{ textAlign: 'center', mb: 5 }}>
-            <CircularProgress />
-          </Box>
-        )}
-        <Contactanos colors={colors} onLoading={setIsContactLoading} />
-        </Container>
+       
+        <Ubicacion />
+      </Container>
     </Box>
   );
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, IconButton, Modal, Button, Grid, Container, Divider } from '@mui/material';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const availableSocials = [
   { label: 'Facebook', name: 'facebook', icon: <FaFacebook /> },
@@ -20,8 +21,9 @@ const Footer = () => {
   const [modalContent, setModalContent] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const navigate = useNavigate();
 
-  // Detectar el tema del sistema
+  // Your existing useEffect hooks remain the same...
   useEffect(() => {
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkMode(matchDarkTheme.matches);
@@ -37,7 +39,6 @@ const Footer = () => {
     };
   }, []);
 
-  // Obtener datos del backend
   useEffect(() => {
     const fetchSocials = async () => {
       try {
@@ -84,7 +85,6 @@ const Footer = () => {
     fetchDisclaimer();
   }, []);
 
-  // Manejar la apertura y cierre del modal
   const handleOpenModal = (title, content) => {
     setModalTitle(title);
     setModalContent(content);
@@ -93,10 +93,11 @@ const Footer = () => {
 
   const handleCloseModal = () => setModalOpen(false);
 
+  // Your existing footer JSX remains the same until the Modal component...
   return (
     <footer
       style={{
-        backgroundColor: isDarkMode ? '#0D1B2A' : '#00BCD4', // Fondo diferente en tema oscuro
+        backgroundColor: isDarkMode ? '#0D1B2A' : '#00BCD4',
         color: '#ffffff',
         padding: '20px 0',
         textAlign: 'center',
@@ -108,7 +109,10 @@ const Footer = () => {
           {/* Columna 1: Acerca de Carol */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Acerca de Carol</Typography>
-            <Button sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}>
+            <Button
+              sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
+              onClick={() => navigate('/about')}
+            >
               Información sobre nuestra empresa
             </Button>
             <Divider sx={{ backgroundColor: '#ffffff', my: 1, opacity: 0.5 }} />
@@ -117,10 +121,16 @@ const Footer = () => {
           {/* Columna 2: Servicio al Cliente */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Servicio al Cliente</Typography>
-            <Button sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}>
+            <Button
+              sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
+              onClick={() => navigate('/FAQ')}
+            >
               Preguntas frecuentes
             </Button>
-            <Button sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}>
+            <Button
+              sx={{ color: '#ffffff', fontSize: '0.85rem', textAlign: 'left' }}
+              onClick={() => navigate('/Contact')}
+            >
               Contáctanos
             </Button>
             <Divider sx={{ backgroundColor: '#ffffff', my: 1, opacity: 0.5 }} />
@@ -176,29 +186,115 @@ const Footer = () => {
         <Typography sx={{ mt: 2, fontSize: '0.7rem' }}>© 2024 Odontologia Carol. Todos los derechos reservados.</Typography>
       </Container>
 
-      {/* Modal para mostrar políticas, términos y deslinde */}
-      <Modal open={modalOpen} onClose={handleCloseModal}>
+      {/* Enhanced Modal Design */}
+      <Modal 
+        open={modalOpen} 
+        onClose={handleCloseModal}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <Box
           sx={{
-            backgroundColor: '#fff',
-            padding: 3,
-            margin: 'auto',
-            marginTop: '10%',
-            maxWidth: 600,
+            position: 'relative',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            p: { xs: 2, sm: 4 },
+            mx: 2,
+            maxWidth: '600px',
             maxHeight: '80vh',
+            width: '100%',
             overflowY: 'auto',
-            borderRadius: 2,
-            boxShadow: 24,
+            '&:focus': {
+              outline: 'none',
+            },
+            animation: 'modal-slide-down 0.3s ease-out',
+            '@keyframes modal-slide-down': {
+              '0%': {
+                opacity: 0,
+                transform: 'translateY(-20px)',
+              },
+              '100%': {
+                opacity: 1,
+                transform: 'translateY(0)',
+              },
+            },
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>{modalTitle}</Typography>
-          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>{modalContent}</Typography>
-          <Button
-            onClick={handleCloseModal}
-            sx={{ mt: 3, backgroundColor: '#00BCD4', color: '#ffffff', '&:hover': { backgroundColor: '#0097a7' } }}
-          >
-            Cerrar
-          </Button>
+          {/* Header */}
+          <Box sx={{ 
+            borderBottom: '1px solid rgba(0, 0, 0, 0.1)', 
+            pb: 2, 
+            mb: 3,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontWeight: 600,
+                color: '#1a237e',
+              }}
+            >
+              {modalTitle}
+            </Typography>
+            <IconButton
+              onClick={handleCloseModal}
+              sx={{
+                color: 'grey.500',
+                '&:hover': {
+                  color: 'grey.700',
+                },
+              }}
+            >
+              ✕
+            </IconButton>
+          </Box>
+
+          {/* Content */}
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="body1"
+              sx={{
+                lineHeight: 1.8,
+                color: 'grey.800',
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {modalContent}
+            </Typography>
+          </Box>
+
+          {/* Footer */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end',
+            borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+            pt: 3
+          }}>
+            <Button
+              onClick={handleCloseModal}
+              variant="contained"
+              sx={{
+                backgroundColor: '#00BCD4',
+                color: 'white',
+                px: 4,
+                py: 1,
+                borderRadius: '8px',
+                textTransform: 'none',
+                '&:hover': {
+                  backgroundColor: '#0097a7',
+                },
+                boxShadow: '0 2px 8px rgba(0, 188, 212, 0.25)',
+              }}
+            >
+              Cerrar
+            </Button>
+          </Box>
         </Box>
       </Modal>
     </footer>

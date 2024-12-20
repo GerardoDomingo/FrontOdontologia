@@ -220,7 +220,7 @@ const FAQ = () => {
         onClick={() => setOpenModal(true)}
         sx={styles.askButton}
       >
-        Hacer una pregunta
+        ¿Tienes una duda?
       </Button>
 
       <Dialog

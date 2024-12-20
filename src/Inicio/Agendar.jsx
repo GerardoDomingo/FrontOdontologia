@@ -261,7 +261,7 @@ const ReservaCitas = () => {
                         whiteSpace: 'nowrap'
                     }}
                 >
-                    Reserva de Citas
+                    Programa tu consulta
                 </Typography>
             </Box>
 
