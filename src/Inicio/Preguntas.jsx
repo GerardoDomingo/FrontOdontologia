@@ -65,7 +65,7 @@ const FAQ = () => {
     {
       question: "¿Qué tipos de tratamientos dentales ofrecen?",
       answer:
-        "Ofrecemos una amplia gama de tratamientos que incluyen limpieza dental, blanqueamiento, ortodoncia, implantes dentales, tratamientos de conducto, coronas y puentes dentales.",
+        "Ofrecemos una amplia gama de tratamientos que incluyen limpieza dental, blanqueamiento y ortodoncia.",
     },
     {
       question: "¿Cuánto tiempo dura una limpieza dental profesional?",
@@ -85,7 +85,7 @@ const FAQ = () => {
     {
       question: "¿Qué métodos de pago aceptan?",
       answer:
-        "Aceptamos efectivo, tarjetas de crédito/débito, transferencias bancarias y ofrecemos planes de financiamiento para tratamientos extensos.",
+        "Aceptamos efectivo y ofrecemos planes de financiamiento para tratamientos extensos.",
     },
     {
       question: "¿Cuánto tiempo dura un tratamiento de ortodoncia?",
