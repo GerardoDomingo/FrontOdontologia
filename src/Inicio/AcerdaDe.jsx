@@ -72,18 +72,18 @@ const AboutPage = () => {
   const clinicServices = [
     {
       icon: <MedicalServices color="primary" />,
-      title: 'Servicios Integrales',
-      description: 'Ofrecemos una amplia gama de tratamientos dentales, desde limpiezas hasta procedimientos especializados.'
+      title: 'Servicio Integrale',
+      description: 'Ofrecemos una amplia gama de tratamientos dentales, desde limpiezas hasta otros procedimientos.'
     },
     {
       icon: <Star color="secondary" />,
-      title: 'Calidad Premium',
+      title: 'Servicio de Calidad',
       description: 'Utilizamos tecnología de vanguardia y técnicas modernas para garantizar la mejor atención.'
     },
     {
       icon: <Assistant color="error" />,
       title: 'Atención Personalizada',
-      description: 'Cada paciente es único. Diseñamos tratamientos individualizados con el máximo cuidado y profesionalismo.'
+      description: 'Cada paciente es único. Diseñamos tratamientos individualizados con el máximo cuidado.'
     }
   ];
 
