@@ -77,7 +77,7 @@ const Login = () => {
     blur: { scale: 1, transition: { duration: 0.2 } }
   };
 
-  // Detectar el tema del sistema
+  // Detectar el tema 
   useEffect(() => {
     const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDarkMode(matchDarkTheme.matches);
