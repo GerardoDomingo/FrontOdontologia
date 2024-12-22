@@ -7,7 +7,13 @@ import { Link } from 'react-router-dom';
 const Contactanos = () => {
   const theme = useTheme();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [empresa, setEmpresa] = useState(null);
+  const [empresa, setEmpresa] = useState({
+    nombre_empresa: 'Nombre de la Empresa',
+    slogan: 'Slogan de la empresa',
+    telefono: 'Teléfono',
+    correo_electronico: 'correo@ejemplo.com',
+    direccion: 'Dirección'
+  }); 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
@@ -29,7 +35,6 @@ const Contactanos = () => {
     return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
   }, []);
 
-  // Fetch datos de la empresa
   useEffect(() => {
     const fetchEmpresaData = async () => {
       try {
@@ -51,12 +56,6 @@ const Contactanos = () => {
     fetchEmpresaData();
   }, []);
 
-  const colors = {
-    cardBackground: isDarkMode ? '#121212' : '#f9f9f9',
-    primaryText: isDarkMode ? '#ffffff' : '#000000',
-    secondaryText: isDarkMode ? '#aaaaaa' : '#555555',
-  };
-
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -67,20 +66,7 @@ const Contactanos = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    // Aquí puedes agregar la lógica para enviar el formulario
   };
-
-  if (isLoading) {
-    return null;
-  }
-
-  if (error) {
-    return (
-      <Typography variant="body2" sx={{ color: 'red', textAlign: 'center' }}>
-        {error}
-      </Typography>
-    );
-  }
 
   return (
     <motion.div
@@ -91,11 +77,11 @@ const Contactanos = () => {
       <Box
         component="section"
         sx={{
-          backgroundColor: colors.cardBackground,
+          backgroundColor: isDarkMode ? '#0D1B2A' : '#f9f9f9',
           py: 8,
           px: 3,
           borderRadius: '16px',
-          boxShadow: 3,
+          boxShadow: isDarkMode ? '0 4px 6px -1px rgb(0 0 0 / 0.1)' : 3,
           mb: 5,
           maxWidth: '900px',
           mx: 'auto',
@@ -108,7 +94,7 @@ const Contactanos = () => {
         <Typography
           variant="h4"
           sx={{
-            color: colors.primaryText,
+            color: isDarkMode ? '#ffffff' : '#000000',
             fontWeight: 'bold',
             textAlign: 'center',
             mb: 6,
@@ -118,7 +104,6 @@ const Contactanos = () => {
           Contáctanos
         </Typography>
 
-        {/* Contact Information Section */}
         <Box
           sx={{
             display: 'grid',
@@ -127,11 +112,12 @@ const Contactanos = () => {
             mb: 6
           }}
         >
+          {/* Información de contacto */}
           <Box>
             <Typography
               variant="h6"
               sx={{
-                color: colors.primaryText,
+                color: isDarkMode ? '#ffffff' : '#000000',
                 mb: 3,
                 fontFamily: 'Montserrat, sans-serif',
               }}
@@ -142,7 +128,7 @@ const Contactanos = () => {
             <Typography
               variant="body1"
               sx={{
-                color: colors.secondaryText,
+                color: isDarkMode ? '#94A3B8' : '#555555',
                 mb: 3,
                 fontStyle: 'italic'
               }}
@@ -151,27 +137,41 @@ const Contactanos = () => {
             </Typography>
             
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <IconButton color="primary"><Phone /></IconButton>
-              <Typography sx={{ color: colors.secondaryText }}>{empresa.telefono}</Typography>
+              <IconButton sx={{ color: theme.palette.primary.main }}><Phone /></IconButton>
+              <Typography sx={{ color: isDarkMode ? '#94A3B8' : '#555555', ml: 1 }}>
+                {empresa.telefono}
+              </Typography>
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <IconButton color="primary"><Email /></IconButton>
-              <Typography sx={{ color: colors.secondaryText }}>{empresa.correo_electronico}</Typography>
+              <IconButton sx={{ color: theme.palette.error.main }}><Email /></IconButton>
+              <Typography sx={{ color: isDarkMode ? '#94A3B8' : '#555555', ml: 1 }}>
+                {empresa.correo_electronico}
+              </Typography>
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <IconButton color="primary"><LocationOn /></IconButton>
-              <Typography sx={{ color: colors.secondaryText }}>{empresa.direccion}</Typography>
+              <IconButton sx={{ color: theme.palette.success.main }}><LocationOn /></IconButton>
+              <Typography sx={{ color: isDarkMode ? '#94A3B8' : '#555555', ml: 1 }}>
+                {empresa.direccion}
+              </Typography>
             </Box>
           </Box>
 
-          {/* Contact Form */}
-          <Box component="form" onSubmit={handleSubmit}>
+          {/* Formulario */}
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{
+              backgroundColor: isDarkMode ? '#2A3648' : '#ffffff',
+              padding: 3,
+              borderRadius: '8px',
+            }}
+          >
             <Typography
               variant="h6"
               sx={{
-                color: colors.primaryText,
+                color: isDarkMode ? '#ffffff' : '#000000',
                 mb: 3,
                 fontFamily: 'Montserrat, sans-serif',
               }}
@@ -179,38 +179,36 @@ const Contactanos = () => {
               Envíanos un Mensaje
             </Typography>
             
-            <TextField
-              fullWidth
-              name="nombre"
-              label="Nombre"
-              variant="outlined"
-              margin="normal"
-              value={formData.nombre}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              name="email"
-              label="Correo Electrónico"
-              variant="outlined"
-              margin="normal"
-              value={formData.email}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              name="asunto"
-              label="Asunto"
-              variant="outlined"
-              margin="normal"
-              value={formData.asunto}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
+            {['nombre', 'email', 'asunto'].map((field) => (
+              <TextField
+                key={field}
+                fullWidth
+                name={field}
+                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                variant="outlined"
+                margin="normal"
+                value={formData[field]}
+                onChange={handleInputChange}
+                sx={{
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: isDarkMode ? '#2A3648' : '#ffffff',
+                    '& fieldset': {
+                      borderColor: isDarkMode ? '#475569' : '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '& input': {
+                      color: isDarkMode ? '#ffffff' : '#000000',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: isDarkMode ? '#94A3B8' : '#666666',
+                  },
+                }}
+              />
+            ))}
             
             <TextField
               fullWidth
@@ -222,7 +220,24 @@ const Contactanos = () => {
               rows={4}
               value={formData.mensaje}
               onChange={handleInputChange}
-              sx={{ mb: 2 }}
+              sx={{
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: isDarkMode ? '#2A3648' : '#ffffff',
+                  '& fieldset': {
+                    borderColor: isDarkMode ? '#475569' : '#e0e0e0',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '& textarea': {
+                    color: isDarkMode ? '#ffffff' : '#000000',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: isDarkMode ? '#94A3B8' : '#666666',
+                },
+              }}
             />
             
             <Button
@@ -230,27 +245,32 @@ const Contactanos = () => {
               variant="contained"
               color="primary"
               fullWidth
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 2,
+                py: 1.5,
+                fontWeight: 600,
+                textTransform: 'none',
+              }}
             >
               Enviar Mensaje
             </Button>
           </Box>
         </Box>
 
-        {/* Appointment Section */}
+        {/* Sección de citas */}
         <Box
           sx={{
             textAlign: 'center',
             mt: 6,
             p: 4,
-            backgroundColor: isDarkMode ? '#1A1A1A' : '#f0f0f0',
+            backgroundColor: isDarkMode ? '#2A3648' : '#ffffff',
             borderRadius: '8px',
           }}
         >
           <Typography
             variant="h5"
             sx={{
-              color: colors.primaryText,
+              color: isDarkMode ? '#ffffff' : '#000000',
               mb: 2,
               fontFamily: 'Montserrat, sans-serif',
             }}
@@ -261,14 +281,14 @@ const Contactanos = () => {
           <Typography
             variant="body1"
             sx={{
-              color: colors.secondaryText,
+              color: isDarkMode ? '#94A3B8' : '#555555',
               mb: 3,
             }}
           >
             Agenda tu consulta con nuestros especialistas y recibe la mejor atención personalizada.
           </Typography>
           
-          <Link to="/about" style={{ textDecoration: 'none' }}>
+          <Link to="/agendar-cita" style={{ textDecoration: 'none' }}>
             <Button
               variant="contained"
               color="primary"
