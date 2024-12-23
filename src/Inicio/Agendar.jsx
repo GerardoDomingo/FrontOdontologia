@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box, TextField, Typography, Button, MenuItem, Stepper, IconButton, Step, StepLabel,
     Grid, InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions,
-    Checkbox, Modal, FormControlLabel, Snackbar, Alert, Chip, useMediaQuery, useTheme
+    Checkbox, Modal, FormControlLabel, Snackbar, Alert, Chip, useMediaQuery, useTheme,
+    Switch
 } from '@mui/material';
 import {
-    ArrowBack as ArrowBack,
+    ArrowBack,
     Person as PersonIcon,
     Email as EmailIcon,
     Phone as PhoneIcon,
@@ -13,10 +14,13 @@ import {
     CalendarMonth as CalendarMonthIcon,
     CheckCircle as CheckCircleIcon,
     MedicalServices as MedicalServicesIcon,
-    Star as StarIcon
+    Star as StarIcon,
+    Brightness4 as Brightness4Icon,
+    Brightness7 as Brightness7Icon,
+    Home as HomeIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -29,6 +33,7 @@ const phoneRegex = /^\d{10}$/;
 const steps = ['Identificación', 'Profesional', 'Disponibilidad', 'Confirmación'];
 
 const ReservaCitas = () => {
+    const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         nombre: '',
@@ -48,10 +53,34 @@ const ReservaCitas = () => {
     const [openPrivacyModal, setOpenPrivacyModal] = useState(false);
     const [openTermsModal, setOpenTermsModal] = useState(false);
     const [allAccepted, setAllAccepted] = useState(false);
-
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const navigate = useNavigate();
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
+    // System Theme Detection
+    useEffect(() => {
+        const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+        setIsDarkTheme(matchDarkTheme.matches);
+
+        const handleThemeChange = (e) => {
+            setIsDarkTheme(e.matches);
+        };
+
+        matchDarkTheme.addEventListener('change', handleThemeChange);
+        return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
+    }, []);
+
+
+    // Theme colors
+    const themeColors = {
+        background: isDarkTheme ? '#1B2A3A' : '#F9FDFF',
+        paper: isDarkTheme ? '#243447' : '#ffffff',
+        text: isDarkTheme ? '#ffffff' : '#000000',
+        primary: '#1976d2',
+        secondary: isDarkTheme ? '#90caf9' : '#1976d2'
+    };
+
     const handleAcceptChange = (event) => {
         setAllAccepted(event.target.checked);
     };
@@ -86,7 +115,6 @@ const ReservaCitas = () => {
         }
         return errorMessage;
     };
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -115,8 +143,6 @@ const ReservaCitas = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-
     // Modify the handleNextStep to check terms acceptance
     const handleNextStep = () => {
         if (validateStep()) {
@@ -132,12 +158,12 @@ const ReservaCitas = () => {
     const handlePrevStep = () => {
         setStep(prevStep => prevStep - 1);
     };
-
     const handleReservar = () => {
         if (selectedDate && selectedTime) {
-            setOpenConfirmDialog(true);
+            setStep(4);
         }
     };
+
 
     const handleReset = () => {
         setStep(1);
@@ -159,14 +185,14 @@ const ReservaCitas = () => {
     // Función para abrir el modal de políticas de privacidad y obtener su contenido si aún no está cargado
     const handleOpenPrivacyModal = async (event) => {
         event.stopPropagation();
-        if (!privacyPolicy) await fetchPrivacyPolicy(); // Solo llamar si no está cargado
+        if (!privacyPolicy) await fetchPrivacyPolicy();
         setOpenPrivacyModal(true);
     };
 
     // Función para abrir el modal de términos y condiciones y obtener su contenido si aún no está cargado
     const handleOpenTermsModal = async (event) => {
         event.stopPropagation();
-        if (!termsConditions) await fetchTermsConditions(); // Solo llamar si no está cargado
+        if (!termsConditions) await fetchTermsConditions();
         setOpenTermsModal(true);
     };
 
@@ -201,14 +227,15 @@ const ReservaCitas = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                backgroundColor: '#f0f4f8',
-                pb: 4
+                backgroundColor: themeColors.background,
+                pb: 4,
+                transition: 'background-color 0.3s ease'
             }}
         >
-            {/* Encabezado azul */}
+            {/* Header */}
             <Box
                 sx={{
-                    backgroundColor: '#1976d2',
+                    backgroundColor: themeColors.primary,
                     color: '#fff',
                     py: 2,
                     textAlign: 'center',
@@ -251,24 +278,33 @@ const ReservaCitas = () => {
                     </Box>
                 </IconButton>
 
-                <Typography
-                    variant={isSmallScreen ? 'h5' : 'h4'}
-                    fontWeight="bold"
-                    sx={{
-                        maxWidth: '70%',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                    }}
-                >
+                <Typography variant={isSmallScreen ? 'h5' : 'h4'} fontWeight="bold">
                     Programa tu consulta
                 </Typography>
             </Box>
 
-
             {/* Stepper */}
-            <Box sx={{ width: '90%', maxWidth: '800px', mx: 'auto', my: 4 }}>
-                <Stepper activeStep={step - 1} alternativeLabel>
+            <Box sx={{
+                width: '90%',
+                maxWidth: '800px',
+                mx: 'auto',
+                my: 4,
+                '& .MuiStepLabel-label': {
+                    color: themeColors.text
+                }
+            }}>
+                <Stepper
+                    activeStep={step - 1}
+                    alternativeLabel
+                    sx={{
+                        '& .MuiStepIcon-root': {
+                            color: themeColors.secondary
+                        },
+                        '& .MuiStepIcon-text': {
+                            fill: isDarkTheme ? '#000' : '#fff'
+                        }
+                    }}
+                >
                     {steps.map((label) => (
                         <Step key={label}>
                             <StepLabel>{label}</StepLabel>
@@ -277,7 +313,7 @@ const ReservaCitas = () => {
                 </Stepper>
             </Box>
 
-            {/* Contenido del Formulario */}
+            {/* Form Content */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -285,21 +321,23 @@ const ReservaCitas = () => {
             >
                 <Box
                     sx={{
-                        width: '100%',  // Changed from '90%' to '100%'
-                        maxWidth: { xs: '80%', sm: '750px', md: '850px' },  // Responsive max-width
+                        width: '100%',
+                        maxWidth: { xs: '80%', sm: '750px', md: '850px' },
                         mx: 'auto',
                         backgroundColor: '#ffffff',
-                        borderRadius: 4,  // Slightly increased border radius
-                        p: { xs: 2, sm: 4, md: 5 },  // Responsive padding
-                        boxShadow: 6,  // Slightly stronger shadow
-                        border: '1px solid rgba(0,0,0,0.1)',  // Subtle border
-                        transition: 'all 0.3s ease',  // Smooth transition for hover effects
+                        color: themeColors.text,
+                        borderRadius: 4,
+                        p: { xs: 2, sm: 4, md: 5 },
+                        boxShadow: 6,
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        transition: 'all 0.3s ease',
                         '&:hover': {
-                            transform: 'translateY(-5px)',  // Slight lift effect on hover
+                            transform: 'translateY(-5px)',
                             boxShadow: 8
                         }
                     }}
                 >
+                    {/* Form content goes here */}
                     {step === 1 && (
                         <>
                             <Typography variant="h5" sx={{ mb: 3, textAlign: 'center', color: '#1976d2' }}>
@@ -412,7 +450,10 @@ const ReservaCitas = () => {
                                         />
                                     }
                                     label={
-                                        <Typography variant="body2">
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ color: '#000000' }}
+                                        >
                                             Al seleccionar, confirmas que estás de acuerdo con nuestros{' '}
                                             <Link
                                                 component="span"
@@ -420,7 +461,11 @@ const ReservaCitas = () => {
                                                     e.preventDefault();
                                                     handleOpenTermsModal(e);
                                                 }}
-                                                sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+                                                sx={{
+                                                    cursor: 'pointer',
+                                                    textDecoration: 'underline',
+                                                    color: '#1976d2'
+                                                }}
                                             >
                                                 términos y condiciones
                                             </Link>{' '}
@@ -431,7 +476,11 @@ const ReservaCitas = () => {
                                                     e.preventDefault();
                                                     handleOpenPrivacyModal(e);
                                                 }}
-                                                sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+                                                sx={{
+                                                    cursor: 'pointer',
+                                                    textDecoration: 'underline',
+                                                    color: '#1976d2'
+                                                }}
                                             >
                                                 política de privacidad
                                             </Link>.
@@ -853,7 +902,7 @@ const ReservaCitas = () => {
                                     fullWidth
                                     variant="contained"
                                     color="primary"
-                                    onClick={handleReservar}
+                                    onClick={handleReservar}  // Esta función ahora llevará al paso 4
                                     disabled={!selectedDate || !selectedTime}
                                     sx={{
                                         textTransform: 'none',
@@ -869,31 +918,65 @@ const ReservaCitas = () => {
                             </Box>
                         </Box>
                     )}
-
                     {step === 4 && (
                         <Box
                             sx={{
                                 width: '80%',
                                 mx: 'auto',
-                                backgroundColor: '#fff',
+                                backgroundColor: '#ffffff',    // Fondo blanco fijo                                 
                                 borderRadius: 2,
                                 p: 4,
                                 boxShadow: 3,
                                 textAlign: 'center',
                             }}
                         >
-                            <Typography variant="h5" sx={{ mb: 3 }}>
-                                Confirmación
+                            <CheckCircleIcon
+                                color="success"
+                                sx={{
+                                    fontSize: 60,
+                                    mb: 2
+                                }}
+                            />
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    mb: 3,
+                                    fontWeight: 'bold',
+                                    color: '#1976d2'  // Color azul para el título                                 
+                                }}
+                            >
+                                ¡Solicitud Enviada!
                             </Typography>
-                            <Typography>
-                                Su solicitud de cita ha sido enviada. El médico será notificado y se le confirmará
-                                la disponibilidad.
+                            <Typography
+                                sx={{
+                                    mb: 2,
+                                    color: '#000000'  // Texto negro fijo
+                                }}
+                            >
+                                Su solicitud de cita ha sido enviada. El médico revisará su disponibilidad y pronto recibirá una notificación.
+                            </Typography>
+                            <Typography
+                                sx={{
+                                    mb: 3,
+                                    fontStyle: 'italic',
+                                    color: '#666666'  // Gris oscuro para el texto secundario                                
+                                }}
+                            >
+                                Por favor, esté pendiente de su correo electrónico ({formData.correo}) y su teléfono ({formData.telefono})
+                                donde recibirá la confirmación de su cita.
                             </Typography>
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => setStep(1)}
-                                sx={{ mt: 4, textTransform: 'none', fontWeight: 'bold' }}
+                                onClick={() => navigate('/')}
+                                startIcon={<HomeIcon />}
+                                sx={{
+                                    mt: 4,
+                                    textTransform: 'none',
+                                    fontWeight: 'bold',
+                                    py: 1.5,
+                                    px: 4
+                                }}
                             >
                                 Volver al inicio
                             </Button>
@@ -902,31 +985,28 @@ const ReservaCitas = () => {
                 </Box>
             </motion.div>
 
-            {/* Confirmation Dialog */}
-            <Dialog
-                open={openConfirmDialog}
-                onClose={() => setOpenConfirmDialog(false)}
+            {/* Snackbar for terms acceptance */}
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <DialogTitle>
-                    <CheckCircleIcon color="success" sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Confirmación de Cita
-                </DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        Su solicitud de cita ha sido enviada con éxito.
-                        El médico será notificado y se le confirmará la disponibilidad.
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={handleReset}
-                        color="primary"
-                        variant="contained"
-                    >
-                        Volver al Inicio
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity="warning"
+                    sx={{
+                        width: '100%',
+                        backgroundColor: isDarkTheme ? 'rgba(255, 244, 229, 0.95)' : undefined,
+                        color: '#663c00',
+                        '& .MuiAlert-icon': {
+                            color: '#663c00'
+                        }
+                    }}
+                >
+                    Debe aceptar los términos y condiciones para continuar
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
