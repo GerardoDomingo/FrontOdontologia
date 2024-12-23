@@ -942,7 +942,7 @@ const ReservaCitas = () => {
                                 sx={{
                                     mb: 3,
                                     fontWeight: 'bold',
-                                    color: '#1976d2'  // Color azul para el título                                 
+                                    color: '#1976d2'  // Color azul para el títuloo                              
                                 }}
                             >
                                 ¡Solicitud Enviada!
