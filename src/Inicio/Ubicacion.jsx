@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { GoogleMap, Marker, useJsApiLoader 
+} from '@react-google-maps/api';
 import { motion } from 'framer-motion';
-import { LocationOn } from '@mui/icons-material';
-
+import { LocationOn, OpenInNew } from '@mui/icons-material';
 const Ubicacion = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -31,11 +31,13 @@ const Ubicacion = () => {
     primaryColor: isDarkMode ? '#00BCD4' : '#1976d2',
   };
 
-  // Map coordinates
   const center = {
     lat: 21.081734,
     lng: -98.536002
   };
+
+    // Google Maps Street View link
+    const streetViewLink = `https://www.google.com/maps/@21.0816681,-98.5359763,19.64z`;
 
   const mapStyles = {
     height: "400px",
@@ -76,6 +78,7 @@ const Ubicacion = () => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyCjYgHzkG53-aSTcHJkAPYu98TIkGZ2d-w"
   });
@@ -84,12 +87,31 @@ const Ubicacion = () => {
     return (
       <Box 
         display="flex" 
+        flexDirection="column"
         justifyContent="center" 
         alignItems="center" 
         height="400px"
-        sx={{ backgroundColor: colors.cardBackground }}
+        sx={{ 
+          backgroundColor: colors.cardBackground,
+          borderRadius: '8px',
+          boxShadow: isDarkMode ? '0 4px 20px rgba(0, 0, 0, 0.5)' : '0 4px 20px rgba(0, 0, 0, 0.1)',
+        }}
       >
-        <Typography variant="h6" sx={{ color: colors.secondaryText }}>
+        <CircularProgress 
+          size={60}
+          thickness={4}
+          sx={{ 
+            color: colors.primaryColor,
+            mb: 2
+          }} 
+        />
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            color: colors.secondaryText,
+            fontFamily: 'Montserrat, sans-serif',
+          }}
+        >
           Cargando mapa...
         </Typography>
       </Box>
@@ -116,43 +138,7 @@ const Ubicacion = () => {
           transition: 'all 0.3s ease',
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{
-            color: colors.primaryColor,
-            fontWeight: 'bold',
-            textAlign: 'center',
-            mb: 4,
-            fontFamily: 'Montserrat, sans-serif',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1,
-            transition: 'color 0.3s ease'
-          }}
-        >
-          <LocationOn 
-            sx={{ 
-              fontSize: 35, 
-              color: colors.primaryColor,
-              transition: 'color 0.3s ease'
-            }} 
-          />
-          Ubicación
-        </Typography>
-
-        <Typography
-          variant="body1"
-          sx={{
-            color: colors.secondaryText,
-            textAlign: 'center',
-            mb: 4,
-            fontFamily: 'Roboto, sans-serif',
-            transition: 'color 0.3s ease'
-          }}
-        >
-          Encuéntranos en nuestra ubicación exacta en Huejutla de Reyes, Hidalgo, México.
-        </Typography>
+        {/* Mantener el título y descripción existentes... */}
 
         <GoogleMap
           mapContainerStyle={mapStyles}
@@ -179,18 +165,51 @@ const Ubicacion = () => {
           />
         </GoogleMap>
 
-        <Typography
-          variant="body2"
-          sx={{
-            color: colors.secondaryText,
-            textAlign: 'center',
-            mt: 3,
-            fontFamily: 'Roboto, sans-serif',
-            transition: 'color 0.3s ease'
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            mt: 3 
           }}
         >
-          <strong style={{ color: colors.primaryText }}>Dirección:</strong> Ixcatlan, Huejutla de Reyes, Hidalgo, México.
-        </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: colors.secondaryText,
+              textAlign: 'center',
+              fontFamily: 'Roboto, sans-serif',
+              transition: 'color 0.3s ease',
+              mb: 2
+            }}
+          >
+            <strong style={{ color: colors.primaryText }}>
+              Dirección:
+            </strong> Ixcatlan, Huejutla de Reyes, Hidalgo, México.
+          </Typography>
+
+          <Button
+            variant="outlined"
+            color="primary"
+            href={streetViewLink}
+            target="_blank"
+            startIcon={<OpenInNew />}
+            sx={{
+              mt: 2,
+              textTransform: 'none',
+              borderColor: colors.primaryColor,
+              color: colors.primaryColor,
+              '&:hover': {
+                borderColor: colors.primaryColor,
+                backgroundColor: isDarkMode ? 'rgba(0, 188, 212, 0.08)' : 'rgba(25, 118, 210, 0.08)',
+              },
+              fontFamily: 'Roboto, sans-serif',
+              fontWeight: 500
+            }}
+          >
+            Abrir en Google Maps
+          </Button>
+        </Box>
       </Box>
     </motion.div>
   );

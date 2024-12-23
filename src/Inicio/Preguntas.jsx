@@ -97,8 +97,8 @@ const FAQ = () => {
   const styles = {
     container: {
       background: isDarkTheme
-        ? "linear-gradient(135deg, #1a2a3a, #2A3A4A)"
-        : "linear-gradient(135deg, #e6f2ff, #ffffff)",
+        ? "linear-gradient(135deg, #1C2A38, #1C2A38)"
+        : "linear-gradient(35deg, #ffffff, #E5F3FD)",
       minHeight: "55vh",
       padding: isMobile ? "1rem" : "2rem",
       display: "flex",

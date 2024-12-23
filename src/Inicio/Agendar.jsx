@@ -286,11 +286,17 @@ const ReservaCitas = () => {
             {/* Stepper */}
             <Box sx={{
                 width: '90%',
-                maxWidth: '800px',
+                maxWidth: '600px',
                 mx: 'auto',
-                my: 4,
+                my: 3,
                 '& .MuiStepLabel-label': {
-                    color: themeColors.text
+                    color: themeColors.text,
+                    fontSize: {
+                        xs: '0.7rem',
+                        sm: '0.8rem',
+                    },
+                    fontWeight: 500,
+                    mt: 1
                 }
             }}>
                 <Stepper
@@ -298,21 +304,100 @@ const ReservaCitas = () => {
                     alternativeLabel
                     sx={{
                         '& .MuiStepIcon-root': {
-                            color: themeColors.secondary
+                            color: 'transparent',
+                            width: {
+                                xs: 24,
+                                sm: 28,
+                            },
+                            height: {
+                                xs: 24,
+                                sm: 28,
+                            },
+                            border: `2px solid ${isDarkTheme ? '#90caf9' : '#1976d2'}`,
+                            borderRadius: '50%',
+                            transition: 'all 0.3s ease-in-out',
+                            position: 'relative',
+
+                            '&::after': {
+                                content: '""',
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%) scale(0)',
+                                width: '70%',
+                                height: '70%',
+                                borderRadius: '50%',
+                                backgroundColor: isDarkTheme ? '#90caf9' : '#1976d2',
+                                transition: 'transform 0.3s ease-in-out'
+                            },
+
+                            // Círculo activo
+                            '&.Mui-active': {
+                                borderColor: isDarkTheme ? '#90caf9' : '#1976d2',
+                                '&::after': {
+                                    transform: 'translate(-50%, -50%) scale(1)',
+                                }
+                            },
+
+                            // Círculo completado
+                            '&.Mui-completed': {
+                                borderColor: isDarkTheme ? '#90caf9' : '#1976d2',
+                                color: isDarkTheme ? '#90caf9' : '#1976d2', // Color para el check icon
+                                '&::after': {
+                                    transform: 'translate(-50%, -50%) scale(1)',
+                                    backgroundColor: isDarkTheme ? '#90caf9' : '#1976d2',
+                                }
+                            }
                         },
                         '& .MuiStepIcon-text': {
-                            fill: isDarkTheme ? '#000' : '#fff'
+                            fill: isDarkTheme ? '#FFF' : '#000', // Siempre blanco para contraste con el fondo
+                            fontWeight: 'bold',
+                            fontSize: '0.7rem',
+                            zIndex: 1,
+                            position: 'relative'
+                        },
+
+                        // Línea conectora
+                        '& .MuiStepConnector-line': {
+                            borderColor: isDarkTheme ? 'rgba(144, 202, 249, 0.2)' : 'rgba(25, 118, 210, 0.2)',
+                            borderTopWidth: 2,
+                            transition: 'all 0.3s ease'
+                        },
+
+                        // Línea conectora activa y completada
+                        '& .MuiStepConnector-active .MuiStepConnector-line, & .MuiStepConnector-completed .MuiStepConnector-line': {
+                            borderColor: isDarkTheme ? '#90caf9' : '#1976d2'
+                        },
+
+                        // Ajuste del espaciado
+                        '& .MuiStep-root': {
+                            padding: {
+                                xs: '0 4px',
+                                sm: '0 8px',
+                            }
                         }
                     }}
                 >
                     {steps.map((label) => (
                         <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
+                            <StepLabel>
+                                <Box sx={{
+                                    typography: 'body2',
+                                    fontWeight: 'medium',
+                                    textAlign: 'center',
+                                    width: {
+                                        xs: '60px',
+                                        sm: '80px',
+                                    },
+                                    mx: 'auto'
+                                }}>
+                                    {label}
+                                </Box>
+                            </StepLabel>
                         </Step>
                     ))}
                 </Stepper>
             </Box>
-
             {/* Form Content */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
