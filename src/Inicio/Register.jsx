@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment, CircularProgress, Checkbox, FormControlLabel, Link, Modal } from '@mui/material';
-import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye, FaPlusCircle } from 'react-icons/fa'; // Importamos 
-import zxcvbn from 'zxcvbn';
+import { Alert, Box, Button, Card, CardContent, Checkbox, CircularProgress, Container, FormControl, FormControlLabel, FormHelperText, Grid, IconButton, InputAdornment, InputLabel, Link, MenuItem, Modal, Select, Step, StepLabel, Stepper, TextField, Typography } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Notificaciones from '../Compartidos/Notificaciones'
+import React, { useEffect, useState } from 'react';
+import { FaCheckCircle, FaEnvelope, FaEye, FaEyeSlash, FaInfoCircle, FaLock, FaPhone, FaPlusCircle, FaUser } from 'react-icons/fa'; // Importamos 
+import { useNavigate } from 'react-router-dom';
+import zxcvbn from 'zxcvbn';
 import ErrorBoundary from '../Compartidos/ErrorBoundary.jsx';
+import Notificaciones from '../Compartidos/Notificaciones';
 
 
 const Register = () => {
@@ -54,6 +56,7 @@ const Register = () => {
   const phoneRegex = /^\d{10}$/;
   const today = new Date().toISOString().split('T')[0];
   const [showChangeEmailConfirmation, setShowChangeEmailConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [isEmailEditable, setIsEmailEditable] = useState(true); // Controlar si el correo es editable
   const [privacyPolicy, setPrivacyPolicy] = useState('');
@@ -397,111 +400,123 @@ const Register = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const updateTutorFullName = (nombre, apellidos) => {
+    const nombreCompleto = `${nombre || ''} ${apellidos || ''}`.trim();
+    setFormData(prev => ({
+      ...prev,
+      nombreTutor: nombreCompleto,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Iniciar el estado de cargando
-    setIsLoading(true);
-
-    // Forzar una espera de 2 segundos para mostrar el spinner de carga
-    await delay(2000);
-
-    let newErrors = {};
-
-    // Validación para "Otro" en alergias
-    if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
-      newErrors.otraAlergia = 'Especifica la alergia';
-    }
-
-    // Validación de lugar "Otro"
-    if (formData.lugar === 'Otro' && !formData.otroLugar.trim()) {
-      newErrors.otroLugar = 'Especifica el lugar';
-    }
-
-    // Validación de tutor si es menor de edad
-    if (!formData.esMayorDeEdad) {
-      if (!formData.tipoTutor) {
-        newErrors.tipoTutor = 'Selecciona un tutor';
-      }
-      if (!formData.nombreTutor || formData.nombreTutor.trim() === '') {
-        newErrors.nombreTutor = 'El nombre del tutor es obligatorio';
-      }
-    }
-
-    // Establecer errores si los hay
-    setErrors(newErrors);
-
-    // Si hay errores, detener la carga y no continuar con el registro
-    if (Object.keys(newErrors).length > 0) {
-      setIsLoading(false);
-      return;
-    }
-
-    // Verificar la validez de la contraseña antes de permitir el registro
-    const isPasswordValid = await checkPasswordValidity(formData.password);
-
-    // Validar la fortaleza de la contraseña
-    if (!isPasswordValid || passwordStrength < 3) {
-      setNotificationMessage(
-        passwordStrength < 3
-          ? 'La contraseña debe ser al menos "Fuerte" para continuar con el registro.'
-          : 'La contraseña debe cumplir con los requisitos y no haber sido filtrada.'
-      );
-      setNotificationType('error');
-      setOpenNotification(true);
-      setIsLoading(false);
-      return;
-    }
-
-    // Reemplazar "Otro" en alergias y lugar si es necesario
-    const alergiasFinal = formData.alergias.map((alergia) =>
-      alergia === 'Otro' ? formData.otraAlergia : alergia
-    );
-    const lugarFinal = formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar;
-
-    // Preparar datos finales para el envío
-    const dataToSubmit = {
-      ...formData,
-      lugar: lugarFinal,
-      alergias: alergiasFinal,
-      tutor: !formData.esMayorDeEdad
-        ? { tipo: formData.tipoTutor, nombre: formData.nombreTutor }
-        : null, // Solo incluir tutor si es menor de edad
-    };
+    // Prevenir múltiples envíos
+    if (isSubmitting || isLoading) return;
 
     try {
-      const response = await axios.post('https://backendodontologia.onrender.com/api/register', dataToSubmit, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      setIsSubmitting(true);
+      setIsLoading(true);
 
+      // Validaciones iniciales
+      let newErrors = {};
+
+      // Validación para "Otro" en alergias
+      if (formData.alergias.includes('Otro') && !formData.otraAlergia.trim()) {
+        newErrors.otraAlergia = 'Especifica la alergia';
+      }
+
+      // Validación de lugar "Otro"
+      if (formData.lugar === 'Otro' && !formData.otroLugar.trim()) {
+        newErrors.otroLugar = 'Especifica el lugar';
+      }
+
+      // Validación de tutor si es menor de edad
+      // En tu handleSubmit o donde manejes las validaciones
+      if (!formData.esMayorDeEdad) {
+        if (!formData.tipoTutor) {
+          newErrors.tipoTutor = 'Selecciona el tipo de tutor';
+        }
+
+        if (formData.tipoTutor === 'Otro' && !formData.relacionTutor?.trim()) {
+          newErrors.relacionTutor = 'Especifica el tipo de tutor';
+        }
+
+        if (!formData.nombreTutorNombre?.trim()) {
+          newErrors.nombreTutorNombre = 'El nombre del tutor es requerido';
+        }
+
+        if (!formData.nombreTutorApellidos?.trim()) {
+          newErrors.nombreTutorApellidos = 'Los apellidos del tutor son requeridos';
+        }
+      }
+
+      // Si hay errores de validación, detener el proceso
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        throw new Error('Por favor, completa todos los campos requeridos');
+      }
+
+      // Verificar contraseña
+      const isPasswordValid = await checkPasswordValidity(formData.password);
+      if (!isPasswordValid || passwordStrength < 3) {
+        throw new Error(
+          passwordStrength < 3
+            ? 'La contraseña debe ser al menos "Fuerte" para continuar.'
+            : 'La contraseña debe cumplir con los requisitos y no estar comprometida.'
+        );
+      }
+
+      // Preparar datos para el envío
+      const dataToSubmit = {
+        ...formData,
+        lugar: formData.lugar === 'Otro' ? formData.otroLugar : formData.lugar,
+        alergias: formData.alergias.map(alergia =>
+          alergia === 'Otro' ? formData.otraAlergia : alergia
+        ),
+        tutor: !formData.esMayorDeEdad
+          ? { tipo: formData.tipoTutor, nombre: formData.nombreTutor }
+          : null,
+      };
+
+      // Enviar datos
+      const response = await axios.post(
+        'https://backendodontologia.onrender.com/api/register',
+        dataToSubmit,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      // Manejar respuesta exitosa
       if (response.status === 200 || response.status === 201) {
-        setNotificationMessage('Usuario registrado exitosamente');
+        setNotificationMessage('¡Registro exitoso! Redirigiendo...');
         setNotificationType('success');
         setOpenNotification(true);
 
-        // Redirigir al login después de 2 segundos
+        // Redirigir después de mostrar el mensaje
         setTimeout(() => {
           navigate('/login');
-        }, 2000);
-      } else {
-        setNotificationMessage('Error al registrar el usuario');
-        setNotificationType('error');
-        setOpenNotification(true);
+        }, 2500);
       }
+
     } catch (error) {
-      if (error.response && error.response.data.message) {
-        setNotificationMessage(error.response.data.message);
-      } else {
-        setNotificationMessage('Error en la solicitud');
+      // Manejar errores
+      let errorMessage = 'Error en el registro. Intenta nuevamente.';
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
       }
+
+      setNotificationMessage(errorMessage);
       setNotificationType('error');
       setOpenNotification(true);
+
     } finally {
-      setIsLoading(false); // Finalizar el estado de cargando
+      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -684,614 +699,1278 @@ const Register = () => {
     Acrílico: 'Presente en prótesis dentales.',
   };
 
+  const commonTextFieldStyles = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '8px',
+      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)',
+      transition: 'all 0.3s ease',
+      '&:hover fieldset': {
+        borderColor: '#03427c',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#03427c',
+        borderWidth: '2px'
+      },
+      '& fieldset': {
+        borderColor: 'rgba(3, 66, 124, 0.2)'
+      }
+    },
+    '& .MuiInputLabel-root': {
+      color: 'rgba(3, 66, 124, 0.7)',
+      '&.Mui-focused': {
+        color: '#03427c',
+      }
+    },
+    '& .MuiInputAdornment-root': {
+      '& .MuiSvgIcon-root': {
+        color: '#03427c'
+      }
+    }
+  }
+
+
   const getStepContent = (step) => {
     switch (step) {
       case 0:
         return (
-          <Box>
-            {/* Campo de Nombre */}
-            <TextField
-              fullWidth
-              label="Nombre"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              onInput={(e) => {
-                e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
-              }}
-
-              margin="normal"
-              required
-              error={!!errors.nombre}
-              helperText={errors.nombre || 'Solo letras, espacios y acentos.'}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaUser />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            {/* Campo de Apellido Paterno */}
-            <TextField
-              fullWidth
-              label="Apellido Paterno"
-              name="aPaterno"
-              value={formData.aPaterno}
-              onChange={handleChange}
-              margin="normal"
-              required
-              error={!!errors.aPaterno}
-              helperText={errors.aPaterno || 'Solo letras, espacios y acentos.'}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaUser />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {/* Campo de Apellido Materno */}
-            <TextField
-              fullWidth
-              label="Apellido Materno"
-              name="aMaterno"
-              value={formData.aMaterno}
-              onChange={handleChange}
-              margin="normal"
-              required
-              error={!!errors.aMaterno}
-              helperText={errors.aMaterno || 'Solo letras, espacios y acentos.'}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaUser />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            {/* Campo de Género */}
-            <FormControl fullWidth margin="normal" required error={!!errors.genero}>
-              <InputLabel>Género</InputLabel>
-              <Select
-                value={formData.genero}
-                onChange={handleChange}
-                label="Género"
-                name="genero"
-              >
-                <MenuItem value="Masculino">Masculino</MenuItem>
-                <MenuItem value="Femenino">Femenino</MenuItem>
-                <MenuItem value="Prefiero no decirlo">Prefiero no decirlo</MenuItem>
-              </Select>
-              {errors.genero && <FormHelperText>{errors.genero}</FormHelperText>}
-            </FormControl>
-            {/* Campo de Fecha de Nacimiento */}
-            <TextField
-              fullWidth
-              label="Fecha de Nacimiento"
-              name="fechaNacimiento"
-              type="date"
-              inputProps={{ max: today }}
-              value={formData.fechaNacimiento}
-              onChange={handleChange}
-              margin="normal"
-              required
-              error={!!errors.fechaNacimiento}
-              helperText={
-                errors.fechaNacimiento || 'Selecciona tu fecha de nacimiento'
-              }
-              InputLabelProps={{ shrink: true }}
-            />
-            {/* Mostrar mensaje si es menor de edad después de seleccionar la fecha */}
-            {formData.fechaNacimiento && !formData.esMayorDeEdad && (
-              <Typography variant="caption" sx={{ color: 'red', mt: 1 }}>
-                Parece que es menor de edad, por lo que se necesitan los datos del tutor.
-              </Typography>
-            )}
-
-            {/* Mostrar campos de tutor solo si es menor de edad */}
-            {formData.fechaNacimiento && !formData.esMayorDeEdad && (
-              <Box sx={{ mt: 2 }}>
-                <FormControl fullWidth margin="normal" required error={!!errors.tipoTutor}>
-                  <InputLabel>Selecciona el tutor</InputLabel>
-                  <Select
-                    value={formData.tipoTutor || ''}
-                    onChange={handleChange}
-                    label="Selecciona el tutor"
-                    name="tipoTutor"
-                  >
-                    <MenuItem value="Madre">Madre</MenuItem>
-                    <MenuItem value="Padre">Padre</MenuItem>
-                    <MenuItem value="Otro">Otro</MenuItem>
-                  </Select>
-                  {errors.tipoTutor && <FormHelperText>{errors.tipoTutor}</FormHelperText>}
-                </FormControl>
-                {formData.tipoTutor === 'Otro' && (
-                  <TextField
-                    fullWidth
-                    label="Especificar relación con el menor"
-                    name="relacionTutor"
-                    value={formData.relacionTutor || ''}
-                    onChange={handleChange}
-                    onInput={(e) => {
-                      e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
-                    }}
-                    margin="normal"
-                    required
-                    error={!!errors.relacionTutor}
-                    helperText={errors.relacionTutor || 'Solo letras, espacios y acentos. No puede estar vacío.'}
-                  />
-                )}
-
-                <TextField
-                  fullWidth
-                  label="Nombre completo del Tutor"
-                  name="nombreTutor"
-                  value={formData.nombreTutor || ''}
-                  onChange={(e) => {
-                    const trimmedValue = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, ''); // Solo permite letras, espacios y acentos
-                    setFormData((prevData) => ({
-                      ...prevData,
-                      nombreTutor: trimmedValue,
-                    }));
-                    if (!trimmedValue) {
-                      setErrors((prevErrors) => ({
-                        ...prevErrors,
-                        nombreTutor: 'El nombre del tutor es obligatorio y solo puede contener letras.',
-                      }));
-                    } else {
-                      setErrors((prevErrors) => ({
-                        ...prevErrors,
-                        nombreTutor: '',
-                      }));
+          <Box sx={{ p: 2 }}>
+            <Grid container spacing={2}>
+              {/* Datos Personales Título */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: '#03427c',
+                    mb: 2,
+                    fontWeight: 600,
+                    position: 'relative',
+                    '&:after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: -8,
+                      left: 0,
+                      width: '40px',
+                      height: '3px',
+                      backgroundColor: '#03427c',
+                      borderRadius: '2px'
                     }
                   }}
-                  margin="normal"
+                >
+                  Datos Personales
+                </Typography>
+              </Grid>
+
+              {/* Campos de nombre y apellidos en una fila */}
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  onInput={(e) => {
+                    e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
+                  }}
                   required
-                  error={!!errors.nombreTutor}
-                  helperText={errors.nombreTutor || 'Solo se permiten letras, espacios y acentos.'}
+                  error={!!errors.nombre}
+                  helperText={errors.nombre || 'Solo letras, espacios y acentos.'}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FaUser style={{ color: errors.nombre ? '#d32f2f' : '#03427c' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#03427c',
+                    }
+                  }}
                 />
+              </Grid>
 
-              </Box>
-            )}
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Apellido Paterno"
+                  name="aPaterno"
+                  value={formData.aPaterno}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.aPaterno}
+                  helperText={errors.aPaterno || 'Solo letras, espacios y acentos.'}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FaUser style={{ color: errors.aPaterno ? '#d32f2f' : '#03427c' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#03427c',
+                    }
+                  }}
+                />
+              </Grid>
 
-            {/* Campo de Lugar de Procedencia */}
-            <FormControl fullWidth margin="normal" required error={!!errors.lugar}>
-              <InputLabel>Lugar de Proveniencia</InputLabel>
-              <Select
-                value={formData.lugar}
-                onChange={handleChange}
-                label="Lugar de Proveniencia"
-                name="lugar"
-              >
-                <MenuItem value="Ixcatlan">Ixcatlan</MenuItem>
-                <MenuItem value="Tepemaxac">Tepemaxac</MenuItem>
-                <MenuItem value="Pastora">Pastora</MenuItem>
-                <MenuItem value="Ahuacatitla">Ahuacatitla</MenuItem>
-                <MenuItem value="Tepeica">Tepeica</MenuItem>
-                <MenuItem value="Axcaco">Axcaco</MenuItem>
-                <MenuItem value="Otro">Otro</MenuItem>
-              </Select>
-              {errors.lugar && <FormHelperText>{errors.lugar}</FormHelperText>}
-            </FormControl>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Apellido Materno"
+                  name="aMaterno"
+                  value={formData.aMaterno}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.aMaterno}
+                  helperText={errors.aMaterno || 'Solo letras, espacios y acentos.'}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FaUser style={{ color: errors.aMaterno ? '#d32f2f' : '#03427c' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#03427c',
+                    }
+                  }}
+                />
+              </Grid>
 
-            {/* Campo Especificar Lugar */}
-            {formData.lugar === 'Otro' && (
-              <TextField
-                fullWidth
-                label="Especificar Lugar"
-                name="otroLugar"
-                value={formData.otroLugar}
-                onChange={handleChange}
-                margin="normal"
-                required
-                error={!!errors.otroLugar}
-                helperText={errors.otroLugar || 'Escribe el lugar específico'}
-              />
-            )}
+              {/* Género y Fecha de Nacimiento */}
+              <Grid item xs={12} md={6}>
+                <FormControl
+                  fullWidth
+                  required
+                  error={!!errors.genero}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#03427c',
+                    }
+                  }}
+                >
+                  <InputLabel>Género</InputLabel>
+                  <Select
+                    value={formData.genero}
+                    onChange={handleChange}
+                    label="Género"
+                    name="genero"
+                  >
+                    <MenuItem value="Masculino">Masculino</MenuItem>
+                    <MenuItem value="Femenino">Femenino</MenuItem>
+                    <MenuItem value="Otro">Prefiero no decirlo</MenuItem>
+                  </Select>
+                  {errors.genero && (
+                    <FormHelperText error>{errors.genero}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+
+              {/* CAMPO DE EDAD */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Fecha de Nacimiento"
+                  name="fechaNacimiento"
+                  type="date"
+                  inputProps={{
+                    max: today,
+                    style: {
+                      fontSize: '1rem',
+                      padding: '12px',
+                      cursor: 'pointer'
+                    }
+                  }}
+                  value={formData.fechaNacimiento}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.fechaNacimiento}
+                  helperText={errors.fechaNacimiento || 'Selecciona tu fecha de nacimiento'}
+                  InputLabelProps={{
+                    shrink: true,
+                    sx: {
+                      fontSize: '1rem',
+                      transform: 'translate(14px, -9px) scale(0.75)'
+                    }
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,1)',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                        borderWidth: '2px',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                        borderWidth: '2px'
+                      },
+                      '& input::-webkit-calendar-picker-indicator': {
+                        cursor: 'pointer',
+                        padding: '8px',
+                        position: 'absolute',
+                        right: '8px',
+                        filter: isDarkMode ? 'invert(1)' : 'none',
+                        opacity: 0.7,
+                        '&:hover': {
+                          opacity: 1
+                        }
+                      }
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: 'rgba(3, 66, 124, 0.7)',
+                      '&.Mui-focused': {
+                        color: '#03427c',
+                      }
+                    },
+                    '& .MuiInputBase-input': {
+                      color: isDarkMode ? '#ffffff' : '#000000',
+                    }
+                  }}
+                />
+              </Grid>
+
+              {/* Mensaje de menor de edad */}
+              {formData.fechaNacimiento && !formData.esMayorDeEdad && (
+                <Grid item xs={12}>
+                  <Alert
+                    severity="info"
+                    variant="filled"
+                    icon={<InfoIcon sx={{ fontSize: '1.5rem' }} />}
+                    sx={{
+                      mt: 1,
+                      borderRadius: '8px',
+                      '& .MuiAlert-icon': {
+                        opacity: 1,
+                        alignItems: 'center'
+                      },
+                      '& .MuiAlert-message': {
+                        padding: '8px 0'
+                      },
+                      animation: 'fadeIn 0.5s ease-in-out',
+                      '@keyframes fadeIn': {
+                        '0%': {
+                          opacity: 0,
+                          transform: 'translateY(-10px)'
+                        },
+                        '100%': {
+                          opacity: 1,
+                          transform: 'translateY(0)'
+                        }
+                      }
+                    }}
+                  >
+                    Al ser menor de edad, necesitaremos los datos del tutor.
+                  </Alert>
+                </Grid>
+              )}
+
+              {/* Campos del tutor */}
+              {formData.fechaNacimiento && !formData.esMayorDeEdad && (
+                <>
+                  <Grid item xs={12}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        color: '#03427c',
+                        mt: 2,
+                        mb: 2,
+                        fontWeight: 600
+                      }}
+                    >
+                      Datos del Tutor
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <FormControl
+                      fullWidth
+                      required
+                      error={!!errors.tipoTutor}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)',
+                          '&:hover fieldset': {
+                            borderColor: '#03427c',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#03427c',
+                            borderWidth: '2px'
+                          }
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(3, 66, 124, 0.7)',
+                          '&.Mui-focused': {
+                            color: '#03427c',
+                          }
+                        }
+                      }}
+                    >
+                      <InputLabel>Tipo de Tutor</InputLabel>
+                      <Select
+                        value={formData.tipoTutor || ''}
+                        onChange={handleChange}
+                        label="Tipo de Tutor"
+                        name="tipoTutor"
+                      >
+                        <MenuItem value="Madre">Madre</MenuItem>
+                        <MenuItem value="Padre">Padre</MenuItem>
+                        <MenuItem value="Abuelo/a">Abuelo/a</MenuItem>
+                        <MenuItem value="Tío/a">Tío/a</MenuItem>
+                        <MenuItem value="Hermano/a">Hermano/a</MenuItem>
+                        <MenuItem value="Otro">Otro</MenuItem>
+                      </Select>
+                      {errors.tipoTutor && (
+                        <FormHelperText error>{errors.tipoTutor}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Grid>
+
+                  {formData.tipoTutor === 'Otro' && (
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Especificar tipo de tutor"
+                        name="relacionTutor"
+                        value={formData.relacionTutor || ''}
+                        onChange={handleChange}
+                        onInput={(e) => {
+                          e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
+                        }}
+                        required
+                        error={!!errors.relacionTutor}
+                        helperText={errors.relacionTutor || 'Ejemplo: Tío, Abuelo, etc.'}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '8px',
+                            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)',
+                            '&:hover fieldset': {
+                              borderColor: '#03427c',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#03427c',
+                              borderWidth: '2px'
+                            }
+                          },
+                          '& .MuiInputLabel-root': {
+                            color: 'rgba(3, 66, 124, 0.7)',
+                            '&.Mui-focused': {
+                              color: '#03427c',
+                            }
+                          }
+                        }}
+                      />
+                    </Grid>
+                  )}
+
+                  {/* Nombre del Tutor separado en campos */}
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Nombre del Tutor"
+                      name="nombreTutorNombre"
+                      value={formData.nombreTutorNombre || ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
+                        handleChange({ ...e, target: { ...e.target, value } });
+                        const nombreCompleto = `${value} ${formData.nombreTutorApellidos || ''}`.trim();
+                        setFormData(prev => ({
+                          ...prev,
+                          nombreTutorNombre: value,
+                          nombreTutor: nombreCompleto
+                        }));
+                      }}
+                      required
+                      error={!!errors.nombreTutorNombre}
+                      helperText={errors.nombreTutorNombre || 'Ingresa el nombre'}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)',
+                          '&:hover fieldset': {
+                            borderColor: '#03427c',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#03427c',
+                            borderWidth: '2px'
+                          }
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(3, 66, 124, 0.7)',
+                          '&.Mui-focused': {
+                            color: '#03427c',
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Apellidos del Tutor"
+                      name="nombreTutorApellidos"
+                      value={formData.nombreTutorApellidos || ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\u00e0-\u00fc\s]/g, '');
+                        handleChange({ ...e, target: { ...e.target, value } });
+                        const nombreCompleto = `${formData.nombreTutorNombre || ''} ${value}`.trim();
+                        setFormData(prev => ({
+                          ...prev,
+                          nombreTutorApellidos: value,
+                          nombreTutor: nombreCompleto
+                        }));
+                      }}
+                      required
+                      error={!!errors.nombreTutorApellidos}
+                      helperText={errors.nombreTutorApellidos || 'Ingresa los apellidos'}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)',
+                          '&:hover fieldset': {
+                            borderColor: '#03427c',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#03427c',
+                            borderWidth: '2px'
+                          }
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(3, 66, 124, 0.7)',
+                          '&.Mui-focused': {
+                            color: '#03427c',
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {/* Lugar de Procedencia */}
+              <Grid item xs={12}>
+                <FormControl
+                  fullWidth
+                  required
+                  error={!!errors.lugar}
+                  sx={{
+                    mt: 2,
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#03427c',
+                    }
+                  }}
+                >
+                  <InputLabel>Lugar de Proveniencia</InputLabel>
+                  <Select
+                    value={formData.lugar}
+                    onChange={handleChange}
+                    label="Lugar de Proveniencia"
+                    name="lugar"
+                  >
+                    <MenuItem value="Ixcatlan">Ixcatlan</MenuItem>
+                    <MenuItem value="Tepemaxac">Tepemaxac</MenuItem>
+                    <MenuItem value="Pastora">Pastora</MenuItem>
+                    <MenuItem value="Ahuacatitla">Ahuacatitla</MenuItem>
+                    <MenuItem value="Tepeica">Tepeica</MenuItem>
+                    <MenuItem value="Axcaco">Axcaco</MenuItem>
+                    <MenuItem value="Otro">Otro</MenuItem>
+                  </Select>
+                  {errors.lugar && <FormHelperText error>{errors.lugar}</FormHelperText>}
+                </FormControl>
+              </Grid>
+
+              {formData.lugar === 'Otro' && (
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Especificar Lugar"
+                    name="otroLugar"
+                    value={formData.otroLugar}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.otroLugar}
+                    helperText={errors.otroLugar || 'Escribe el lugar específico'}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: '#03427c',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03427c',
+                        },
+                      },
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#03427c',
+                      }
+                    }}
+                  />
+                </Grid>
+              )}
+            </Grid>
           </Box>
         );
       case 1:
         return (
-          <Box>
-            {/* Campo de correo electrónico */}
-            <TextField
-              fullWidth
-              label="Correo electrónico"
-              name="email"
-              value={formData.email}
-              onChange={(e) => {
-                setFormData({ ...formData, email: e.target.value });
-                setIsEmailSent(false); // Restablecer estados relacionados con la verificación
-                setIsEmailVerified(false);
-                setIsVerifiedComplete(false);
-              }}
-              margin="normal"
-              required
-              error={!!errors.email}
-              helperText={errors.email}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaEnvelope />
-                  </InputAdornment>
-                ),
-              }}
-              disabled={!isEmailEditable} // El campo solo será editable si isEmailEditable es true
-            />
-
-            {/* Botón para verificar el correo */}
-            {!isEmailVerified && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleVerifyEmail} // Función para verificar el correo
-                sx={{
-                  mt: 2,
-                  mx: 1, // Separación horizontal
-                  textTransform: 'none', // Para que el texto no sea todo mayúsculas
-                }}
-                disabled={isVerifyingEmail || isVerifiedComplete || isEmailSent} // Deshabilitar si ya se verificó o se está verificando
-              >
-                {isVerifiedComplete
-                  ? 'Verificado'
-                  : isVerifyingEmail
-                    ? 'Verificando...'
-                    : isEmailSent
-                      ? 'Correo Enviado'
-                      : 'Verificar Correo'}
-              </Button>
-            )}
-
-            {/* Botón "Cambiar correo" */}
-            {isEmailSent && !isEmailVerified && (
-              <Button
-                variant="outlined" // Cambiar a "outlined" para diferenciar del botón principal
-                color="secondary"
-                sx={{
-                  mt: 2,
-                  mx: 1, // Separación horizontal
-                  textTransform: 'none', // Para que el texto no sea todo mayúsculas
-                }}
-                onClick={() => setShowChangeEmailConfirmation(true)} // Muestra el cuadro de confirmación
-              >
-                Cambiar correo
-              </Button>
-            )}
-
-
-            {/* Confirmación para cambiar correo */}
-            <Modal open={showChangeEmailConfirmation} onClose={() => setShowChangeEmailConfirmation(false)}>
-              <Box
-                sx={{
-                  width: '80%',
-                  maxWidth: 400,
-                  bgcolor: 'background.paper',
-                  p: 4,
-                  m: 'auto',
-                  mt: 5,
-                  borderRadius: 2,
-                  textAlign: 'center',
-                }}
-              >
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  ¿Estás seguro de que deseas cambiar el correo? Esto invalidará el código enviado anteriormente.
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleEmailChange} // Llamar a la función para habilitar edición
-                  sx={{ mr: 2 }}
-                >
-                  Sí, cambiar correo
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => setShowChangeEmailConfirmation(false)}
-                >
-                  Cancelar
-                </Button>
-              </Box>
-            </Modal>
-
-            {/* Mostrar mensaje de verificación exitosa o error */}
-            {isEmailVerified && (
-              <Typography sx={{ color: 'green', mt: 2 }}>
-                Correo verificado correctamente.
-              </Typography>
-            )}
-
-            {emailVerificationError && (
-              <Typography sx={{ color: 'red', mt: 2 }}>
-                {emailVerificationError}
-              </Typography>
-            )}
-
-            {/* Si el correo está verificado, permitir la entrada del código de verificación */}
-            {isEmailSent && !isEmailVerified && (
-              <TextField
-                fullWidth
-                label="Código de verificación"
-                name="verificationToken"
-                value={formData.verificationToken}
-                onChange={(e) => setFormData({ ...formData, verificationToken: e.target.value })}
-                margin="normal"
-                required
-                error={!!errors.verificationToken}
-                helperText={errors.verificationToken}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <FaLock />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-
-            {/* Botón para validar el código de verificación */}
-            {isEmailSent && !isEmailVerified && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleVerifyToken} // Función para validar el token
-                sx={{ mt: 2 }}
-              >
-                Validar Código
-              </Button>
-            )}
-
-            {/* Mostrar el resto de los campos sólo si el correo ha sido verificado */}
-            {isEmailVerified && (
-              <>
-                <TextField
-                  fullWidth
-                  label="Teléfono"
-                  name="telefono"
-                  value={formData.telefono}
-                  onChange={handleChange}
-                  margin="normal"
-                  required
-                  error={!!errors.telefono}
-                  helperText={errors.telefono}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <FaPhone />
-                      </InputAdornment>
-                    ),
+          <Box sx={{ p: 2 }}>
+            <Grid container spacing={3}>
+              {/* Sección de Verificación de Email */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: '#03427c',
+                    mb: 3,
+                    fontWeight: 600,
+                    position: 'relative',
+                    '&:after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: -8,
+                      left: 0,
+                      width: '40px',
+                      height: '3px',
+                      backgroundColor: '#03427c',
+                      borderRadius: '2px'
+                    }
                   }}
-                />
+                >
+                  Verificación de Correo
+                </Typography>
+              </Grid>
 
-                <FormControl fullWidth margin="normal" error={!!errors.alergias}>
-                  <InputLabel>Alergias</InputLabel>
-                  <Select
-                    multiple
-                    value={formData.alergias}
+              {/* Campo de Email y Botones */}
+              <Grid item xs={12}>
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  alignItems: { xs: 'stretch', sm: 'flex-start' },
+                  gap: 2
+                }}>
+                  <TextField
+                    fullWidth
+                    label="Correo electrónico"
+                    name="email"
+                    value={formData.email}
                     onChange={(e) => {
-                      const { value } = e.target;
-
-                      // Si seleccionas "Ninguna", deselecciona todas las demás
-                      if (value.includes('Ninguna')) {
-                        setFormData({
-                          ...formData,
-                          alergias: ['Ninguna'],
-                        });
-                      } else {
-                        // Remover "Ninguna" si se seleccionan otras alergias
-                        setFormData({
-                          ...formData,
-                          alergias: typeof value === 'string' ? value.split(',') : value.filter((alergia) => alergia !== 'Ninguna'),
-                        });
+                      setFormData({ ...formData, email: e.target.value });
+                      setIsEmailSent(false);
+                      setIsEmailVerified(false);
+                      setIsVerifiedComplete(false);
+                    }}
+                    required
+                    error={!!errors.email}
+                    helperText={errors.email}
+                    disabled={!isEmailEditable}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <FaEnvelope style={{ color: errors.email ? '#d32f2f' : '#03427c' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      flex: 1,
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: '#03427c',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03427c',
+                        }
+                      },
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#03427c',
                       }
                     }}
-                    label="Alergias"
-                    name="alergias"
-                    renderValue={(selected) => selected.join(', ')} // Muestra las alergias seleccionadas
-                  >
-                    <MenuItem value="Ninguna">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                        Ninguna
-                        {formData.alergias.includes('Ninguna') ? (
-                          <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-                        ) : (
-                          <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-                        )}
-                      </div>
-                    </MenuItem>
+                  />
 
-                    {Object.keys(alergiasInfo).map((alergia) => (
-                      <MenuItem key={alergia} value={alergia} disabled={formData.alergias.includes('Ninguna')}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                          {alergia}
-                          {formData.alergias.includes(alergia) ? (
-                            <FaCheckCircle style={{ color: 'blue' }} /> // Palomita azul si está seleccionada
-                          ) : (
-                            <FaPlusCircle /> // Símbolo de "+" si no está seleccionada
-                          )}
-                        </div>
-                      </MenuItem>
-                    ))}
-
-                    <MenuItem value="Otro" disabled={formData.alergias.includes('Ninguna')}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                        Otro
-                      </div>
-                    </MenuItem>
-                  </Select>
-
-                  {/* Mostrar información sobre la alergia seleccionada si está en alergiasInfo */}
-                  {formData.alergias.some((alergia) => alergiasInfo[alergia]) && (
-                    <Typography variant="caption" sx={{ color: 'gray', display: 'flex', alignItems: 'center', mt: 1 }}>
-                      <FaInfoCircle style={{ marginRight: '5px' }} /> {alergiasInfo[formData.alergias.find((alergia) => alergiasInfo[alergia])]}
-                    </Typography>
+                  {!isEmailVerified && (
+                    <Button
+                      variant="contained"
+                      onClick={handleVerifyEmail}
+                      disabled={isVerifyingEmail || isVerifiedComplete || isEmailSent}
+                      sx={{
+                        bgcolor: '#03427c',
+                        minWidth: '150px',
+                        height: '56px',
+                        '&:hover': {
+                          bgcolor: '#02305c'
+                        },
+                        '&.Mui-disabled': {
+                          bgcolor: 'rgba(3, 66, 124, 0.4)'
+                        }
+                      }}
+                    >
+                      {isVerifiedComplete ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <FaCheckCircle /> Verificado
+                        </Box>
+                      ) : isVerifyingEmail ? (
+                        <CircularProgress size={24} sx={{ color: 'white' }} />
+                      ) : isEmailSent ? (
+                        'Correo Enviado'
+                      ) : (
+                        'Verificar Correo'
+                      )}
+                    </Button>
                   )}
+                </Box>
+              </Grid>
 
-                  <FormHelperText>Puedes seleccionar más de una alergia</FormHelperText>
-                  {errors.alergias && <FormHelperText>{errors.alergias}</FormHelperText>}
+              {/* Código de Verificación */}
+              {isEmailSent && !isEmailVerified && (
+                <Grid item xs={12}>
+                  <Box sx={{
+                    bgcolor: 'rgba(3, 66, 124, 0.03)',
+                    p: 3,
+                    borderRadius: 2,
+                    border: '1px solid rgba(3, 66, 124, 0.1)'
+                  }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2, color: '#03427c', fontWeight: 500 }}>
+                      Ingresa el código de verificación enviado a tu correo
+                    </Typography>
 
-                  {formData.alergias.includes('Otro') && (
                     <TextField
                       fullWidth
-                      label="Especificar Alergia"
-                      name="otraAlergia"
-                      value={formData.otraAlergia}
-                      onChange={handleChange}
-                      margin="normal"
+                      label="Código de verificación"
+                      name="verificationToken"
+                      value={formData.verificationToken}
+                      onChange={(e) => setFormData({ ...formData, verificationToken: e.target.value })}
                       required
-                      error={!!errors.otraAlergia} // Mostrar el error si está definido
-                      helperText={errors.otraAlergia} // Mostrar mensaje de error si existe
+                      error={!!errors.verificationToken}
+                      helperText={errors.verificationToken}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <FaLock style={{ color: errors.verificationToken ? '#d32f2f' : '#03427c' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: '#03427c',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#03427c',
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#03427c',
+                        }
+                      }}
                     />
-                  )}
 
-                </FormControl>
-              </>
-            )}
+                    <Box sx={{
+                      display: 'flex',
+                      gap: 2,
+                      mt: 2,
+                      flexDirection: { xs: 'column', sm: 'row' }
+                    }}>
+                      <Button
+                        variant="contained"
+                        onClick={handleVerifyToken}
+                        sx={{
+                          bgcolor: '#03427c',
+                          '&:hover': {
+                            bgcolor: '#02305c'
+                          }
+                        }}
+                      >
+                        Validar Código
+                      </Button>
+
+                      <Button
+                        variant="outlined"
+                        onClick={() => setShowChangeEmailConfirmation(true)}
+                        sx={{
+                          color: '#03427c',
+                          borderColor: '#03427c',
+                          '&:hover': {
+                            borderColor: '#02305c',
+                            bgcolor: 'rgba(3, 66, 124, 0.05)'
+                          }
+                        }}
+                      >
+                        Cambiar correo
+                      </Button>
+                    </Box>
+                  </Box>
+                </Grid>
+              )}
+
+              {/* Información Adicional (visible después de verificar) */}
+              {isEmailVerified && (
+                <>
+                  <Grid item xs={12}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        color: '#03427c',
+                        mt: 4,
+                        mb: 3,
+                        fontWeight: 600
+                      }}
+                    >
+                      Información de Contacto y Salud
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Teléfono"
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handleChange}
+                      required
+                      error={!!errors.telefono}
+                      helperText={errors.telefono}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <FaPhone style={{ color: errors.telefono ? '#d32f2f' : '#03427c' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: '#03427c',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#03427c',
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#03427c',
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <FormControl
+                      fullWidth
+                      error={!!errors.alergias}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: '#03427c',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#03427c',
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#03427c',
+                        }
+                      }}
+                    >
+                      <InputLabel>Alergias</InputLabel>
+                      <Select
+                        multiple
+                        value={formData.alergias}
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          // Si seleccionas "Ninguna", deselecciona todas las demás
+                          if (value.includes('Ninguna')) {
+                            setFormData({
+                              ...formData,
+                              alergias: ['Ninguna'],
+                            });
+                          } else {
+                            // Remover "Ninguna" si se seleccionan otras alergias
+                            setFormData({
+                              ...formData,
+                              alergias: typeof value === 'string' ? value.split(',') : value.filter((alergia) => alergia !== 'Ninguna'),
+                            });
+                          }
+                        }}
+                        label="Alergias"
+                        name="alergias"
+                        renderValue={(selected) => selected.join(', ')}
+                      >
+                        <MenuItem value="Ninguna">
+                          <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: '100%'
+                          }}>
+                            <Typography>Ninguna</Typography>
+                            {formData.alergias.includes('Ninguna') ? (
+                              <FaCheckCircle style={{ color: '#03427c' }} />
+                            ) : (
+                              <FaPlusCircle />
+                            )}
+                          </Box>
+                        </MenuItem>
+
+                        {Object.keys(alergiasInfo).map((alergia) => (
+                          <MenuItem
+                            key={alergia}
+                            value={alergia}
+                            disabled={formData.alergias.includes('Ninguna')}
+                          >
+                            <Box sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              width: '100%'
+                            }}>
+                              <Typography>{alergia}</Typography>
+                              {formData.alergias.includes(alergia) ? (
+                                <FaCheckCircle style={{ color: '#03427c' }} />
+                              ) : (
+                                <FaPlusCircle />
+                              )}
+                            </Box>
+                          </MenuItem>
+                        ))}
+
+                        <MenuItem
+                          value="Otro"
+                          disabled={formData.alergias.includes('Ninguna')}
+                        >
+                          <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: '100%'
+                          }}>
+                            <Typography>Otro</Typography>
+                            {formData.alergias.includes('Otro') ? (
+                              <FaCheckCircle style={{ color: '#03427c' }} />
+                            ) : (
+                              <FaPlusCircle />
+                            )}
+                          </Box>
+                        </MenuItem>
+                      </Select>
+
+                      {/* Información de alergias seleccionadas */}
+                      {formData.alergias.some((alergia) => alergiasInfo[alergia]) && (
+                        <Alert
+                          severity="info"
+                          sx={{ mt: 1 }}
+                          icon={<FaInfoCircle />}
+                        >
+                          {alergiasInfo[formData.alergias.find((alergia) => alergiasInfo[alergia])]}
+                        </Alert>
+                      )}
+
+                      <FormHelperText>
+                        {errors.alergias || 'Puedes seleccionar más de una alergia'}
+                      </FormHelperText>
+                    </FormControl>
+
+                    {/* Campo para especificar otra alergia */}
+                    {formData.alergias.includes('Otro') && (
+                      <TextField
+                        fullWidth
+                        label="Especificar Alergia"
+                        name="otraAlergia"
+                        value={formData.otraAlergia}
+                        onChange={handleChange}
+                        required
+                        error={!!errors.otraAlergia}
+                        helperText={errors.otraAlergia}
+                        sx={{
+                          mt: 2,
+                          '& .MuiOutlinedInput-root': {
+                            '&:hover fieldset': {
+                              borderColor: '#03427c',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#03427c',
+                            }
+                          },
+                          '& .MuiInputLabel-root.Mui-focused': {
+                            color: '#03427c',
+                          }
+                        }}
+                      />
+                    )}
+                  </Grid>
+                </>
+              )}
+            </Grid>
+
+            {/* Modal de Confirmación */}
+            <Modal
+              open={showChangeEmailConfirmation}
+              onClose={() => setShowChangeEmailConfirmation(false)}
+            >
+              <Box sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '90%',
+                maxWidth: 400,
+                bgcolor: 'background.paper',
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 2,
+              }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#03427c' }}>
+                  Cambiar correo electrónico
+                </Typography>
+
+                <Typography variant="body1" sx={{ mb: 3 }}>
+                  ¿Estás seguro de que deseas cambiar el correo? Esto invalidará el código enviado anteriormente.
+                </Typography>
+
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setShowChangeEmailConfirmation(false)}
+                    sx={{
+                      color: '#03427c',
+                      borderColor: '#03427c',
+                      '&:hover': {
+                        borderColor: '#02305c',
+                        bgcolor: 'rgba(3, 66, 124, 0.05)'
+                      }
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    onClick={handleEmailChange}
+                    sx={{
+                      bgcolor: '#03427c',
+                      '&:hover': {
+                        bgcolor: '#02305c'
+                      }
+                    }}
+                  >
+                    Sí, cambiar correo
+                  </Button>
+                </Box>
+              </Box>
+            </Modal>
           </Box>
         );
       case 2:
         return (
-          <Box>
-            <TextField
-              fullWidth
-              label="Contraseña"
-              name="password"
-              type={showPassword ? 'text' : 'password'} // Alterna entre 'text' y 'password'
-              value={formData.password}
-              onChange={(e) => {
-                handleChange(e); // Actualiza el estado
-                if (e.target.value !== formData.confirmPassword) {
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    confirmPassword: 'Las contraseñas no coinciden',
-                  }));
-                } else {
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    confirmPassword: '',
-                  }));
-                }
-              }}
-              margin="normal"
-              required
-              error={!!errors.password}
-              helperText={errors.password}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaLock />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Button onClick={togglePasswordVisibility}>
-                      {showPassword ? <FaEye /> : <FaEyeSlash />} {/* Cambia el ícono */}
-                    </Button>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Confirmar Contraseña"
-              name="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'} // Alterna entre 'text' y 'password'
-              value={formData.confirmPassword}
-              onChange={(e) => {
-                handleChange(e); // Actualiza el estado
-                if (e.target.value !== formData.password) {
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    confirmPassword: 'Las contraseñas no coinciden',
-                  }));
-                } else {
-                  setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    confirmPassword: '',
-                  }));
-                }
-              }}
-              margin="normal"
-              required
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaLock />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Button onClick={toggleConfirmPasswordVisibility}>
-                      {showConfirmPassword ? <FaEye /> : <FaEyeSlash />} {/* Cambia el ícono */}
-                    </Button>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-
-            {/* Indicadores de seguridad de la contraseña */}
-            {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
-            {isPasswordFiltered && <p style={{ color: 'red' }}>Contraseña filtrada. Por favor, elige otra.</p>}
-            {isPasswordSafe && !isPasswordFiltered && (
-              <p>
-                <FaCheckCircle style={{ color: 'green' }} /> Contraseña segura
-              </p>
-            )}
-            {/* Barra de fortaleza de la contraseña */}
-
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="body2">Fortaleza de la contraseña</Typography>
-              <Box
-                sx={{
-                  height: '10px',
-                  width: '100%',
-                  backgroundColor: '#e0e0e0',
-                  borderRadius: '5px',
-                  mt: 1,
-                  position: 'relative',
-                }}
-              >
-                <Box
+          <Box sx={{ p: 2 }}>
+            <Grid container spacing={3}>
+              {/* Título */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
                   sx={{
-                    height: '100%',
-                    width: `${(passwordStrength / 4) * 100}%`,
-                    backgroundColor:
-                      passwordStrength < 2
-                        ? 'red'
-                        : passwordStrength === 2
-                          ? 'yellow'
-                          : 'green',
-                    borderRadius: '5px',
-                    transition: 'width 0.3s ease-in-out, background-color 0.3s ease-in-out', // Agregamos transición también al color
+                    color: '#03427c',
+                    mb: 3,
+                    fontWeight: 600,
+                    position: 'relative',
+                    '&:after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: -8,
+                      left: 0,
+                      width: '40px',
+                      height: '3px',
+                      backgroundColor: '#03427c',
+                      borderRadius: '2px'
+                    }
+                  }}
+                >
+                  Configura tu Contraseña
+                </Typography>
+              </Grid>
+
+              {/* Campo Contraseña */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Contraseña"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (e.target.value !== formData.confirmPassword) {
+                      setErrors(prev => ({
+                        ...prev,
+                        confirmPassword: 'Las contraseñas no coinciden',
+                      }));
+                    } else {
+                      setErrors(prev => ({
+                        ...prev,
+                        confirmPassword: '',
+                      }));
+                    }
+                  }}
+                  required
+                  error={!!errors.password}
+                  helperText={errors.password}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FaLock style={{ color: errors.password ? '#d32f2f' : '#03427c' }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={togglePasswordVisibility}
+                          edge="end"
+                          sx={{ color: '#03427c' }}
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                      }
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#03427c',
+                    }
                   }}
                 />
-              </Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  color:
-                    passwordStrength < 2 ? 'red' : passwordStrength === 2 ? 'yellow' : 'green',
-                  mt: 1,
-                }}
-              >
-                {passwordStrength === 0 && 'Muy débil'}
-                {passwordStrength === 1 && 'Débil'}
-                {passwordStrength === 2 && 'Regular'}
-                {passwordStrength === 3 && 'Fuerte'}
-                {passwordStrength === 4 && 'Muy fuerte'}
-              </Typography>
-            </Box>
+              </Grid>
 
+              {/* Campo Confirmar Contraseña */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Confirmar Contraseña"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (e.target.value !== formData.password) {
+                      setErrors(prev => ({
+                        ...prev,
+                        confirmPassword: 'Las contraseñas no coinciden',
+                      }));
+                    } else {
+                      setErrors(prev => ({
+                        ...prev,
+                        confirmPassword: '',
+                      }));
+                    }
+                  }}
+                  required
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FaLock style={{ color: errors.confirmPassword ? '#d32f2f' : '#03427c' }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={toggleConfirmPasswordVisibility}
+                          edge="end"
+                          sx={{ color: '#03427c' }}
+                        >
+                          {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#03427c',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#03427c',
+                      }
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#03427c',
+                    }
+                  }}
+                />
+              </Grid>
+
+              {/* Mensajes de Estado y Seguridad */}
+              <Grid item xs={12}>
+                {passwordError && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    {passwordError}
+                  </Alert>
+                )}
+
+                {isPasswordFiltered && (
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    Contraseña filtrada. Por favor, elige otra.
+                  </Alert>
+                )}
+
+                {isPasswordSafe && !isPasswordFiltered && (
+                  <Alert
+                    icon={<FaCheckCircle />}
+                    severity="success"
+                    sx={{ mb: 2 }}
+                  >
+                    Contraseña segura
+                  </Alert>
+                )}
+              </Grid>
+
+              {/* Indicador de Fortaleza */}
+              <Grid item xs={12}>
+                <Box sx={{ mt: 1 }}>
+                  <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 1
+                  }}>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                    >
+                      Fortaleza de la contraseña
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: passwordStrength < 2
+                          ? '#d32f2f'
+                          : passwordStrength === 2
+                            ? '#ed6c02'
+                            : '#2e7d32'
+                      }}
+                    >
+                      {passwordStrength === 0 && 'Muy débil'}
+                      {passwordStrength === 1 && 'Débil'}
+                      {passwordStrength === 2 && 'Regular'}
+                      {passwordStrength === 3 && 'Fuerte'}
+                      {passwordStrength === 4 && 'Muy fuerte'}
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      height: '6px',
+                      bgcolor: 'rgba(0, 0, 0, 0.1)',
+                      borderRadius: '3px',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        height: '100%',
+                        width: `${(passwordStrength / 4) * 100}%`,
+                        bgcolor: passwordStrength < 2
+                          ? '#d32f2f'
+                          : passwordStrength === 2
+                            ? '#ed6c02'
+                            : '#2e7d32',
+                        transition: 'all 0.3s ease'
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
           </Box>
         );
       default:
-        return 'Unknown step';
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              p: 4
+            }}
+          >
+            <Typography
+              variant="h6"
+              color="error"
+              sx={{ mb: 2 }}
+            >
+              Ha ocurrido un error
+            </Typography>
+            <Typography
+              variant="body1"
+              color="textSecondary"
+            >
+              Paso no reconocido en el formulario
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => window.location.reload()}
+              sx={{
+                mt: 2,
+                bgcolor: '#03427c',
+                '&:hover': {
+                  bgcolor: '#02305c'
+                }
+              }}
+            >
+              Reiniciar Formulario
+            </Button>
+          </Box>
+        );
     }
   };
 
@@ -1512,13 +2191,13 @@ const Register = () => {
                         variant="contained"
                         type={activeStep === steps.length - 1 ? "submit" : "button"}
                         onClick={activeStep === steps.length - 1 ? undefined : handleNext}
-                        disabled={isLoading || (activeStep === steps.length - 1 && !allAccepted)}
+                        disabled={isLoading || isSubmitting || (activeStep === steps.length - 1 && !allAccepted)}
                         sx={{
-                          minWidth: '120px', // Ancho mínimo más pequeño
-                          px: 4,  // Padding horizontal reducido
-                          py: 1,  // Padding vertical reducido
+                          minWidth: '120px',
+                          px: 4,
+                          py: 1,
                           bgcolor: '#03427c',
-                          position: 'relative', // Para el loader
+                          position: 'relative',
                           '&:hover': {
                             bgcolor: '#02305c',
                             transform: 'translateX(3px)',
@@ -1527,16 +2206,21 @@ const Register = () => {
                           '&.Mui-disabled': {
                             bgcolor: 'rgba(3, 66, 124, 0.4)'
                           },
-                          width: { xs: '100%', sm: 'auto' } // Full width en móvil, auto en desktop
+                          width: { xs: '100%', sm: 'auto' }
                         }}
                       >
-                        {isLoading ? (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {(isLoading || isSubmitting) ? (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1
+                            }}
+                          >
                             <CircularProgress
                               size={20}
                               sx={{
                                 color: 'white',
-                                mr: 1,
                                 animation: 'spin 1s linear infinite',
                                 '@keyframes spin': {
                                   '0%': { transform: 'rotate(0deg)' },
@@ -1544,7 +2228,7 @@ const Register = () => {
                                 }
                               }}
                             />
-                            Procesando...
+                            <span>Procesando...</span>
                           </Box>
                         ) : (
                           activeStep === steps.length - 1 ? 'Registrar' : 'Siguiente'

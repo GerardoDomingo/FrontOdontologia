@@ -96,7 +96,7 @@ function App() {
         <Route path="/recuperacion" element={<Recuperacion />} />
         <Route path="/resetContra" element={<Reset />} />
 
-        {/* Rutas protegidas del paciente */}
+        {/* Rutas protegidas de pacientes */}
         <Route path="/Paciente/principal" element={<PrivateRoute><LayoutPaciente><Principal /></LayoutPaciente></PrivateRoute>} />
 
         {/* Rutas protegidas del administrador */}
