@@ -11,7 +11,7 @@ import {
   Paper,
   IconButton
 } from '@mui/material';
-import { Phone, Email, LocationOn, WhatsApp, ArrowBack } from '@mui/icons-material';
+import { Phone, Email, LocationOn, WhatsApp, ArrowBack, OpenInNew } from '@mui/icons-material';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -128,15 +128,15 @@ const Contacto = () => {
             Contáctanos
           </Typography>
           <Typography
-                  variant="body1"
-                  sx={{
-                    mb: 3,
-                    color: isDarkMode ? '#94A3B8' : '#666',
-                    textAlign: 'center'
-                  }}
-                >
-Nos encantará atenderte y resolver cualquier duda que puedas tener.
-                </Typography>
+            variant="body1"
+            sx={{
+              mb: 3,
+              color: isDarkMode ? '#94A3B8' : '#666',
+              textAlign: 'center'
+            }}
+          >
+            Nos encantará atenderte y resolver cualquier duda que puedas tener.
+          </Typography>
 
 
           <Grid container spacing={4}>
@@ -320,6 +320,10 @@ Nos encantará atenderte y resolver cualquier duda que puedas tener.
                     center={center}
                     zoom={15}
                     options={{
+                      zoomControl: true,
+                      streetViewControl: true,
+                      mapTypeControl: true,
+                      fullscreenControl: true,
                       styles: isDarkMode ? [
                         { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
                         { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -327,29 +331,60 @@ Nos encantará atenderte y resolver cualquier duda que puedas tener.
                       ] : []
                     }}
                   >
-                    <Marker position={center} />
+                    <Marker
+                      position={center}
+                      title="Clínica Dental Carol"
+                      animation={window.google.maps.Animation.DROP}
+                    />
                   </GoogleMap>
                 )}
               </Box>
 
-              <Button
-                variant="outlined"
-                startIcon={<LocationOn />}
-                fullWidth
-                sx={{
-                  mt: 2,
-                  color: isDarkMode ? '#ffffff' : '#0052A3',
-                  borderColor: isDarkMode ? '#ffffff' : '#0052A3',
-                  '&:hover': {
+              {/* Botones de acción */}
+              <Box sx={{
+                mt: 2,
+                display: 'flex',
+                gap: 2,
+                flexDirection: { xs: 'column', sm: 'row' }
+              }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<OpenInNew />}
+                  sx={{
+                    flex: 1,
+                    color: isDarkMode ? '#ffffff' : '#0052A3',
                     borderColor: isDarkMode ? '#ffffff' : '#0052A3',
-                    bgcolor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,82,163,0.1)'
-                  }
-                }}
-                href="https://www.google.com/maps/@21.0816681,-98.5359763,19.64z"
-                target="_blank"
-              >
-                Ver en Google Maps
-              </Button>
+                    '&:hover': {
+                      borderColor: isDarkMode ? '#ffffff' : '#0052A3',
+                      bgcolor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,82,163,0.1)'
+                    }
+                  }}
+                  href="https://www.google.com/maps/@21.0816681,-98.5359763,19.64z"
+                  target="_blank"
+                >
+                  Ver en Google Maps
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  startIcon={<LocationOn />}
+                  sx={{
+                    flex: 1,
+                    color: isDarkMode ? '#ffffff' : '#0052A3',
+                    borderColor: isDarkMode ? '#ffffff' : '#0052A3',
+                    '&:hover': {
+                      borderColor: isDarkMode ? '#ffffff' : '#0052A3',
+                      bgcolor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,82,163,0.1)'
+                    }
+                  }}
+                  onClick={() => {
+                    const url = `https://www.google.com/maps/dir/?api=1&destination=${center.lat},${center.lng}`;
+                    window.open(url, '_blank');
+                  }}
+                >
+                  Cómo Llegar
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </Paper>

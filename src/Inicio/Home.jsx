@@ -26,7 +26,11 @@ import img2 from '../img/img2_1.jpg';
 import img3 from '../img/img3_1.png';
 
 // Importar componente Contactanos
-import Ubicacion from './Ubicacion';
+import { Suspense, lazy } from 'react';
+
+// Importación lazy del componente Ubicacion
+const Ubicacion = lazy(() => import('./Ubicacion'));
+
 
 
 const Home = () => {
@@ -289,9 +293,19 @@ const Home = () => {
             </AnimatePresence>
           </Box>
         </Box>
-       
-        <Ubicacion />
-      </Container>
+
+        <Suspense fallback={
+          <Box sx={{
+            height: '400px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <CircularProgress />
+          </Box>
+        }>
+          <Ubicacion />
+        </Suspense>      </Container>
     </Box>
   );
 };
