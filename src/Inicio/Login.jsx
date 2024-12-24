@@ -1,721 +1,941 @@
-import React, { useState, useRef, useEffect } from 'react';
 import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Card,
-  CardContent,
-  IconButton,
-  InputAdornment,
-  CircularProgress,
+    Alert,
+    Box,
+    Button,
+    Checkbox,
+    CircularProgress,
+    FormControlLabel,
+    IconButton,
+    InputAdornment,
+    Paper,
+    TextField,
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
-import { FaTooth } from 'react-icons/fa';
-import { Email, Lock, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material';
-import ReCAPTCHA from 'react-google-recaptcha';
-import { useNavigate, Link } from 'react-router-dom';
-import Notificaciones from '../Compartidos/Notificaciones';
+import React, { useEffect, useRef, useState } from 'react';
+
+import {
+    ArrowBack,
+    CheckCircle,
+    Email,
+    Lock,
+    Visibility,
+    VisibilityOff
+} from '@mui/icons-material';
+
 import { motion } from 'framer-motion';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { FaTooth } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import Notificaciones from '../Compartidos/Notificaciones';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [errorMessage, setErrorMessage] = useState('');
-  const [captchaValue, setCaptchaValue] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [openNotification, setOpenNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
-  const [verificationCode, setVerificationCode] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isCaptchaLoading, setIsCaptchaLoading] = useState('');
-  const [isCaptchaLocked, setIsCaptchaLocked] = useState(false);
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [errorMessage, setErrorMessage] = useState('');
+    const [captchaValue, setCaptchaValue] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [openNotification, setOpenNotification] = useState(false);
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isCaptchaLocked, setIsCaptchaLocked] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [emailError, setEmailError] = useState('');
+    const [canResend, setCanResend] = useState(true);
+    const [resendTimer, setResendTimer] = useState(0);
+    const [isCaptchaLoading, setIsCaptchaLoading] = useState(true);
 
-  const recaptchaRef = useRef(null);
-  const navigate = useNavigate();
+    const recaptchaRef = useRef(null);
+    const navigate = useNavigate();
 
-  // Función helper para manejar el timeout en fetch
-  const fetchWithTimeout = async (url, options, timeout = 15000) => {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
+    // Función helper para manejar el timeout en fetch
+    const fetchWithTimeout = async (url, options, timeout = 15000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-      clearTimeout(id);
-      return response;
-    } catch (error) {
-      clearTimeout(id);
-      if (error.name === 'AbortError') {
-        throw new Error('La solicitud tardó demasiado tiempo en responder');
-      }
-      throw error;
-    }
-  };
-
-  const handleCaptchaError = () => {
-    setErrorMessage('Error al cargar el captcha. Por favor, recarga la página.');
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const inputVariants = {
-    focus: { scale: 1.02, transition: { duration: 0.2 } },
-    blur: { scale: 1, transition: { duration: 0.2 } }
-  };
-
-  // Detectar el tema 
-  useEffect(() => {
-    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(matchDarkTheme.matches);
-
-    const handleThemeChange = (e) => {
-      setIsDarkMode(e.matches);
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            clearTimeout(id);
+            return response;
+        } catch (error) {
+            clearTimeout(id);
+            if (error.name === 'AbortError') {
+                throw new Error('La solicitud tardó demasiado tiempo en responder');
+            }
+            throw error;
+        }
     };
 
-    matchDarkTheme.addEventListener('change', handleThemeChange);
-    return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
-  }, []);
+    // Detectar el tema 
+    useEffect(() => {
+        const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+        setIsDarkMode(matchDarkTheme.matches);
 
-  // Eliminar notificación después de un tiempo específico
-  useEffect(() => {
-    if (openNotification) {
-      let duration = 3000;
-      if (notificationMessage.includes('Cuenta bloqueada')) {
-        duration = 6000;
-      }
+        const handleThemeChange = (e) => {
+            setIsDarkMode(e.matches);
+        };
 
-      const timer = setTimeout(() => {
-        setOpenNotification(false);
-      }, duration);
+        matchDarkTheme.addEventListener('change', handleThemeChange);
+        return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
+    }, []);
 
-      return () => clearTimeout(timer);
-    }
-  }, [openNotification, notificationMessage]);
+    // Eliminar notificación después de un tiempo específico
+    useEffect(() => {
+        if (openNotification) {
+            let duration = 3000;
+            if (notificationMessage.includes('Cuenta bloqueada')) {
+                duration = 6000;
+            }
 
-  // Eliminar mensaje de error después de 3 segundos
-  useEffect(() => {
-    if (errorMessage) {
-      const timer = setTimeout(() => {
-        setErrorMessage('');
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [errorMessage]);
+            const timer = setTimeout(() => {
+                setOpenNotification(false);
+            }, duration);
 
-  useEffect(() => {
-    const checkRecaptcha = setTimeout(() => {
-      if (!window.grecaptcha) {
-        setErrorMessage('Error al cargar el captcha. Verifica tu conexión a internet.');
-      }
-    }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [openNotification, notificationMessage]);
 
-    return () => clearTimeout(checkRecaptcha);
-  }, []);
+    // Eliminar mensaje de error después de 3 segundos
+    useEffect(() => {
+        if (errorMessage) {
+            const timer = setTimeout(() => {
+                setErrorMessage('');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [errorMessage]);
 
-  // Manejar cambios en los campos del formulario
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
+    useEffect(() => {
+        const remembered = localStorage.getItem('rememberMe') === 'true';
+        if (remembered) {
+            const savedEmail = localStorage.getItem('savedEmail');
+            if (savedEmail) {
+                setFormData(prev => ({ ...prev, email: savedEmail }));
+                setRememberMe(true);
+            }
+        }
+    }, []);
 
-  // Capturar el valor del captcha
-  const handleCaptchaChange = (value) => {
-    setCaptchaValue(value);
-  };
+    const handleRememberMeChange = (event) => {
+        const checked = event.target.checked;
+        setRememberMe(checked);
 
-  // Alternar la visibilidad de la contraseña
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+        if (checked) {
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('savedEmail', formData.email);
+        } else {
+            localStorage.removeItem('rememberMe');
+            localStorage.removeItem('savedEmail');
+        }
+    };
 
-  // Manejar el envío del formulario
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    if (!captchaValue) {
-      setErrorMessage('Por favor, completa el captcha.');
-      if (recaptchaRef.current) {
-        recaptchaRef.current.reset();
-      }
-      return;
-    }
+    // Manejar cambios en los campos del formulario
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
 
-    setIsLoading(true);
+        if (name === 'email') {
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
+            if (value && !emailRegex.test(value)) {
+                setEmailError('Correo electrónico inválido.');
+            } else {
+                setEmailError('');
+            }
+        }
+    };
 
-    try {
-      const response = await fetchWithTimeout(
-        'https://backendodontologia.onrender.com/api/users/login',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({ ...formData, captchaValue }),
-        },
-        15000 // 15 segundos de timeout
-      );
+    useEffect(() => {
+        let checkRecaptcha;
 
-      const data = await response.json();
+        const loadRecaptcha = () => {
+            setIsCaptchaLoading(true);
 
-      if (response.ok) {
+            if (checkRecaptcha) {
+                clearTimeout(checkRecaptcha);
+            }
+
+            if (window.grecaptcha) {
+                setIsCaptchaLoading(false);
+                return;
+            }
+
+            checkRecaptcha = setTimeout(() => {
+                if (!window.grecaptcha) {
+                    setIsCaptchaLoading(false);
+                }
+            }, 3000);
+        };
+
+        loadRecaptcha();
+
+        const handleLoad = () => {
+            loadRecaptcha();
+        };
+
+        window.addEventListener('load', handleLoad);
+
+        return () => {
+            if (checkRecaptcha) {
+                clearTimeout(checkRecaptcha);
+            }
+            window.removeEventListener('load', handleLoad);
+        };
+    }, []);
+
+    // Actualiza la función handleCaptchaChange:
+    const handleCaptchaChange = (value) => {
+        setCaptchaValue(value);
+        setIsCaptchaLoading(false);
+        if (value) {
+            setErrorMessage('');
+        }
+    };
+
+
+    // Manejar el envío del formulario
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
+        if (!emailRegex.test(formData.email)) {
+            setErrorMessage('Por favor, ingrese un correo electrónico válido');
+            return;
+        }
+
+        if (!captchaValue) {
+            setErrorMessage('Por favor, completa el captcha.');
+            if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+            }
+            return;
+        }
+
+        if (rememberMe) {
+            localStorage.setItem('savedEmail', formData.email);
+        }
+        setIsLoading(true);
+
         try {
-          const sendCodeResponse = await fetchWithTimeout(
-            'https://backendodontologia.onrender.com/api/send-verification-code',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ email: formData.email }),
-            },
-            15000
-          );
+            const response = await fetchWithTimeout(
+                'https://backendodontologia.onrender.com/api/users/login',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ ...formData, captchaValue }),
+                },
+                15000 // 15 segundos de timeout
+            );
 
-          if (sendCodeResponse.ok) {
-            setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
-            setOpenNotification(true);
-            setOpenModal(true);
-            setIsCaptchaLocked(true);
-          } else {
-            const errorData = await sendCodeResponse.json();
-            setErrorMessage(errorData.message || 'Error al enviar el código de verificación. Intenta de nuevo.');
-          }
+            const data = await response.json();
+
+            if (response.ok) {
+                try {
+                    const sendCodeResponse = await fetchWithTimeout(
+                        'https://backendodontologia.onrender.com/api/send-verification-code',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ email: formData.email }),
+                        },
+                        15000
+                    );
+
+                    if (sendCodeResponse.ok) {
+                        setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
+                        setOpenNotification(true);
+                        setShowVerificationModal(true);
+                        setIsCaptchaLocked(true);
+                    } else {
+                        const errorData = await sendCodeResponse.json();
+                        setErrorMessage(errorData.message || 'Error al enviar el código de verificación. Intenta de nuevo.');
+                    }
+                } catch (error) {
+                    setErrorMessage('Error al enviar el código de verificación. Por favor, intenta nuevamente.');
+                }
+            } else if (data.failedAttempts !== undefined) {
+                setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
+                setOpenNotification(true);
+                setErrorMessage('Contraseña incorrecta.');
+            } else if (data.lockStatus) {
+                const formattedDate = new Date(data.lockUntil).toLocaleString('es-ES');
+                setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
+                setOpenNotification(true);
+            } else {
+                setErrorMessage(data.message || 'Error al iniciar sesión.');
+            }
         } catch (error) {
-          setErrorMessage('Error al enviar el código de verificación. Por favor, intenta nuevamente.');
+            if (error.message === 'La solicitud tardó demasiado tiempo en responder') {
+                setErrorMessage('El servidor está tardando en responder. Por favor, intenta nuevamente.');
+            } else {
+                setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
+            }
+        } finally {
+            setIsLoading(false);
+            if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+            }
+            setCaptchaValue(null);
         }
-      } else if (data.failedAttempts !== undefined) {
-        setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
-        setOpenNotification(true);
-        setErrorMessage('Contraseña incorrecta.');
-      } else if (data.lockStatus) {
-        const formattedDate = new Date(data.lockUntil).toLocaleString('es-ES');
-        setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
-        setOpenNotification(true);
-      } else {
-        setErrorMessage(data.message || 'Error al iniciar sesión.');
-      }
-    } catch (error) {
-      if (error.message === 'La solicitud tardó demasiado tiempo en responder') {
-        setErrorMessage('El servidor está tardando en responder. Por favor, intenta nuevamente.');
-      } else {
-        setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
-      }
-    } finally {
-      setIsLoading(false);
-      if (recaptchaRef.current) {
-        recaptchaRef.current.reset();
-      }
-      setCaptchaValue(null);
-    }
-  };
+    };
 
-  // Manejar la verificación del código
-  const handleVerifyCode = async () => {
-    if (!verificationCode.trim()) {
-      setErrorMessage('Por favor, ingresa el código de verificación.');
-      return;
-    }
+    // Función para reenviar el código
+    const handleResendCode = async () => {
+        if (!canResend) return;
 
-    setIsVerifying(true);
+        try {
+            setCanResend(false);
+            setResendTimer(30); // 30 segundos de espera
 
-    try {
-      const response = await fetch('https://backendodontologia.onrender.com/api/verify-verification-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formData.email.trim(), code: verificationCode.trim() }),
-      });
+            const response = await fetchWithTimeout(
+                'https://backendodontologia.onrender.com/api/send-verification-code',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: formData.email }),
+                },
+                15000
+            );
 
-      const data = await response.json();
+            if (response.ok) {
+                setNotificationMessage('Se ha enviado un nuevo código a tu correo electrónico');
+                setOpenNotification(true);
 
-      if (!response.ok) {
-        setErrorMessage(data.message || 'Error al verificar el código.');
-        return;
-      }
+                // Iniciar contador regresivo
+                const timer = setInterval(() => {
+                    setResendTimer((prev) => {
+                        if (prev <= 1) {
+                            clearInterval(timer);
+                            setCanResend(true);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            } else {
+                setErrorMessage('Error al reenviar el código');
+                setCanResend(true);
+            }
+        } catch (error) {
+            setErrorMessage('Error al reenviar el código. Inténtalo más tarde');
+            setCanResend(true);
+        }
+    };
 
-      setNotificationMessage(data.message || 'Código verificado correctamente.');
-      setOpenNotification(true);
-      setVerificationCode('');
-      setOpenModal(false);
+    // Manejar la verificación del código
+    const handleVerifyCode = async () => {
+        if (!verificationCode.trim()) {
+            setErrorMessage('Por favor, ingresa el código de verificación.');
+            return;
+        }
 
-      if (data.userType === 'administradores') {
-        localStorage.setItem('loggedIn', true);
-        navigate('/Administrador/principal');
-      } else if (data.userType === 'pacientes') {
-        localStorage.setItem('loggedIn', true);
-        navigate('/Paciente/principal');
-      } else {
-        setErrorMessage('Tipo de usuario desconocido. Inténtalo nuevamente.');
-      }
-    } catch (error) {
-      setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
-    } finally {
-      setIsVerifying(false);
-    }
-  };
+        if (verificationCode.length !== 6) {
+            setErrorMessage('Por favor, ingresa el código completo de 6 caracteres');
+            return;
+        }
+        // Validar que solo contenga letras mayúsculas y números
+        const codeRegex = /^[A-Z0-9]{6}$/;
+        if (!codeRegex.test(verificationCode)) {
+            setErrorMessage('El código solo puede contener letras mayúsculas y números');
+            return;
+        }
 
-  return (
-    <Box
-      component={motion.div}
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      sx={{
-        background: isDarkMode
-          ? 'linear-gradient(135deg, #1a1f2c 0%, #2d3748 100%)'
-          : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: { xs: '16px', sm: '20px' },
-        position: 'relative',
-      }}
-    >
-      <IconButton
-        component={Link}
-        to="/"
-        sx={{
-          position: 'absolute',
-          top: 16,
-          left: 16,
-          color: isDarkMode ? '#60a5fa' : '#3b82f6',
-          '&:hover': {
-            transform: 'scale(1.1)',
-            transition: 'transform 0.2s',
-          },
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <ArrowBack />
-          <Typography
-            variant="body2"
-            sx={{
-              ml: 1,
-              color: isDarkMode ? '#cbd5e1' : '#475569',
-              opacity: 0.9
-            }}
-          >
-            Atrás
-          </Typography>
-        </Box>
-      </IconButton>
+        setIsVerifying(true);
 
-      <Card
-        component={motion.div}
-        whileHover={{ scale: 1.01 }}
-        transition={{ type: "spring", stiffness: 300 }}
-        sx={{
-          maxWidth: { xs: '100%', sm: 400 },
-          width: '100%',
-          borderRadius: '20px',
-          boxShadow: isDarkMode
-            ? '0 4px 20px rgba(0, 0, 0, 0.3)'
-            : '0 4px 20px rgba(148, 163, 184, 0.2)',
-          backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-          color: isDarkMode ? '#f1f5f9' : '#1e293b',
-          padding: '24px',
-          overflow: 'hidden',
-        }}
-      >
-        <CardContent sx={{ textAlign: 'center', p: { xs: 2, sm: 4 } }}>
-          <motion.div
-            whileHover={{ rotate: 360 }}
+        try {
+            const response = await fetchWithTimeout(
+                'https://backendodontologia.onrender.com/api/verify-verification-code',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.email.trim(),
+                        code: verificationCode.trim()
+                    }),
+                },
+                15000 // 15 segundos de timeout
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setErrorMessage(data.message || 'Error al verificar el código.');
+                return;
+            }
+
+            setNotificationMessage(data.message || 'Código verificado correctamente.');
+            setOpenNotification(true);
+            setVerificationCode('');
+            setShowVerificationModal(false); // Cambiado de setOpenModal a setShowVerificationModal
+
+            // Guardar en localStorage y redireccionar según el tipo de usuario
+            if (data.userType === 'administradores') {
+                localStorage.setItem('loggedIn', true);
+                localStorage.setItem('userType', 'administradores');
+                navigate('/Administrador/principal');
+            } else if (data.userType === 'pacientes') {
+                localStorage.setItem('loggedIn', true);
+                localStorage.setItem('userType', 'pacientes');
+                navigate('/Paciente/principal');
+            } else {
+                setErrorMessage('Tipo de usuario desconocido. Inténtalo nuevamente.');
+            }
+        } catch (error) {
+            if (error.message === 'La solicitud tardó demasiado tiempo en responder') {
+                setErrorMessage('El servidor está tardando en responder. Por favor, intenta nuevamente.');
+            } else {
+                setErrorMessage('Error de conexión. Inténtalo de nuevo más tarde.');
+            }
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
+    return (
+        <Box
+            component={motion.div}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-          >
-            <IconButton
-              sx={{
-                fontSize: 48,
-                color: isDarkMode ? '#60a5fa' : '#3b82f6',
-                mb: 2
-              }}
-            >
-              <FaTooth />
-            </IconButton>
-          </motion.div>
-
-          <Typography
-            variant="h5"
             sx={{
-              fontWeight: 700,
-              mb: 4,
-              background: isDarkMode
-                ? 'linear-gradient(to right, #60a5fa, #3b82f6)'
-                : 'linear-gradient(to right, #3b82f6, #2563eb)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Iniciar Sesión
-          </Typography>
-
-          <form onSubmit={handleSubmit}>
-            <Box sx={{ mb: 3 }}>
-              <TextField
-                component={motion.div}
-                variants={inputVariants}
-                whileFocus="focus"
-                whileBlur="blur"
-                fullWidth
-                label="Correo Electrónico"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email sx={{ color: isDarkMode ? '#60a5fa' : '#3b82f6' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: isDarkMode ? 'rgba(148, 163, 184, 0.1)' : 'rgba(241, 245, 249, 0.8)',
-                    borderRadius: '12px',
-                    '&:hover': {
-                      backgroundColor: isDarkMode ? 'rgba(148, 163, 184, 0.15)' : 'rgba(241, 245, 249, 1)',
-                    },
-                    '& fieldset': {
-                      borderColor: isDarkMode ? '#475569' : '#cbd5e1',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: isDarkMode ? '#60a5fa' : '#3b82f6',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: isDarkMode ? '#60a5fa' : '#3b82f6',
-                    },
-                  },
-                  '& .MuiInputBase-input': {
-                    color: isDarkMode ? '#f1f5f9' : '#1e293b',
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: isDarkMode ? '#cbd5e1' : '#64748b',
-                    '&.Mui-focused': {
-                      color: isDarkMode ? '#60a5fa' : '#3b82f6',
-                    },
-                  },
-                }}
-              />
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <TextField
-                component={motion.div}
-                variants={inputVariants}
-                whileFocus="focus"
-                whileBlur="blur"
-                fullWidth
-                type={showPassword ? 'text' : 'password'}
-                label="Contraseña"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock sx={{ color: isDarkMode ? '#60a5fa' : '#3b82f6' }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleTogglePasswordVisibility}
-                        sx={{ color: isDarkMode ? '#60a5fa' : '#3b82f6' }}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: isDarkMode ? 'rgba(148, 163, 184, 0.1)' : 'rgba(241, 245, 249, 0.8)',
-                    borderRadius: '12px',
-                    '&:hover': {
-                      backgroundColor: isDarkMode ? 'rgba(148, 163, 184, 0.15)' : 'rgba(241, 245, 249, 1)',
-                    },
-                    '& fieldset': {
-                      borderColor: isDarkMode ? '#475569' : '#cbd5e1',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: isDarkMode ? '#60a5fa' : '#3b82f6',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: isDarkMode ? '#60a5fa' : '#3b82f6',
-                    },
-                  },
-                  '& .MuiInputBase-input': {
-                    color: isDarkMode ? '#f1f5f9' : '#1e293b',
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: isDarkMode ? '#cbd5e1' : '#64748b',
-                    '&.Mui-focused': {
-                      color: isDarkMode ? '#60a5fa' : '#3b82f6',
-                    },
-                  },
-                }}
-              />
-            </Box>
-            <Box
-              sx={{
+                minHeight: '100vh',
                 display: 'flex',
-                justifyContent: 'center',
-                mb: 3,
-                position: 'relative'
-              }}
+                flexDirection: { xs: 'column', md: 'row' },
+                bgcolor: '#F9FDFF'
+            }}
+        >
+            {/* Sección Principal - Formulario */}
+            <Box
+                sx={{
+                    flex: { xs: '1', md: '1 1 50%' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    p: { xs: 2, sm: 3, md: 4 },
+                    position: 'relative',
+                    minHeight: { xs: '100vh', md: 'auto' }
+                }}
             >
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey="6Lc74mAqAAAAAL5MmFjf4x0PWP9MtBNEy9ypux_h"
-                onChange={isCaptchaLocked ? null : handleCaptchaChange}
-                onError={handleCaptchaError}
-                onLoad={() => setIsCaptchaLoading(false)}
-                theme={isDarkMode ? 'dark' : 'light'}
-              />
-              {isCaptchaLocked && (
+                {/* Botón Regresar */}
+                <IconButton
+                    component={Link}
+                    to="/"
+                    sx={{
+                        position: 'absolute',
+                        top: { xs: 10, md: 20 },
+                        left: { xs: 10, md: 20 },
+                        color: '#0052A3',
+                        zIndex: 1,
+                        '&:hover': {
+                            bgcolor: 'rgba(0, 82, 163, 0.1)'
+                        }
+                    }}
+                >
+                    <ArrowBack />
+                    <Typography sx={{ ml: 1, color: '#0052A3', display: { xs: 'none', sm: 'block' } }}>
+                        Regresar
+                    </Typography>
+                </IconButton>
+
+                {/* Contenedor del Formulario */}
+                <Paper
+                    elevation={3}
+                    component={motion.div}
+                    whileHover={{ y: -5 }}
+                    sx={{
+                        width: '100%',
+                        maxWidth: { xs: '100%', sm: 450 },
+                        p: { xs: 3, sm: 4 },
+                        borderRadius: 2,
+                        bgcolor: 'white',
+                        boxShadow: '0 4px 20px rgba(0, 82, 163, 0.1)'
+                    }}
+                >
+                    {/* Logo y Título */}
+                    <Box sx={{ textAlign: 'center', mb: 4 }}>
+                        <motion.div
+                            whileHover={{ rotate: 360 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <FaTooth size={40} style={{ color: '#0052A3' }} />
+                        </motion.div>
+                        <Typography
+                            variant="h4"
+                            sx={{
+                                mt: 2,
+                                fontWeight: 700,
+                                color: '#0052A3',
+                                fontFamily: '"Poppins", sans-serif',
+                                fontSize: { xs: '1.5rem', sm: '2rem' }
+                            }}
+                        >
+                            Clínica Dental Carol
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                mt: 1,
+                                color: 'text.secondary'
+                            }}
+                        >
+                            Accede a tu cuenta dental
+                        </Typography>
+                    </Box>
+
+                    {/* Formulario */}
+                    <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                        {/* Campo Email */}
+                        <TextField
+                            fullWidth
+                            required
+                            label="Correo electrónico"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            variant="outlined"
+                            margin="normal"
+                            error={!!emailError}
+                            helperText={emailError}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Email sx={{ color: emailError ? 'error.main' : '#0052A3' }} />
+                                    </InputAdornment>
+                                )
+                            }}
+                            sx={{
+                                mb: 2,
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderColor: emailError ? 'error.main' : 'rgba(27, 42, 58, 0.2)'
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: emailError ? 'error.main' : '#0052A3'
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: emailError ? 'error.main' : '#0052A3'
+                                    }
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: emailError ? 'error.main' : 'inherit',
+                                    '&.Mui-focused': {
+                                        color: emailError ? 'error.main' : '#0052A3'
+                                    }
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    margin: '4px 0 0'
+                                }
+                            }}
+                        />
+
+                        {/* Campo Contraseña */}
+                        <TextField
+                            fullWidth
+                            required
+                            label="Contraseña"
+                            name="password"
+                            type={showPassword ? 'text' : 'password'}
+                            value={formData.password}
+                            onChange={handleChange}
+                            variant="outlined"
+                            margin="normal"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Lock sx={{ color: '#0052A3' }} />
+                                    </InputAdornment>
+                                ),
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
+                            sx={{
+                                mb: 2,
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderColor: 'rgba(27, 42, 58, 0.2)'
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: '#0052A3'
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#0052A3'
+                                    }
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#0052A3'
+                                }
+                            }}
+                        />
+
+                        {/* Opciones adicionales */}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 3
+                            }}
+                        >
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={rememberMe}
+                                        onChange={handleRememberMeChange}
+                                        sx={{
+                                            color: '#0052A3',
+                                            '&.Mui-checked': {
+                                                color: '#0052A3'
+                                            }
+                                        }}
+                                    />
+                                }
+                                label={
+                                    <Typography sx={{ fontSize: '0.9rem' }}>
+                                        Recuérdame
+                                    </Typography>
+                                }
+                            />
+                            <Link
+                                to="/recuperacion"
+                                style={{
+                                    color: '#0052A3',
+                                    textDecoration: 'none',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 500
+                                }}
+                            >
+                                ¿Olvidaste tu contraseña?
+                            </Link>
+                        </Box>
+
+                        {/* ReCAPTCHA */}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                mb: 3,
+                                minHeight: '78px' // Altura mínima para evitar saltos
+                            }}
+                        >
+                            {isCaptchaLoading ? (
+                                <CircularProgress size={24} />
+                            ) : (
+                                <ReCAPTCHA
+                                    ref={recaptchaRef}
+                                    sitekey="6Lc74mAqAAAAAL5MmFjf4x0PWP9MtBNEy9ypux_h"
+                                    onChange={handleCaptchaChange}
+                                    onError={() => {
+                                        setIsCaptchaLoading(false);
+                                        setErrorMessage('Error al cargar el captcha. Por favor, recarga la página.');
+                                    }}
+                                    onExpired={() => setCaptchaValue(null)}
+                                    theme={isDarkMode ? 'dark' : 'light'}
+                                />
+                            )}
+                        </Box>
+                        {/* Mensaje de Error */}
+                        {errorMessage && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                            >
+                                <Alert
+                                    severity="error"
+                                    sx={{ mb: 2 }}
+                                    onClose={() => setErrorMessage('')}
+                                >
+                                    {errorMessage}
+                                </Alert>
+                            </motion.div>
+                        )}
+
+                        {/* Modal de Verificación */}
+                        <Dialog
+                            open={showVerificationModal}
+                            onClose={() => {
+                                if (!isVerifying) {
+                                    setShowVerificationModal(false);
+                                    setVerificationCode('');
+                                    setErrorMessage('');
+                                }
+                            }}
+                            fullWidth
+                            maxWidth="xs"
+                        >
+                            <DialogTitle sx={{ textAlign: 'center', color: '#0052A3' }}>
+                                Verificación Requerida
+                            </DialogTitle>
+                            <DialogContent>
+                                <Typography variant="body2" sx={{ mb: 2, textAlign: 'center' }}>
+                                    Se ha enviado un código de verificación a tu correo electrónico.
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    label="Código de verificación"
+                                    value={verificationCode}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+                                        if (value.length <= 6) {
+                                            setVerificationCode(value);
+                                            setErrorMessage('');
+                                        }
+                                    }}
+                                    error={!!errorMessage}
+                                    helperText={errorMessage || 'Ingresa el código de 6 caracteres'}
+                                    disabled={isVerifying}
+                                    autoFocus
+                                    inputProps={{
+                                        maxLength: 6,
+                                        style: { textTransform: 'uppercase', letterSpacing: '0.5em' }
+                                    }}
+                                    placeholder="ABC123"
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: errorMessage ? 'error.main' : '#0052A3'
+                                            }
+                                        },
+                                        '& .MuiInputLabel-root.Mui-focused': {
+                                            color: errorMessage ? 'error.main' : '#0052A3'
+                                        },
+                                        '& input': {
+                                            textAlign: 'center'
+                                        }
+                                    }}
+                                />
+                                {/* Botón de reenvío con contador */}
+                                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                                    <Button
+                                        onClick={handleResendCode}
+                                        disabled={!canResend}
+                                        sx={{
+                                            color: '#0052A3',
+                                            textTransform: 'none',
+                                            '&.Mui-disabled': {
+                                                color: 'text.secondary'
+                                            }
+                                        }}
+                                    >
+                                        {canResend
+                                            ? '¿No recibiste el código? Reenviar'
+                                            : `Podrás reenviar en ${resendTimer} segundos`
+                                        }
+                                    </Button>
+                                </Box>
+                            </DialogContent>
+                            <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
+                                <Button
+                                    onClick={handleVerifyCode}
+                                    variant="contained"
+                                    disabled={isVerifying || !verificationCode.trim()}
+                                    sx={{
+                                        bgcolor: '#0052A3',
+                                        '&:hover': {
+                                            bgcolor: '#003d7a'
+                                        },
+                                        minWidth: '120px'
+                                    }}
+                                >
+                                    {isVerifying ? <CircularProgress size={24} /> : 'Verificar'}
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                        {/* Botón de Inicio de Sesión */}
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            disabled={isLoading || !captchaValue}
+                            sx={{
+                                mt: 2,
+                                mb: 3,
+                                py: 1.5,
+                                bgcolor: '#0052A3',
+                                color: 'white',
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                borderRadius: '8px',
+                                '&:hover': {
+                                    bgcolor: '#0052A3'
+                                },
+                                '&.Mui-disabled': {
+                                    bgcolor: 'rgba(27, 42, 58, 0.6)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            {isLoading ? (
+                                <CircularProgress size={24} color="inherit" />
+                            ) : (
+                                'Iniciar Sesión'
+                            )}
+                        </Button>
+
+                        {/* Link de Registro */}
+                        <Typography
+                            variant="body2"
+                            align="center"
+                            sx={{ mt: 2 }}
+                        >
+                            ¿No tienes una cuenta?{' '}
+                            <Link
+                                to="/register"
+                                style={{
+                                    color: '#0052A3',
+                                    textDecoration: 'none',
+                                    fontWeight: 600
+                                }}
+                            >
+                                Regístrate aquí
+                            </Link>
+                        </Typography>
+                    </form>
+                </Paper>
+            </Box>
+
+            {/* Sección Lateral - Imagen y Mensaje */}
+            <Box
+                sx={{
+                    flex: '1 1 50%',
+                    display: { xs: 'none', md: 'flex' },
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    bgcolor: '#03427c',
+                    color: 'white',
+                    p: 6,
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}
+            >
+                {/* Patrón de fondo */}
                 <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                    cursor: 'not-allowed',
-                    zIndex: 1,
-                  }}
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        opacity: 0.1,
+                        backgroundImage: 'repeating-linear-gradient(45deg, #ffffff 0, #ffffff 1px, transparent 0, transparent 50%)',
+                        backgroundSize: '20px 20px'
+                    }}
                 />
-              )}
-              {isCaptchaLoading && (
-                <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-                  Cargando captcha...
-                </Typography>
-              )}
-            </Box>
 
+                {/* Contenido */}
+                <Box sx={{ position: 'relative', textAlign: 'center' }}>
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <Typography
+                            variant="h3"
+                            sx={{
+                                mb: 4,
+                                fontWeight: 700,
+                                fontFamily: '"Poppins", sans-serif'
+                            }}
+                        >
+                            Bienvenido a Carol
+                        </Typography>
+                    </motion.div>
 
-            {errorMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isDarkMode ? '#ef4444' : '#dc2626',
-                    textAlign: 'center',
-                    mb: 3,
-                    backgroundColor: isDarkMode ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    p: 2,
-                    borderRadius: '12px',
-                  }}
-                >
-                  {errorMessage}
-                </Typography>
-              </motion.div>
-            )}
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                    >
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                mb: 6,
+                                opacity: 0.9,
+                                maxWidth: 500,
+                                mx: 'auto'
+                            }}
+                        >
+                            Tu salud dental es nuestra prioridad. Accede para gestionar tus citas y consultar tu historial.
+                        </Typography>
+                    </motion.div>
 
-            <Button
-              component={motion.button}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              fullWidth
-              type="submit"
-              variant="contained"
-              sx={{
-                background: isDarkMode
-                  ? 'linear-gradient(to right, #60a5fa, #3b82f6)'
-                  : 'linear-gradient(to right, #3b82f6, #2563eb)',
-                color: '#ffffff',
-                py: 1.5,
-                fontSize: '16px',
-                fontWeight: 600,
-                borderRadius: '12px',
-                textTransform: 'none',
-                boxShadow: isDarkMode
-                  ? '0 4px 12px rgba(96, 165, 250, 0.3)'
-                  : '0 4px 12px rgba(59, 130, 246, 0.3)',
-                '&:hover': {
-                  background: isDarkMode
-                    ? 'linear-gradient(to right, #3b82f6, #2563eb)'
-                    : 'linear-gradient(to right, #2563eb, #1d4ed8)',
-                },
-                '&.Mui-disabled': {
-                  background: isDarkMode
-                    ? 'linear-gradient(to right, #475569, #64748b)'
-                    : 'linear-gradient(to right, #94a3b8, #cbd5e1)',
-                  color: isDarkMode ? '#94a3b8' : '#f1f5f9',
-                },
-              }}
-              disabled={!captchaValue || isLoading}
-            >
-              {isLoading ? (
-                <CircularProgress size={24} sx={{ color: '#ffffff' }} />
-              ) : (
-                'Iniciar Sesión'
-              )}
-            </Button>
-
-            {openModal && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Box sx={{ mt: 3 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: isDarkMode ? '#60a5fa' : '#3b82f6',
-                      textAlign: 'center',
-                      mb: 2,
-                    }}
-                  >
-                    Se envió un código de verificación a tu correo. Ingresa el código aquí:
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    label="Código de Verificación"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    required
-                    sx={{
-                      mb: 2,
-                      '& .MuiOutlinedInput-root': {
-                        backgroundColor: isDarkMode ? 'rgba(148, 163, 184, 0.1)' : 'rgba(241, 245, 249, 0.8)',
-                        borderRadius: '12px',
-                        '& .MuiInputBase-input': {
-                          color: isDarkMode ? '#f1f5f9' : '#1e293b',
-                        },
-                        '& fieldset': {
-                          borderColor: isDarkMode ? '#475569' : '#cbd5e1',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: isDarkMode ? '#60a5fa' : '#3b82f6',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: isDarkMode ? '#60a5fa' : '#3b82f6',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: isDarkMode ? '#cbd5e1' : '#64748b',
-                        '&.Mui-focused': {
-                          color: isDarkMode ? '#60a5fa' : '#3b82f6',
-                        },
-                      },
-                    }}
-                  />
-                  <Button
-                    component={motion.button}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    variant="contained"
-                    fullWidth
-                    onClick={handleVerifyCode}
-                    disabled={isVerifying}
-                    sx={{
-                      background: isDarkMode
-                        ? 'linear-gradient(to right, #60a5fa, #3b82f6)'
-                        : 'linear-gradient(to right, #3b82f6, #2563eb)',
-                      color: '#ffffff',
-                      py: 1.5,
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      borderRadius: '12px',
-                      textTransform: 'none',
-                      boxShadow: isDarkMode
-                        ? '0 4px 12px rgba(96, 165, 250, 0.3)'
-                        : '0 4px 12px rgba(59, 130, 246, 0.3)',
-                    }}
-                  >
-                    {isVerifying ? (
-                      <CircularProgress size={24} sx={{ color: '#ffffff' }} />
-                    ) : (
-                      'Verificar Código'
-                    )}
-                  </Button>
+                    {/* Características */}
+                    <Box sx={{ textAlign: 'left', maxWidth: 400, mx: 'auto' }}>
+                        {[
+                            'Agenda y gestiona tus citas en línea',
+                            'Accede a tu historial dental completo',
+                            'Recibe recordatorios de tus próximas citas',
+                            'Consulta tratamientos y presupuestos'
+                        ].map((feature, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: 0.6 + index * 0.1 }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        mb: 2
+                                    }}
+                                >
+                                    <CheckCircle
+                                        sx={{
+                                            mr: 2,
+                                            color: '#4CAF50'
+                                        }}
+                                    />
+                                    <Typography>
+                                        {feature}
+                                    </Typography>
+                                </Box>
+                            </motion.div>
+                        ))}
+                    </Box>
                 </Box>
-              </motion.div>
-            )}
-
-            <Box sx={{ mt: 4, textAlign: 'center' }}>
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isDarkMode ? '#60a5fa' : '#3b82f6',
-                    mb: 1,
-                  }}
-                >
-                  <Link
-                    to="/register"
-                    style={{
-                      color: 'inherit',
-                      textDecoration: 'none',
-                      fontWeight: 500,
-                    }}
-                  >
-                    ¿No tienes cuenta? Regístrate
-                  </Link>
-                </Typography>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isDarkMode ? '#60a5fa' : '#3b82f6',
-                  }}
-                >
-                  <Link
-                    to="/recuperacion"
-                    style={{
-                      color: 'inherit',
-                      textDecoration: 'none',
-                      fontWeight: 500,
-                    }}
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </Typography>
-              </motion.div>
             </Box>
-          </form>
-        </CardContent>
-      </Card>
 
-      <Notificaciones
-        open={openNotification}
-        message={notificationMessage}
-        type={
-          notificationMessage.includes('Cuenta bloqueada')
-            ? 'error'
-            : notificationMessage.includes('Advertencia')
-              ? 'warning'
-              : 'info'
-        }
-        handleClose={() => setOpenNotification(false)}
-      />
-    </Box>
-  );
+            {/* Notificaciones */}
+            <Notificaciones
+                open={openNotification}
+                message={notificationMessage}
+                handleClose={() => setOpenNotification(false)}
+                severity={notificationMessage.includes('error') ? 'error' : 'success'}
+            />
+        </Box>
+    );
 };
 
 export default Login;

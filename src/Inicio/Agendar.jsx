@@ -77,8 +77,8 @@ const ReservaCitas = () => {
         background: isDarkTheme ? '#1B2A3A' : '#F9FDFF',
         paper: isDarkTheme ? '#243447' : '#ffffff',
         text: isDarkTheme ? '#ffffff' : '#000000',
-        primary: '#1976d2',
-        secondary: isDarkTheme ? '#90caf9' : '#1976d2'
+        primary: '#03427C',
+        secondary: isDarkTheme ? '#90caf9' : '#03427C'
     };
 
     const handleAcceptChange = (event) => {

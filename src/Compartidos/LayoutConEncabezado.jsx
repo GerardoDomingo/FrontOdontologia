@@ -48,7 +48,7 @@ const LayoutConEncabezado = ({ children }) => {
       <Box
         component="footer"
         sx={{
-          backgroundColor: isDarkMode ? '#0d1b2a' : '#00bcd4', // Cambia el color del footer según el tema
+          backgroundColor: isDarkMode ? '#0d1b2a' : '#03427C', // Cambia el color del footer según el tema
           color: '#ffffff',
           p: 2, // Padding para el footer
           textAlign: 'center',

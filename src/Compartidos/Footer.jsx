@@ -97,7 +97,7 @@ const Footer = () => {
   return (
     <footer
       style={{
-        backgroundColor: isDarkMode ? '#0D1B2A' : '#00BCD4',
+        backgroundColor: isDarkMode ? '#0D1B2A' : '#03427C',
         color: '#ffffff',
         padding: '20px 0',
         textAlign: 'center',

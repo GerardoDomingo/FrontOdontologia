@@ -108,7 +108,7 @@ const FAQ = () => {
     },
     title: {
       marginBottom: "1.5rem",
-      color: isDarkTheme ? "#90CAF9" : "#0077CC",
+      color: isDarkTheme ? "#90CAF9" : "#03427C",
       fontSize: isMobile ? "1.5rem" : "1.75rem",
       fontWeight: "bold",
       textAlign: "center",
@@ -138,11 +138,11 @@ const FAQ = () => {
     },
     askButton: {
       marginTop: "2rem",
-      background: isDarkTheme ? "#90CAF9" : "#0077CC",
+      background: isDarkTheme ? "#90CAF9" : "#03427C",
       color: isDarkTheme ? "#000000" : "white",
       fontFamily: "Montserrat, sans-serif",
       "&:hover": {
-        background: isDarkTheme ? "#63a4ff" : "#005fa3",
+        background: isDarkTheme ? "#63a4ff" : "#03427C",
       },
     },
     modal: {
@@ -154,7 +154,7 @@ const FAQ = () => {
     },
     modalTitle: {
       fontFamily: "Montserrat, sans-serif",
-      color: isDarkTheme ? "#90CAF9" : "#0077CC",
+      color: isDarkTheme ? "#90CAF9" : "#03427C",
     },
     textField: {
       marginBottom: "1rem",

@@ -48,7 +48,7 @@ const Home = () => {
     background: isDarkMode
       ? 'linear-gradient(135deg, #1A2A3A 30%, #1D2A38 100%)'
       : 'linear-gradient(135deg, #FFFFFF 30%, #E3F2FD 100%)',
-    primaryText: isDarkMode ? '#82B1FF' : '#1976d2',
+    primaryText: isDarkMode ? '#82B1FF' : '#03427C',
     secondaryText: isDarkMode ? '#B0BEC5' : '#616161',
     cardBackground: isDarkMode ? '#2A3A4A' : '#FFFFFF',
   };

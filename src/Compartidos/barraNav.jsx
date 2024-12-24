@@ -13,7 +13,7 @@ import {
   ListItemText,
   IconButton
 } from '@mui/material';
-import { FaSignInAlt, FaCalendarAlt, FaPhoneAlt  } from 'react-icons/fa';
+import { FaSignInAlt, FaCalendarAlt, FaPhoneAlt } from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -54,28 +54,28 @@ const ResponsiveNavbar = () => {
     }
   };
 
-// Detectar el tema del sistema
-useEffect(() => {
-  setIsDarkTheme(false);
+  // Detectar el tema del sistema
+  useEffect(() => {
+    setIsDarkTheme(false);
 
-  const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
 
-  if (matchDarkTheme.matches) {
-    setIsDarkTheme(true);
-  }
+    if (matchDarkTheme.matches) {
+      setIsDarkTheme(true);
+    }
 
-  const handleThemeChange = (e) => {
-    setIsDarkTheme(e.matches);
-  };
+    const handleThemeChange = (e) => {
+      setIsDarkTheme(e.matches);
+    };
 
-  matchDarkTheme.addEventListener('change', handleThemeChange);
+    matchDarkTheme.addEventListener('change', handleThemeChange);
 
-  fetchTitleAndLogo();
+    fetchTitleAndLogo();
 
-  return () => {
-    matchDarkTheme.removeEventListener('change', handleThemeChange);
-  };
-}, []);
+    return () => {
+      matchDarkTheme.removeEventListener('change', handleThemeChange);
+    };
+  }, []);
 
   // Función para abrir/cerrar el Drawer
   const toggleDrawer = (open) => (event) => {
@@ -237,6 +237,17 @@ useEffect(() => {
                 Acerca de
               </Typography>
             </Link>
+            <Link to="/Contact" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Typography
+                sx={{
+                  color: isDarkTheme ? 'white' : '#333',
+                  fontFamily: '"Montserrat", sans-serif',
+                  '&:hover': { color: '#0066cc' },
+                }}
+              >
+                Contactanos
+              </Typography>
+            </Link>
 
             <Button
               variant="contained"
@@ -246,7 +257,7 @@ useEffect(() => {
               startIcon={<FaCalendarAlt />}
               sx={{
                 fontFamily: '"Montserrat", sans-serif',
-                backgroundColor: '#0066cc',
+                backgroundColor: '#03427C',
                 '&:hover': {
                   backgroundColor: '#0052a3',
                 },
@@ -263,13 +274,13 @@ useEffect(() => {
               startIcon={<FaSignInAlt />}
               sx={{
                 fontFamily: '"Montserrat", sans-serif',
-                color: isDarkTheme ? 'white' : '#0066cc',
-                borderColor: isDarkTheme ? 'white' : '#0066cc',
+                color: isDarkTheme ? 'white' : '#03427C',
+                borderColor: isDarkTheme ? 'white' : '#03427C',
                 '&:hover': {
                   backgroundColor: isDarkTheme
                     ? 'rgba(255,255,255,0.1)'
                     : 'rgba(0,102,204,0.1)',
-                  borderColor: isDarkTheme ? 'white' : '#0052a3',
+                  borderColor: isDarkTheme ? 'white' : '#03427C',
                 },
                 textTransform: 'none',
               }}

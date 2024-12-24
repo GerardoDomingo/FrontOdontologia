@@ -6,7 +6,7 @@ import PrivateRoute from './Compartidos/PrivateRoute.jsx';
 //Inicio
 import Home from './Inicio/Home';
 import Register from './Inicio/Register';
-import Login from './Inicio/Login';
+import Login from './Inicio/Login.jsx';
 import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';
 import Recuperacion from './Inicio/Recuperacion.jsx';
 import Reset from './Inicio/CambiarContrasena.jsx';
