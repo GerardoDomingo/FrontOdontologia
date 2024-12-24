@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Stepper, Step, StepLabel, TextField, Typography, Container, Card, CardContent, MenuItem, Select, FormControl, InputLabel, FormHelperText, InputAdornment, CircularProgress, Checkbox, FormControlLabel, Link, Modal } from '@mui/material';
 import { FaUser, FaPhone, FaEnvelope, FaLock, FaCheckCircle, FaInfoCircle, FaEyeSlash, FaEye, FaPlusCircle } from 'react-icons/fa'; // Importamos 
 import zxcvbn from 'zxcvbn';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Notificaciones from '../Compartidos/Notificaciones'
 import ErrorBoundary from '../Compartidos/ErrorBoundary.jsx';
 
@@ -60,10 +61,23 @@ const Register = () => {
   const [openPrivacyModal, setOpenPrivacyModal] = useState(false);
   const [openTermsModal, setOpenTermsModal] = useState(false);
   const [allAccepted, setAllAccepted] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(matchDarkTheme.matches);
+
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    matchDarkTheme.addEventListener('change', handleThemeChange);
+    return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
+  }, []);
+
   const handleAcceptChange = (event) => {
     setAllAccepted(event.target.checked);
   };
-
 
   // Función para abrir el modal de políticas de privacidad y obtener su contenido si aún no está cargado
   const handleOpenPrivacyModal = async (event) => {
@@ -1276,199 +1290,335 @@ const Register = () => {
 
           </Box>
         );
-
       default:
         return 'Unknown step';
     }
   };
 
   return (
-    <ErrorBoundary> <Container maxWidth="md" sx={{ mt: 6, mb: 14 }}> {/* Aquí agregamos marginTop y marginBottoom */}
-      <Notificaciones
-        open={openNotification}
-        message={notificationMessage}
-        type={notificationType}
-        handleClose={handleCloseNotification}
-      />
-      <Card sx={{ p: 4, boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)', borderRadius: '16px', marginBottom: '20px' }}>
-        <CardContent>
-          <Typography
-            variant="h4"
-            sx={{ textAlign: 'center', mb: 4, color: '#1976d2', fontFamily: 'Roboto, sans-serif', fontWeight: 'bold' }}
+    <ErrorBoundary>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: isDarkMode
+            ? '#1D2A38'
+            : 'linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%)',
+          py: { xs: 4, md: 8 }
+        }}
+      >
+        <Container maxWidth="md">
+          <Notificaciones
+            open={openNotification}
+            message={notificationMessage}
+            type={notificationType}
+            handleClose={handleCloseNotification}
+          />
+
+          <Card
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 4 },
+              boxShadow: '0 8px 32px rgba(3, 66, 124, 0.08)',
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(3, 66, 124, 0.1)',
+            }}
           >
-            Registro
-          </Typography>
+            <CardContent>
+              <Typography
+                variant="h4"
+                sx={{
+                  textAlign: 'center',
+                  mb: 4,
+                  color: '#03427c',
+                  fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 600,
+                  fontSize: { xs: '1.75rem', sm: '2.125rem' },
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: -10,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '60px',
+                    height: '4px',
+                    backgroundColor: '#03427c',
+                    borderRadius: '2px'
+                  }
+                }}
+              >
+                Registro
+              </Typography>
 
-          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel
-                  StepIconProps={{
-                    sx: { display: 'flex' }, // Asegura que los íconos se sigan mostrando
-                  }}
-                  sx={{
-                    // Oculta solo el texto en pantallas pequeñas (xs), pero deja los íconos
-                    '& .MuiStepLabel-label': {
-                      display: { xs: 'none', sm: 'block' } // Oculta solo el texto en xs
-                    }
-                  }}
-                >
-                  {label}
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          <form onSubmit={handleSubmit}>
-            {getStepContent(activeStep)}
+              <Stepper
+                activeStep={activeStep}
+                sx={{
+                  mb: 5,
+                  '& .MuiStepLabel-root .Mui-completed': {
+                    color: '#03427c',
+                  },
+                  '& .MuiStepLabel-root .Mui-active': {
+                    color: '#03427c',
+                  },
+                  '& .MuiStepLabel-root .Mui-active .MuiStepIcon-text': {
+                    fill: 'white',
+                    fontWeight: 'bold'
+                  },
+                  '& .MuiStepConnector-line': {
+                    borderColor: 'rgba(3, 66, 124, 0.2)'
+                  }
+                }}
+              >
+                {steps.map((label) => (
+                  <Step key={label}>
+                    <StepLabel
+                      StepIconProps={{
+                        sx: {
+                          width: { xs: 28, sm: 32 },
+                          height: { xs: 28, sm: 32 }
+                        }
+                      }}
+                      sx={{
+                        '& .MuiStepLabel-label': {
+                          display: { xs: 'none', sm: 'block' },
+                          color: 'rgba(3, 66, 124, 0.8)',
+                          '&.Mui-active': {
+                            color: '#03427c',
+                            fontWeight: 600
+                          }
+                        }
+                      }}
+                    >
+                      {label}
+                    </StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
 
-            {/* Contenedor para los botones y checkboxes */}
-            <Box sx={{ mt: 4 }}>
-              {activeStep === steps.length - 1 && (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                  {/* Checkbox para la aceptación de términos y política */}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={allAccepted}
-                        onChange={handleAcceptChange}
-                        name="acceptAll"
-                        color="primary"
-                      />
-                    }
-                    label={
-                      <Typography variant="body2">
-                        Al registrarte, confirmas que estás de acuerdo con nuestros{' '}
-                        <Link
-                          component="span"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleOpenTermsModal(e);  // Evita el click en el checkbox
-                          }}
-                          sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
-                        >
-                          términos y condiciones
-                        </Link>{' '}
-                        y que entiendes nuestra{' '}
-                        <Link
-                          component="span"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleOpenPrivacyModal(e);  // Evita el click en el checkbox
-                          }}
-                          sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
-                        >
-                          política de privacidad
-                        </Link>.
-                      </Typography>
-                    }
-                  />
+              <form onSubmit={handleSubmit}>
+                <Box sx={{ px: { xs: 0, sm: 2 } }}>
+                  {getStepContent(activeStep)}
                 </Box>
-              )}
 
-              {/* Contenedor de botones para Navegar y Enviar */}
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                {activeStep !== 0 && (
-                  <Button onClick={handleBack} sx={{ mr: 2 }} disabled={isLoading}>
-                    Regresar
-                  </Button>
-                )}
-                {activeStep === steps.length - 1 ? (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    sx={{ px: 4 }}
-                    disabled={isLoading || !allAccepted} // Deshabilitar si no se aceptan los términos
+                <Box sx={{ mt: 4 }}>
+                  {activeStep === steps.length - 1 && (
+                    <Box
+                      sx={{
+                        p: 3,
+                        bgcolor: 'rgba(3, 66, 124, 0.03)',
+                        borderRadius: 2,
+                        mb: 3
+                      }}
+                    >
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={allAccepted}
+                            onChange={handleAcceptChange}
+                            name="acceptAll"
+                            sx={{
+                              color: '#03427c',
+                              '&.Mui-checked': {
+                                color: '#03427c',
+                              },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.7)' }}>
+                            Al registrarte, confirmas que estás de acuerdo con nuestros{' '}
+                            <Link
+                              component="span"
+                              onClick={handleOpenTermsModal}
+                              sx={{
+                                cursor: 'pointer',
+                                color: '#03427c',
+                                textDecoration: 'none',
+                                borderBottom: '1px dashed #03427c',
+                                '&:hover': {
+                                  borderBottom: '1px solid #03427c',
+                                }
+                              }}
+                            >
+                              términos y condiciones
+                            </Link>
+                            {' '}y que entiendes nuestra{' '}
+                            <Link
+                              component="span"
+                              onClick={handleOpenPrivacyModal}
+                              sx={{
+                                cursor: 'pointer',
+                                color: '#03427c',
+                                textDecoration: 'none',
+                                borderBottom: '1px dashed #03427c',
+                                '&:hover': {
+                                  borderBottom: '1px solid #03427c',
+                                }
+                              }}
+                            >
+                              política de privacidad
+                            </Link>.
+                          </Typography>
+                        }
+                      />
+                    </Box>
+                  )}
+
+                  {/* Box para los botones */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: activeStep === 0 ? 'flex-end' : 'space-between', // Alineación condicional
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      gap: 2
+                    }}
                   >
-                    {isLoading ? <CircularProgress size={24} /> : 'Registrar'}
-                  </Button>
-                ) : (
-                  <Button variant="contained" color="primary" onClick={handleNext} sx={{ px: 4 }} disabled={isLoading}>
-                    {isLoading ? <CircularProgress size={24} /> : 'Siguiente'}
-                  </Button>
-                )}
-              </Box>
-            </Box>
+                    {activeStep !== 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Button
+                          onClick={handleBack}
+                          sx={{
+                            minWidth: '100px', // Ancho mínimo más pequeño
+                            px: 3,  // Padding horizontal reducido
+                            py: 1,  // Padding vertical reducido
+                            color: '#03427c',
+                            borderColor: 'rgba(3, 66, 124, 0.5)',
+                            '&:hover': {
+                              borderColor: '#03427c',
+                              bgcolor: 'rgba(3, 66, 124, 0.05)',
+                              transform: 'translateX(-3px)',
+                              transition: 'transform 0.2s'
+                            }
+                          }}
+                          variant="outlined"
+                          disabled={isLoading}
+                        >
+                          Regresar
+                        </Button>
+                      </motion.div>
+                    )}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Button
+                        variant="contained"
+                        type={activeStep === steps.length - 1 ? "submit" : "button"}
+                        onClick={activeStep === steps.length - 1 ? undefined : handleNext}
+                        disabled={isLoading || (activeStep === steps.length - 1 && !allAccepted)}
+                        sx={{
+                          minWidth: '120px', // Ancho mínimo más pequeño
+                          px: 4,  // Padding horizontal reducido
+                          py: 1,  // Padding vertical reducido
+                          bgcolor: '#03427c',
+                          position: 'relative', // Para el loader
+                          '&:hover': {
+                            bgcolor: '#02305c',
+                            transform: 'translateX(3px)',
+                            transition: 'transform 0.2s'
+                          },
+                          '&.Mui-disabled': {
+                            bgcolor: 'rgba(3, 66, 124, 0.4)'
+                          },
+                          width: { xs: '100%', sm: 'auto' } // Full width en móvil, auto en desktop
+                        }}
+                      >
+                        {isLoading ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <CircularProgress
+                              size={20}
+                              sx={{
+                                color: 'white',
+                                mr: 1,
+                                animation: 'spin 1s linear infinite',
+                                '@keyframes spin': {
+                                  '0%': { transform: 'rotate(0deg)' },
+                                  '100%': { transform: 'rotate(360deg)' }
+                                }
+                              }}
+                            />
+                            Procesando...
+                          </Box>
+                        ) : (
+                          activeStep === steps.length - 1 ? 'Registrar' : 'Siguiente'
+                        )}
+                      </Button>
+                    </motion.div>
+                  </Box>
+                </Box>
 
-            <Modal open={openPrivacyModal} onClose={handleClosePrivacyModal}>
-              <Box
-                sx={{
-                  width: '90%', // 90% of the viewport width
-                  maxWidth: 600, // Maximum width
-                  maxHeight: '80vh', // Limit height to 80% of the viewport
-                  bgcolor: 'background.paper',
-                  p: 4,
-                  m: 'auto',
-                  mt: 5,
-                  borderRadius: 2,
-                  overflowY: 'auto', // Enable vertical scrolling
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Políticas de Privacidad
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    whiteSpace: 'pre-line', // Preserve line breaks
-                  }}
+                <Modal
+                  open={openPrivacyModal || openTermsModal}
+                  onClose={openPrivacyModal ? handleClosePrivacyModal : handleCloseTermsModal}
                 >
-                  {privacyPolicy}
-                </Typography>
-                <Button
-                  onClick={handleClosePrivacyModal}
-                  sx={{ mt: 2 }}
-                  variant="contained"
-                  fullWidth
-                >
-                  Cerrar
-                </Button>
-              </Box>
-            </Modal>
-
-            <Modal open={openTermsModal} onClose={handleCloseTermsModal}>
-              <Box
-                sx={{
-                  width: '90%', // 90% of the viewport width
-                  maxWidth: 600, // Maximum width
-                  maxHeight: '80vh', // Limit height to 80% of the viewport
-                  bgcolor: 'background.paper',
-                  p: 4,
-                  m: 'auto',
-                  mt: 5,
-                  borderRadius: 2,
-                  overflowY: 'auto', // Enable vertical scrolling
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Términos y Condiciones
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    whiteSpace: 'pre-line', // Preserve line breaks
-                  }}
-                >
-                  {termsConditions}
-                </Typography>
-                <Button
-                  onClick={handleCloseTermsModal}
-                  sx={{ mt: 2 }}
-                  variant="contained"
-                  fullWidth
-                >
-                  Cerrar
-                </Button>
-              </Box>
-            </Modal>
-          </form>
-        </CardContent>
-      </Card>
-    </Container>
+                  <Box
+                    sx={{
+                      width: '90%',
+                      maxWidth: 600,
+                      maxHeight: '85vh',
+                      bgcolor: '#ffffff',
+                      p: { xs: 3, sm: 4 },
+                      m: 'auto',
+                      mt: '5vh',
+                      borderRadius: 3,
+                      overflowY: 'auto',
+                      boxShadow: '0 8px 32px rgba(3, 66, 124, 0.1)',
+                      border: '1px solid rgba(3, 66, 124, 0.1)'
+                    }}
+                  >
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        color: '#03427c',
+                        fontWeight: 600,
+                        mb: 3,
+                        pb: 2,
+                        borderBottom: '2px solid rgba(3, 66, 124, 0.1)'
+                      }}
+                    >
+                      {openPrivacyModal ? 'Políticas de Privacidad' : 'Términos y Condiciones'}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.7)',
+                        whiteSpace: 'pre-line',
+                        lineHeight: 1.7
+                      }}
+                    >
+                      {openPrivacyModal ? privacyPolicy : termsConditions}
+                    </Typography>
+                    <Button
+                      onClick={openPrivacyModal ? handleClosePrivacyModal : handleCloseTermsModal}
+                      sx={{
+                        mt: 3,
+                        bgcolor: '#03427c',
+                        '&:hover': {
+                          bgcolor: '#02305c'
+                        },
+                        py: 1.5
+                      }}
+                      variant="contained"
+                      fullWidth
+                    >
+                      Cerrar
+                    </Button>
+                  </Box>
+                </Modal>
+              </form>
+            </CardContent>
+          </Card>
+        </Container>
+      </Box>
     </ErrorBoundary>
-
   );
-
 };
 
 export default Register;
