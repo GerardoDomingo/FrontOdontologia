@@ -1,18 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Box, IconButton, Menu, MenuItem, Divider } from '@mui/material';
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Box, 
+  IconButton, 
+  Menu, 
+  MenuItem, 
+  Divider,
+  Badge,
+  Avatar,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUserCircle, FaCalendarAlt, FaSignOutAlt, FaHome, FaCog, FaBell, FaTooth } from 'react-icons/fa';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { 
+  FaUserCircle, 
+  FaCalendarAlt, 
+  FaSignOutAlt, 
+  FaHome, 
+  FaCog, 
+  FaBell, 
+  FaTooth,
+  FaFileAlt,
+  FaPills,
+  FaWallet,
+  FaChartLine,
+  FaComments,
+  FaClinicMedical,
+  FaQuestionCircle,
+  FaFileMedical
+} from 'react-icons/fa';
 import Notificaciones from '../../Compartidos/Notificaciones';
 
 const BarraPaciente = () => {
-    const [notificationMessage, setNotificationMessage] = useState(''); // Estado para manejar el mensaje de notificación
+    const [notificationMessage, setNotificationMessage] = useState('');
     const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [openNotification, setOpenNotification] = useState(false);
-    const navigate = useNavigate(); // Hook de navegación
+    const [notificationCount, setNotificationCount] = useState(2); // Para ejemplo
+    const navigate = useNavigate();
 
-    // Detectar el tema del sistema
+    // Detectar tema del sistema
     useEffect(() => {
         const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
         setIsDarkTheme(matchDarkTheme.matches);
@@ -22,200 +51,179 @@ const BarraPaciente = () => {
         };
 
         matchDarkTheme.addEventListener('change', handleThemeChange);
-
-        return () => {
-            matchDarkTheme.removeEventListener('change', handleThemeChange);
-        };
+        return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
     }, []);
 
-    // Abrir el menú
+    const menuItems = [
+        { icon: FaHome, text: 'Inicio', path: '/Paciente/principal', divider: false },
+        { icon: FaUserCircle, text: 'Mi Perfil', path: '/Paciente/perfil', divider: false },
+        { icon: FaCalendarAlt, text: 'Mis Citas', path: '/Paciente/citas', divider: false },
+        { icon: FaFileMedical, text: 'Historial Clínico', path: '/Paciente/historial', divider: false },
+        { icon: FaPills, text: 'Tratamientos', path: '/Paciente/tratamientos', divider: false },
+        { icon: FaFileAlt, text: 'Recetas', path: '/Paciente/recetas', divider: false },
+        { icon: FaWallet, text: 'Pagos', path: '/Paciente/pagos', divider: false },
+        { icon: FaChartLine, text: 'Progreso', path: '/Paciente/progreso', divider: true },
+        { icon: FaComments, text: 'Mensajes', path: '/Paciente/mensajes', divider: false },
+        { icon: FaBell, text: 'Notificaciones', path: '/Paciente/notificaciones', divider: false },
+        { icon: FaQuestionCircle, text: 'Ayuda', path: '/Paciente/ayuda', divider: true },
+        { icon: FaCog, text: 'Configuración', path: '/Paciente/configuracion', divider: true },
+        { icon: FaSignOutAlt, text: 'Cerrar Sesión', path: null, divider: false }
+    ];
+
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
-    // Cerrar el menú
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
 
     const handleLogout = async () => {
-        handleMenuClose(); // Cierra el menú
-        setOpenNotification(true); // Activa la notificación
-    
+        handleMenuClose();
+        setOpenNotification(true);
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
-                credentials: 'include', // Asegura enviar las cookies con la solicitud
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-    
             if (!response.ok) {
-                // Manejar errores específicos según el código de estado de la respuesta
                 const errorData = await response.json();
-                console.error('Error en el cierre de sesión:', errorData.message || 'Error desconocido');
                 throw new Error(errorData.message || 'Error al cerrar sesión.');
             }
-    
-            // Confirmar que la cookie fue eliminada en el servidor
-            console.log('Sesión cerrada exitosamente en el servidor.');
-    
-            // Limpiar cualquier estado relacionado con la sesión del cliente
-            localStorage.removeItem('loggedIn'); // Elimina el estado de sesión almacenado localmente
+            localStorage.removeItem('loggedIn');
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
             setNotificationMessage('Error al cerrar sesión. Inténtalo nuevamente.');
         } finally {
             setTimeout(() => {
-                navigate('/'); // Redirige después de que la notificación aparezca
-            }, 2000); // Espera 2 segundos antes de redirigir
+                navigate('/');
+            }, 2000);
         }
     };
-    
-    
 
-    // Cerrar la notificación
-    const handleNotificationClose = () => {
-        setOpenNotification(false);
+    const handleItemClick = (item) => {
+        if (item.text === 'Cerrar Sesión') {
+            handleLogout();
+        } else {
+            handleMenuClose();
+        }
     };
 
     return (
         <>
             <AppBar
-                position="static"
+                position="fixed"
                 sx={{
-                    backgroundColor: isDarkTheme ? '#333' : '#F0F0F0',
-                    color: isDarkTheme ? '#fff' : '#333',
-                    boxShadow: 3,
+                    backgroundColor: isDarkTheme ? '#1B2A3A' : '#F9FDFF',
+                    color: isDarkTheme ? '#fff' : '#03427c',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 }}
             >
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    {/* Logo de la barra y título */}
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <FaTooth style={{ fontSize: 32, marginRight: '8px', color: isDarkTheme ? '#fff' : '#333' }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <FaTooth style={{ 
+                            fontSize: 32, 
+                            color: '#03427c',
+                            filter: isDarkTheme ? 'brightness(1.5)' : 'none'
+                        }} />
                         <Typography
                             variant="h6"
-                            component="div"
                             sx={{
-                                flexGrow: 1,
                                 fontWeight: 'bold',
                                 letterSpacing: 1,
-                                color: isDarkTheme ? '#fff' : '#333',
+                                color: isDarkTheme ? '#fff' : '#03427c',
+                                display: { xs: 'none', sm: 'block' }
                             }}
                         >
                             Odontología Carol
                         </Typography>
                     </Box>
 
-                    {/* Icono del perfil del paciente */}
-                    <IconButton
-                        edge="end"
-                        color="inherit"
-                        onClick={handleMenuOpen}
-                        sx={{
-                            '&:hover': { color: '#0066cc' },
-                            color: isDarkTheme ? '#fff' : '#333',
-                        }}
-                    >
-                        <AccountCircleIcon sx={{ fontSize: 38 }} />
-                    </IconButton>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <IconButton
+                            size="large"
+                            color="inherit"
+                            sx={{ '&:hover': { color: '#0066cc' } }}
+                        >
+                            <Badge badgeContent={notificationCount} color="error">
+                                <FaBell />
+                            </Badge>
+                        </IconButton>
+                        
+                        <IconButton
+                            edge="end"
+                            onClick={handleMenuOpen}
+                            sx={{
+                                '&:hover': { transform: 'scale(1.05)' },
+                                transition: 'transform 0.2s'
+                            }}
+                        >
+                            <Avatar
+                                sx={{
+                                    bgcolor: '#03427c',
+                                    width: 40,
+                                    height: 40,
+                                }}
+                            >
+                                <FaUserCircle />
+                            </Avatar>
+                        </IconButton>
+                    </Box>
 
-                    {/* Menú desplegable del paciente */}
                     <Menu
                         anchorEl={anchorEl}
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                         PaperProps={{
-                            style: {
-                                backgroundColor: isDarkTheme ? '#333' : '#fff',
-                                color: isDarkTheme ? '#fff' : '#333',
-                            },
+                            sx: {
+                                backgroundColor: isDarkTheme ? '#1B2A3A' : '#F9FDFF',
+                                color: isDarkTheme ? '#fff' : '#03427c',
+                                width: 220,
+                                borderRadius: 2,
+                                mt: 1,
+                            }
                         }}
                     >
-                        <MenuItem
-                            component={Link}
-                            to="/Paciente/principal"
-                            onClick={handleMenuClose}
-                            sx={{
-                                '&:hover': { color: '#0066cc' },
-                            }}
-                        >
-                            <FaHome style={{ marginRight: 8 }} />
-                            Inicio
-                        </MenuItem>
-
-                        <MenuItem
-                            component={Link}
-                            to="/Paciente/perfil"
-                            onClick={handleMenuClose}
-                            sx={{
-                                '&:hover': { color: '#0066cc' },
-                            }}
-                        >
-                            <FaUserCircle style={{ marginRight: 8 }} />
-                            Perfil
-                        </MenuItem>
-
-                        <MenuItem
-                            component={Link}
-                            to="/Paciente/citas"
-                            onClick={handleMenuClose}
-                            sx={{
-                                '&:hover': { color: '#0066cc' },
-                            }}
-                        >
-                            <FaCalendarAlt style={{ marginRight: 8 }} />
-                            Citas
-                        </MenuItem>
-
-                        <MenuItem
-                            component={Link}
-                            to="/Paciente/notificaciones"
-                            onClick={handleMenuClose}
-                            sx={{
-                                '&:hover': { color: '#0066cc' },
-                            }}
-                        >
-                            <FaBell style={{ marginRight: 8 }} />
-                            Notificaciones
-                        </MenuItem>
-
-                        <Divider />
-
-                        <MenuItem
-                            component={Link}
-                            to="/Paciente/configuracion"
-                            onClick={handleMenuClose}
-                            sx={{
-                                '&:hover': { color: '#0066cc' },
-                            }}
-                        >
-                            <FaCog style={{ marginRight: 8 }} />
-                            Configuración
-                        </MenuItem>
-
-                        <Divider />
-
-                        <MenuItem
-                            onClick={handleLogout} // Cerrar sesión y mostrar notificación
-                            sx={{
-                                '&:hover': { color: '#0066cc' },
-                            }}
-                        >
-                            <FaSignOutAlt style={{ marginRight: 8 }} />
-                            Cerrar sesión
-                        </MenuItem>
+                        {menuItems.map((item, index) => (
+                            <React.Fragment key={index}>
+                                <MenuItem
+                                    component={item.path ? Link : 'button'}
+                                    to={item.path}
+                                    onClick={() => handleItemClick(item)}
+                                    sx={{
+                                        py: 1.6,
+                                        '&:hover': {
+                                            backgroundColor: isDarkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(3,66,124,0.1)',
+                                        },
+                                    }}
+                                >
+                                    <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>
+                                        <item.icon size={20} />
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primary={item.text}
+                                        primaryTypographyProps={{
+                                            fontSize: '0.9rem',
+                                            fontWeight: 500
+                                        }}
+                                    />
+                                </MenuItem>
+                                {item.divider && <Divider sx={{ my: 1 }} />}
+                            </React.Fragment>
+                        ))}
                     </Menu>
                 </Toolbar>
             </AppBar>
+            <Toolbar /> {/* Espaciador para el contenido debajo del AppBar fijo */}
 
-            {/* Notificación de cierre de sesión */}
             <Notificaciones
                 open={openNotification}
-                message="Has cerrado sesión exitosamente"
+                message="Has cerrado sesión exitosamente. Redirigiendo.."
                 type="info"
-                handleClose={handleNotificationClose}
+                handleClose={() => setOpenNotification(false)}
             />
         </>
     );
