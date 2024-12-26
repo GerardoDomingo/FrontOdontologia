@@ -153,7 +153,12 @@ const PatientsReport = () => {
   };
 
   // Función para cambiar estado
-  const handleStatusChange = async (patient, newStatus) => {
+  const handleStatusChange = async (patient) => {
+    if (!patient) {
+      console.error('No se proporcionó información del paciente');
+      return;
+    }
+    console.log('Paciente a actualizar:', patient); // Para depuración
     setPatientToUpdate(patient);
     setOpenConfirmDialog(true);
   };
@@ -170,7 +175,7 @@ const PatientsReport = () => {
         }
 
         const response = await axios.put(
-          `https://backendodontologia.onrender.com/api/pacientes/${patientToUpdate.id}/status`,
+          `https://backendodontologia.onrender.com/api/reportes/pacientes/${patientToUpdate.id}/status`,
           { estado: 'Inactivo' }
         );
 
