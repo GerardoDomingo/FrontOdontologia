@@ -170,7 +170,6 @@ const PatientsReport = () => {
         if (response.status === 200) {
           setNotificationMessage('Estado del paciente actualizado exitosamente');
           setNotificationType('success');
-          // Actualizar la lista de pacientes
           const updatedPatients = patients.map(p =>
             p.id === patientToUpdate.id ? { ...p, estado: 'Inactivo' } : p
           );
@@ -355,8 +354,8 @@ const PatientsReport = () => {
                     />
                   </TableCell>
                   <TableCell sx={{ color: colors.text }}>
-                    {patient.fechaCreacion ?
-                      format(new Date(patient.fechaCreacion), 'dd/MM/yyyy HH:mm', { locale: es })
+                    {patient.fecha_Creacion ?
+                      format(new Date(patient.fecha_Creacion), 'dd/MM/yyyy HH:mm', { locale: es })
                       : 'No disponible'
                     }
                   </TableCell>
