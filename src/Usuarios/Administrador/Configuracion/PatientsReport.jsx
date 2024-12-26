@@ -155,24 +155,25 @@ const PatientsReport = () => {
     };
   };
 
-  const normalizeText = (text) => {
-    return text
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  };
+// Función para normalizar texto (mantener esta parte)
+const normalizeText = (text) => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
 
-  // Función para cambiar estado
-  const handleStatusChange = async (patient) => {
-    if (!patient) {
-      console.error('No se proporcionó información del paciente');
-      return;
-    }
-    setPatientToUpdate(patient);
-    setOpenConfirmDialog(true);
-  };
+// Función para cambiar estado (mantener esta parte)
+const handleStatusChange = async (patient) => {
+  if (!patient) {
+    console.error('No se proporcionó información del paciente');
+    return;
+  }
+  setPatientToUpdate(patient);
+  setOpenConfirmDialog(true);
+};
 
   //handleConfirmStatusChange actual por esta:
   const handleConfirmStatusChange = async () => {
