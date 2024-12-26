@@ -173,7 +173,6 @@ const PatientsReport = () => {
           setNotificationType('error');
           return;
         }
-
         const response = await axios.put(
           `https://backendodontologia.onrender.com/api/reportes/pacientes/${patientToUpdate.id}/status`,
           { estado: 'Inactivo' }
