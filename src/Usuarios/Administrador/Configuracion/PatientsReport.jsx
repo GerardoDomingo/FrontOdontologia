@@ -1,12 +1,14 @@
 import {
   Avatar, Box, Button, Card, CardContent,
-  Chip,
+  Chip, CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
-  DialogTitle, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography
+  DialogTitle, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem,
+  Paper, Select, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, TextField, Typography
 } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -37,6 +39,7 @@ const PatientsReport = () => {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState('success');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Configuración del tema oscuro
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -152,61 +155,74 @@ const PatientsReport = () => {
     };
   };
 
+  const normalizeText = (text) => {
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
   // Función para cambiar estado
   const handleStatusChange = async (patient) => {
     if (!patient) {
       console.error('No se proporcionó información del paciente');
       return;
     }
-    console.log('Paciente a actualizar:', patient); // Para depuración
     setPatientToUpdate(patient);
     setOpenConfirmDialog(true);
   };
 
-  // Función para confirmar cambio de estado
+  //handleConfirmStatusChange actual por esta:
   const handleConfirmStatusChange = async () => {
-    if (confirmName === `${patientToUpdate.nombre} ${patientToUpdate.aPaterno}`) {
-      try {
-        // Verificar que patientToUpdate.id existe
-        if (!patientToUpdate?.id) {
-          setNotificationMessage('Error: ID de paciente no válido');
-          setNotificationType('error');
-          return;
-        }
-        const response = await axios.put(
-          `https://backendodontologia.onrender.com/api/reportes/pacientes/${patientToUpdate.id}/status`,
-          { estado: 'Inactivo' }
-        );
+    const expectedName = `${patientToUpdate.nombre} ${patientToUpdate.aPaterno}`;
+    const normalizedExpected = normalizeText(expectedName);
+    const normalizedInput = normalizeText(confirmName);
 
-        if (response.data.success) {
-          // Actualizar el estado local
-          const updatedPatients = patients.map(p =>
-            p.id === patientToUpdate.id ? { ...p, estado: 'Inactivo' } : p
-          );
-          setPatients(updatedPatients);
-          setFilteredPatients(updatedPatients);
-
-          setNotificationMessage('Estado del paciente actualizado exitosamente');
-          setNotificationType('success');
-        } else {
-          throw new Error(response.data.message);
-        }
-      } catch (error) {
-        console.error('Error completo:', error);
-        setNotificationMessage(
-          error.response?.data?.message ||
-          'Error al actualizar el estado del paciente'
-        );
-        setNotificationType('error');
-      } finally {
-        setOpenConfirmDialog(false);
-        setConfirmName('');
-        setPatientToUpdate(null);
-        setNotificationOpen(true);
-      }
-    } else {
-      setNotificationMessage('El nombre no coincide. Por favor, inténtelo de nuevo.');
+    if (normalizedInput !== normalizedExpected) {
+      setNotificationMessage('Por favor, escriba el nombre y apellido del paciente correctamente');
       setNotificationType('error');
+      setNotificationOpen(true);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      if (!patientToUpdate?.id) {
+        throw new Error('ID de paciente no válido');
+      }
+
+      const response = await axios.put(
+        `https://backendodontologia.onrender.com/api/reportes/pacientes/${patientToUpdate.id}/status`,
+        { estado: 'Inactivo' },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        const updatedPatients = patients.map(p =>
+          p.id === patientToUpdate.id ? { ...p, estado: 'Inactivo' } : p
+        );
+        setPatients(updatedPatients);
+        setFilteredPatients(updatedPatients);
+        setNotificationMessage('Paciente dado de baja exitosamente');
+        setNotificationType('success');
+      } else {
+        throw new Error(response.data.message || 'Error al actualizar el estado');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setNotificationMessage('Error al dar de baja al paciente');
+      setNotificationType('error');
+    } finally {
+      setIsProcessing(false);
+      setOpenConfirmDialog(false);
+      setConfirmName('');
+      setPatientToUpdate(null);
       setNotificationOpen(true);
     }
   };
@@ -415,10 +431,10 @@ const PatientsReport = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        {/* Diálogo de confirmación */}
+        {/* Diálogo de confirmación actualizado */}
         <Dialog
           open={openConfirmDialog}
-          onClose={() => setOpenConfirmDialog(false)}
+          onClose={() => !isProcessing && setOpenConfirmDialog(false)}
           PaperProps={{
             sx: {
               backgroundColor: colors.paper,
@@ -430,42 +446,36 @@ const PatientsReport = () => {
             Confirmar cambio de estado
           </DialogTitle>
           <DialogContent>
-            {/* Cambiamos DialogContentText por Box */}
             <Box sx={{ color: colors.text, mb: 2 }}>
-              Para confirmar la baja del paciente, por favor escriba su nombre completo:
+              Por favor escriba el nombre y apellido del paciente:
             </Box>
-            <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 2 }}>
               {patientToUpdate ? `${patientToUpdate.nombre} ${patientToUpdate.aPaterno}` : ''}
             </Typography>
             <TextField
               fullWidth
               value={confirmName}
               onChange={(e) => setConfirmName(e.target.value)}
-              label="Nombre del paciente"
+              label="Nombre y apellido"
               variant="outlined"
+              disabled={isProcessing}
               sx={{
-                mt: 2,
                 '& .MuiOutlinedInput-root': {
                   color: colors.text,
                   '& fieldset': {
                     borderColor: colors.inputBorder,
-                  },
-                  '&:hover fieldset': {
-                    borderColor: colors.primary,
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: colors.primary,
-                  },
-                },
-                '& .MuiInputLabel-root': {
-                  color: colors.inputLabel,
-                },
+                  }
+                }
               }}
             />
           </DialogContent>
           <DialogActions>
             <Button
-              onClick={() => setOpenConfirmDialog(false)}
+              onClick={() => {
+                setOpenConfirmDialog(false);
+                setConfirmName('');
+              }}
+              disabled={isProcessing}
               sx={{ color: colors.text }}
             >
               Cancelar
@@ -474,11 +484,29 @@ const PatientsReport = () => {
               onClick={handleConfirmStatusChange}
               variant="contained"
               color="error"
+              disabled={isProcessing}
+              startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
             >
-              Confirmar
+              {isProcessing ? 'Procesando...' : 'Confirmar'}
             </Button>
           </DialogActions>
         </Dialog>
+        {/* Snackbar para notificaciones */}
+        <Snackbar
+          open={notificationOpen}
+          autoHideDuration={6000}
+          onClose={() => setNotificationOpen(false)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <MuiAlert
+            elevation={6}
+            variant="filled"
+            severity={notificationType}
+            onClose={() => setNotificationOpen(false)}
+          >
+            {notificationMessage}
+          </MuiAlert>
+        </Snackbar>
 
         <Dialog
           open={open}
