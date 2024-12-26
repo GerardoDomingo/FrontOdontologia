@@ -374,8 +374,8 @@ const PatientsReport = () => {
                     />
                   </TableCell>
                   <TableCell sx={{ color: colors.text }}>
-                    {patient.fecha_Creacion ?
-                      format(new Date(patient.fecha_Creacion), 'dd/MM/yyyy HH:mm', { locale: es })
+                    {patient.fecha_creacion ?
+                      format(new Date(patient.fecha_creacion), 'dd/MM/yyyy HH:mm', { locale: es })
                       : 'No disponible'
                     }
                   </TableCell>
