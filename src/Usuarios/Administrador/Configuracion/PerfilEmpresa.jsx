@@ -13,9 +13,17 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Modal
-} from '@mui/material';
-import { Save as SaveIcon, Edit as EditIcon, Close as CloseIcon, PhotoCamera as PhotoCameraIcon, ZoomIn as ZoomInIcon } from '@mui/icons-material';
+    Modal,
+    Tooltip,
+    Fade,
+    useTheme,
+    useMediaQuery,
+    Skeleton} from '@mui/material';
+import {
+    Save as SaveIcon,
+    Edit as EditIcon,
+    Close as CloseIcon,
+    PhotoCamera as PhotoCameraIcon} from '@mui/icons-material';
 import axios from 'axios';
 import Notificaciones from '../../../Compartidos/Notificaciones';
 import { Link } from 'react-router-dom';
@@ -47,10 +55,93 @@ const PerfilEmpresa = () => {
     });
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const [openImageModal, setOpenImageModal] = useState(false); // Para controlar el modal de la imagen
+    const [isDarkTheme, setIsDarkTheme] = useState(false);
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [previewChanges, setPreviewChanges] = useState(false);
+    const [logoHistory, setLogoHistory] = useState([]);
+    const theme = useTheme();
+
+    // Efecto para detectar tema oscuro
+    useEffect(() => {
+        const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+        setIsDarkTheme(matchDarkTheme.matches);
+
+        const handleThemeChange = (e) => {
+            setIsDarkTheme(e.matches);
+        };
+
+        matchDarkTheme.addEventListener('change', handleThemeChange);
+        return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
+    }, []);
+
+    // Definición mejorada de colores para mejor contraste
+    const colors = {
+        background: isDarkTheme ? '#263749' : 'rgba(173, 216, 230, 0.2)',
+        paper: isDarkTheme ? '#243447' : '#ffffff',
+        text: isDarkTheme ? '#FFFFFF' : '#333333',             // Blanco puro para modo oscuro
+        secondaryText: isDarkTheme ? '#E8F1FF' : '#666666',    // Gris más claro para modo oscuro
+        inputText: isDarkTheme ? '#FFFFFF' : '#333333',        // Texto blanco en inputs
+        inputLabel: isDarkTheme ? '#E8F1FF' : '#666666',       // Labels más claros
+        inputBorder: isDarkTheme ? '#4B9FFF' : '#e0e0e0',
+        primary: isDarkTheme ? '#4B9FFF' : '#1976d2',
+        inputBackground: isDarkTheme ? '#1B2A3A' : '#ffffff',  // Fondo más oscuro para inputs
+        disabledBackground: isDarkTheme ? '#243447' : '#f5f5f5',
+        disabledText: isDarkTheme ? '#B8C7D9' : '#9e9e9e'
+    };
+    
+    // Estilos mejorados para los inputs
+    const inputStyles = {
+        '& .MuiOutlinedInput-root': {
+            backgroundColor: colors.inputBackground,
+            color: colors.inputText, // Color directo del texto
+            '& fieldset': {
+                borderColor: colors.inputBorder,
+                borderWidth: isDarkTheme ? '2px' : '1px',
+            },
+            '&:hover fieldset': {
+                borderColor: colors.primary,
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: colors.primary,
+            },
+            '& input': {
+                color: colors.inputText,
+                '&::placeholder': {
+                    color: colors.secondaryText,
+                    opacity: 1
+                }
+            },
+            '& textarea': {
+                color: colors.inputText,
+            }
+        },
+        '& .MuiInputLabel-root': {
+            color: colors.inputLabel,
+            '&.Mui-focused': {
+                color: colors.primary
+            }
+        },
+        '& .MuiFormHelperText-root': {
+            color: isDarkTheme ? '#FF9999' : '#f44336',
+            opacity: 1
+        },
+        '&.Mui-disabled': {
+            '& .MuiInputBase-input': {
+                color: colors.disabledText,
+                '-webkit-text-fill-color': colors.disabledText,
+            },
+            '& .MuiInputLabel-root': {
+                color: colors.disabledText,
+            },
+            backgroundColor: 'transparent'
+        }
+    };
 
     useEffect(() => {
         const fetchPerfilEmpresa = async () => {
             try {
+                setIsLoading(true); // Establecer loading al inicio
                 const response = await axios.get('https://backendodontologia.onrender.com/api/perfilEmpresa/get');
                 const { id_empresa, nombre_empresa, direccion, telefono, correo_electronico, descripcion, logo, slogan } = response.data;
 
@@ -71,12 +162,20 @@ const PerfilEmpresa = () => {
                 }
 
                 if (logo) {
-                    const logoBase64 = `data:image/png;base64,${logo}`;
+                    // Verificar si el logo ya incluye el prefijo data:image
+                    const logoBase64 = logo.startsWith('data:image')
+                        ? logo
+                        : `data:image/png;base64,${logo}`;
+
+                    console.log('Logo cargado:', logoBase64.substring(0, 50) + '...'); // Para debugging
                     setLogoPreview(logoBase64);
-                    setOriginalLogo(logoBase64); // Guardamos el logo original
+                    setOriginalLogo(logoBase64);
                 }
             } catch (error) {
+                console.error('Error al cargar el perfil:', error);
                 mostrarNotificacion('Error al obtener el perfil de la empresa', 'error');
+            } finally {
+                setIsLoading(false); // Asegurarnos de que isLoading se establezca en false
             }
         };
 
@@ -125,12 +224,12 @@ const PerfilEmpresa = () => {
             descripcion: formData.descripcion,
             slogan: formData.slogan,
         };
-    
+
         setFormData(originalData); // Restablece los datos originales
         setHasChanges(false); // Marca que no hay cambios pendientes
         setIsEditingDatos(false); // Cierra el modo de edición
     };
-    
+
     const handleConfirmCancelLogo = () => {
         setLogoPreview(originalLogo); // Restaura el logo original
         setFormData({ ...formData, logo: null }); // Elimina el archivo cargado
@@ -196,9 +295,9 @@ const PerfilEmpresa = () => {
             mostrarNotificacion('No hay información para actualizar', 'error');
             return;
         }
-    
+
         if (!validateForm()) return;
-    
+
         const formDataToSend = {
             id_empresa: formData.id_empresa,
             nombre_empresa: formData.nombre_empresa,
@@ -208,10 +307,10 @@ const PerfilEmpresa = () => {
             descripcion: formData.descripcion,
             slogan: formData.slogan,
         };
-    
+
         try {
             const response = await axios.put('https://backendodontologia.onrender.com/api/perfilEmpresa/updateDatos', formDataToSend);
-    
+
             if (response.status === 200) {
                 mostrarNotificacion('Datos actualizados con éxito', 'success');
                 setHasChanges(false);
@@ -232,92 +331,212 @@ const PerfilEmpresa = () => {
         setOpenImageModal(false); // Cierra el modal de la imagen
     };
 
-    return (
-        <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: 'rgba(173, 216, 230, 0.2)', position: 'relative' }}>
-            <Container maxWidth="md">
-                <IconButton
-                    component={Link}
-                    to="/Administrador/principal"
-                    sx={{
-                        position: 'absolute',
-                        top: 24,
-                        right: 24,
-                        color: 'gray',
-                    }}
-                >
-                    <CloseIcon fontSize="large" />
-                </IconButton>
+    // Componente para el visor de imagen mejorado
 
-                <Box sx={{ mt: 6, backgroundColor: '#fff', padding: 4, borderRadius: '16px', boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)' }}>
+    return (
+        <Box sx={{
+            p: { xs: 2, sm: 4 },
+            minHeight: '100vh',
+            backgroundColor: isDarkTheme ? colors.background : 'rgba(173, 216, 230, 0.2)',
+            position: 'relative',
+            transition: 'all 0.3s ease'
+        }}>
+            <Container maxWidth="md">
+
+                <Box sx={{
+                    mt: 6,
+                    backgroundColor: isDarkTheme ? colors.paper : '#fff',
+                    padding: { xs: 2, sm: 4 },
+                    borderRadius: '16px',
+                    boxShadow: isDarkTheme ? '0 4px 20px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.3s ease'
+                }}>
                     <Box sx={{ textAlign: 'center', mb: 4 }}>
-                        <Typography variant="h4" gutterBottom>
+                        <Typography
+                            variant="h4"
+                            gutterBottom
+                            sx={{
+                                color: colors.text,
+                                fontSize: { xs: '1.5rem', sm: '2rem' },
+                                fontWeight: 600,
+                                mb: 3
+                            }}
+                        >
                             Perfil de la Empresa
                         </Typography>
 
-                        <Avatar
-                            src={logoPreview}
-                            alt="Logo de la empresa"
-                            onClick={handleOpenImageModal} // Abre el modal al hacer clic
-                            sx={{
-                                width: 100,
-                                height: 100,
-                                margin: '0 auto',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                                boxShadow: 2,
-                                cursor: 'pointer',
-                            }}
-                        />
-
+                        {isLoading ? (
+                            <Skeleton
+                                variant="circular"
+                                width={100}
+                                height={100}
+                                sx={{ margin: '0 auto' }}
+                            />
+                        ) : logoPreview ? (
+                            <Tooltip title="Click para ampliar" arrow>
+                                <Avatar
+                                    src={logoPreview}
+                                    alt="Logo de la empresa"
+                                    onClick={handleOpenImageModal}
+                                    sx={{
+                                        width: 100,
+                                        height: 100,
+                                        margin: '0 auto',
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                        backgroundColor: isDarkTheme ? '#1B2A3A' : '#ffffff',
+                                        boxShadow: isDarkTheme ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 8px rgba(0,0,0,0.2)',
+                                        cursor: 'pointer',
+                                        border: `2px solid ${colors.primary}`,
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            transform: 'scale(1.05)',
+                                            boxShadow: isDarkTheme ? '0 6px 16px rgba(0,0,0,0.4)' : '0 6px 16px rgba(0,0,0,0.2)',
+                                        }
+                                    }}
+                                />
+                            </Tooltip>
+                        ) : (
+                            <Avatar
+                                sx={{
+                                    width: 100,
+                                    height: 100,
+                                    margin: '0 auto',
+                                    backgroundColor: isDarkTheme ? '#1B2A3A' : '#ffffff',
+                                    border: `2px solid ${colors.primary}`,
+                                }}
+                            >
+                                <PhotoCameraIcon />
+                            </Avatar>
+                        )}
                         <IconButton
                             color="primary"
                             component="label"
-                            sx={{ position: 'relative', bottom: 0, mt: 1 }}
+                            sx={{
+                                mt: 2,
+                                backgroundColor: colors.hover,
+                                '&:hover': {
+                                    backgroundColor: colors.hover,
+                                    transform: 'scale(1.1)'
+                                },
+                                transition: 'all 0.2s ease'
+                            }}
                             onClick={() => setIsEditingLogo(true)}
                         >
                             <PhotoCameraIcon />
-                            <input type="file" hidden onChange={handleFileChange} />
+                            <input type="file" hidden onChange={handleFileChange} accept="image/*" />
                         </IconButton>
 
                         {logoChanged && (
-                            <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelLogo} sx={{ mr: 2 }}>
-                                    Cancelar
-                                </Button>
-                                <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSaveLogo}>
-                                    Guardar
-                                </Button>
-                            </Box>
+                            <Fade in={true}>
+                                <Box sx={{
+                                    textAlign: 'center',
+                                    mt: 2,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: 2
+                                }}>
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<CloseIcon />}
+                                        onClick={handleCancelLogo}
+                                        sx={{
+                                            color: colors.text,
+                                            borderColor: colors.border,
+                                            '&:hover': {
+                                                borderColor: colors.primary,
+                                                backgroundColor: colors.hover
+                                            }
+                                        }}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<SaveIcon />}
+                                        onClick={handleSaveLogo}
+                                        sx={{
+                                            backgroundColor: colors.primary,
+                                            '&:hover': {
+                                                backgroundColor: isDarkTheme ? '#5BABFF' : '#1565c0'
+                                            }
+                                        }}
+                                    >
+                                        Guardar
+                                    </Button>
+                                </Box>
+                            </Fade>
                         )}
                     </Box>
-
-                    {/* Modal para la imagen ampliada */}
-                    <Modal open={openImageModal} onClose={handleCloseImageModal}>
-                        <Box
-                            sx={{
+                    <Modal
+                        open={openImageModal}
+                        onClose={handleCloseImageModal}
+                        closeAfterTransition
+                        BackdropProps={{
+                            timeout: 500,
+                            style: { backgroundColor: 'rgba(0, 0, 0, 0.8)' } // Fondo más oscuro para mejor contraste
+                        }}
+                    >
+                        <Fade in={openImageModal}>
+                            <Box sx={{
                                 position: 'absolute',
                                 top: '50%',
                                 left: '50%',
                                 transform: 'translate(-50%, -50%)',
-                                width: '80%',
-                                bgcolor: 'background.paper',
-                                boxShadow: 24,
+                                width: '90%',
+                                maxWidth: '600px',
+                                bgcolor: colors.paper,
+                                boxShadow: isDarkTheme ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(0,0,0,0.1)',
                                 p: 4,
+                                borderRadius: '16px',
                                 textAlign: 'center',
-                            }}
-                        >
-                            <img
-                                src={logoPreview}
-                                alt="Logo ampliado"
-                                style={{ maxWidth: '100%', maxHeight: '100%' }}
-                            />
-                            <Button onClick={handleCloseImageModal} sx={{ mt: 2 }}>
-                                Cerrar
-                            </Button>
-                        </Box>
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center'
+                            }}>
+                                <IconButton
+                                    onClick={handleCloseImageModal}
+                                    sx={{
+                                        position: 'absolute',
+                                        right: 8,
+                                        top: 8,
+                                        color: colors.text,
+                                        backgroundColor: 'rgba(0,0,0,0.1)',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(0,0,0,0.2)'
+                                        }
+                                    }}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                                <Box
+                                    component="img"
+                                    src={logoPreview}
+                                    alt="Logo ampliado"
+                                    sx={{
+                                        maxWidth: '100%',
+                                        maxHeight: '60vh',
+                                        objectFit: 'contain',
+                                        borderRadius: '8px',
+                                        mt: 2,
+                                        backgroundColor: isDarkTheme ? '#1B2A3A' : '#ffffff',
+                                        border: `1px solid ${colors.border}`
+                                    }}
+                                />
+                                <Typography
+                                    variant="caption"
+                                    sx={{
+                                        mt: 2,
+                                        color: colors.secondaryText
+                                    }}
+                                >
+                                    Click fuera de la imagen para cerrar
+                                </Typography>
+                            </Box>
+                        </Fade>
                     </Modal>
                     <form onSubmit={handleSaveDatos}>
-                        <Grid container spacing={2}>
+                        <Grid container spacing={3}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
@@ -328,6 +547,7 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditingDatos}
                                     error={!!errorMessages.nombre_empresa}
                                     helperText={errorMessages.nombre_empresa}
+                                    sx={inputStyles}
                                 />
                             </Grid>
 
@@ -341,6 +561,7 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditingDatos}
                                     error={!!errorMessages.direccion}
                                     helperText={errorMessages.direccion}
+                                    sx={inputStyles}
                                 />
                             </Grid>
 
@@ -354,6 +575,7 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditingDatos}
                                     error={!!errorMessages.telefono}
                                     helperText={errorMessages.telefono}
+                                    sx={inputStyles}
                                 />
                             </Grid>
 
@@ -369,6 +591,7 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditingDatos}
                                     error={!!errorMessages.correo_electronico}
                                     helperText={errorMessages.correo_electronico}
+                                    sx={inputStyles}
                                 />
                             </Grid>
 
@@ -384,6 +607,7 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditingDatos}
                                     error={!!errorMessages.descripcion}
                                     helperText={errorMessages.descripcion}
+                                    sx={inputStyles}
                                 />
                             </Grid>
 
@@ -397,21 +621,47 @@ const PerfilEmpresa = () => {
                                     disabled={!isEditingDatos}
                                     error={!!errorMessages.slogan}
                                     helperText={errorMessages.slogan}
+                                    sx={inputStyles}
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                            <Grid item xs={12} sx={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: 2,
+                                mt: 3
+                            }}>
                                 {!isEditingDatos ? (
                                     <Button
                                         variant="outlined"
                                         startIcon={<EditIcon />}
                                         onClick={() => setIsEditingDatos(true)}
+                                        sx={{
+                                            color: colors.primary,
+                                            borderColor: colors.primary,
+                                            '&:hover': {
+                                                borderColor: colors.primary,
+                                                backgroundColor: colors.hover
+                                            }
+                                        }}
                                     >
                                         Editar
                                     </Button>
                                 ) : (
                                     <>
-                                        <Button variant="outlined" startIcon={<CloseIcon />} onClick={handleCancelDatos} sx={{ mr: 2 }}>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<CloseIcon />}
+                                            onClick={handleCancelDatos}
+                                            sx={{
+                                                color: colors.text,
+                                                borderColor: colors.border,
+                                                '&:hover': {
+                                                    borderColor: colors.primary,
+                                                    backgroundColor: colors.hover
+                                                }
+                                            }}
+                                        >
                                             Cancelar
                                         </Button>
                                         <Button
@@ -419,6 +669,15 @@ const PerfilEmpresa = () => {
                                             startIcon={<SaveIcon />}
                                             onClick={handleSaveDatos}
                                             disabled={!hasChanges}
+                                            sx={{
+                                                backgroundColor: colors.primary,
+                                                '&:hover': {
+                                                    backgroundColor: isDarkTheme ? '#5BABFF' : '#1565c0'
+                                                },
+                                                '&.Mui-disabled': {
+                                                    backgroundColor: isDarkTheme ? '#2C3E50' : '#e0e0e0'
+                                                }
+                                            }}
                                         >
                                             Guardar
                                         </Button>
@@ -439,19 +698,36 @@ const PerfilEmpresa = () => {
                 handleClose={handleCloseNotification}
             />
 
-            {/* Diálogo de confirmación para cancelar cambios en el logo */}
-            <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)}>
-                <DialogTitle>{"Confirmar cancelación"}</DialogTitle>
+            <Dialog
+                open={openConfirmDialog}
+                onClose={() => setOpenConfirmDialog(false)}
+                PaperProps={{
+                    sx: {
+                        backgroundColor: colors.paper,
+                        color: colors.text
+                    }
+                }}
+            >
+                <DialogTitle sx={{ color: colors.text }}>
+                    {"Confirmar cancelación"}
+                </DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
+                    <DialogContentText sx={{ color: colors.secondaryText }}>
                         ¿Deseas deshacer los cambios realizados en el logo?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenConfirmDialog(false)} color="primary">
+                    <Button
+                        onClick={() => setOpenConfirmDialog(false)}
+                        sx={{ color: colors.primary }}
+                    >
                         No
                     </Button>
-                    <Button onClick={handleConfirmCancelLogo} color="primary" autoFocus>
+                    <Button
+                        onClick={handleConfirmCancelLogo}
+                        autoFocus
+                        sx={{ color: colors.primary }}
+                    >
                         Sí
                     </Button>
                 </DialogActions>

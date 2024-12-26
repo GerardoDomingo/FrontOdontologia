@@ -72,7 +72,7 @@ const Configuracion = () => {
   const colors = {
     background: isDarkMode ? '#1B2A3A' : '#F9FDFF',
     cardBg: isDarkMode ? '#243447' : '#FFFFFF',
-    primary: '#03427c',
+    primary: '#0052A3',
     text: isDarkMode ? '#FFFFFF' : '#333333',
     subtext: isDarkMode ? '#E0E0E0' : '#666666',
     hover: isDarkMode ? 'rgba(3,66,124,0.3)' : 'rgba(3,66,124,0.1)',
@@ -83,7 +83,7 @@ const Configuracion = () => {
 
   const tabs = [
     { 
-      label: 'Aviso de Privacidad', 
+      label: 'Política de Privacidad', 
       icon: <FaFileAlt size={20} />,
       component: AvisoDePrivacidad
     },

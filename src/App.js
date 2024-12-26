@@ -24,6 +24,7 @@ import LayoutAdmin from './Usuarios/Administrador/LayoutAdmin.jsx';
 import PrincipalAdmin from './Usuarios/Administrador/Principal.jsx';
 import Configuracion from './Usuarios/Administrador/Configuracion.jsx';
 import Reportes from './Usuarios/Administrador/Configuracion/reportes.jsx';
+import Pacientes from './Usuarios/Administrador/Configuracion/PatientsReport.jsx';
 import PerfilEmpresa from './Usuarios/Administrador/Configuracion/PerfilEmpresa.jsx';
 
 function App() {
@@ -103,6 +104,7 @@ function App() {
         <Route path="/Administrador/principal" element={<PrivateRoute><LayoutAdmin><PrincipalAdmin /></LayoutAdmin></PrivateRoute>} />
         <Route path="/Administrador/configuracion" element={<PrivateRoute><LayoutAdmin><Configuracion /></LayoutAdmin></PrivateRoute>} />
         <Route path="/Administrador/reportes" element={<PrivateRoute><LayoutAdmin><Reportes /></LayoutAdmin></PrivateRoute>} />
+        <Route path="/Administrador/pacientes" element={<PrivateRoute><LayoutAdmin><Pacientes /></LayoutAdmin></PrivateRoute>} />
         <Route path="/Administrador/PerfilEmpresa" element={<PrivateRoute><LayoutAdmin><PerfilEmpresa /></LayoutAdmin></PrivateRoute>} />
       </Routes>
       {!loading ? null : <div>Cargando configuración de empresa...</div>} {/* Mensaje de carga opcionall */}

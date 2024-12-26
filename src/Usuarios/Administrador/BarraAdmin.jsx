@@ -1,37 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Box, 
-  IconButton, 
-  Menu, 
-  MenuItem, 
-  Divider,
-  Badge,
-  Avatar,
-  ListItemIcon,
-  ListItemText,
-  useTheme,
-  useMediaQuery
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Box,
+    IconButton,
+    Menu,
+    MenuItem,
+    Divider,
+    Badge,
+    Avatar,
+    ListItemIcon,
+    ListItemText,
+    useTheme,
+    useMediaQuery
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  FaUserCircle,
-  FaCalendarAlt,
-  FaSignOutAlt,
-  FaHome,
-  FaCog,
-  FaTooth,
-  FaChartLine,
-  FaUsers,
-  FaClipboardList,
-  FaMoneyBillWave,
-  FaDatabase,
-  FaBell,
-  FaUserMd,
-  FaClock
+import {
+    FaHome, FaUsers, FaCalendarAlt, FaChartLine, FaMoneyBillWave,
+    FaClock, FaBell, FaCog, FaSignOutAlt, FaFileAlt, FaTooth, FaUserCircle
 } from 'react-icons/fa';
+
 import Notificaciones from '../../Compartidos/Notificaciones';
 
 const BarraAdmin = () => {
@@ -69,17 +58,18 @@ const BarraAdmin = () => {
 
     // Configuración responsiva del menú
     const menuWidth = isMobile ? '100%' : '220px';
-    
+
     const menuItems = [
         { icon: FaHome, text: 'Panel Principal', path: '/Administrador/principal', divider: false },
         { icon: FaUsers, text: 'Gestión de Pacientes', path: '/Administrador/pacientes', divider: false },
         { icon: FaCalendarAlt, text: 'Agenda', path: '/Administrador/agenda', divider: false },
         { icon: FaChartLine, text: 'Estadísticas', path: '/Administrador/estadisticas', divider: false },
+        { icon: FaFileAlt, text: 'Reportes', path: '/Administrador/reportes', divider: false },
         { icon: FaMoneyBillWave, text: 'Finanzas', path: '/Administrador/finanzas', divider: false },
         { icon: FaClock, text: 'Historial', path: '/Administrador/historial', divider: true },
         { icon: FaBell, text: 'Notificaciones', path: '/Administrador/notificaciones', divider: false },
         { icon: FaCog, text: 'Configuración', path: '/Administrador/configuracion', divider: true },
-        { icon: FaSignOutAlt, text: 'Cerrar Sesión', path: null, divider: false }
+        { icon: FaSignOutAlt, text: 'Cerrar Sesión', path: null, divider: false },
     ];
 
     // Handlers permanecen iguales...
@@ -113,9 +103,9 @@ const BarraAdmin = () => {
                     boxShadow: isDarkTheme ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 4px rgba(0,0,0,0.1)',
                 }}
             >
-                <Toolbar 
-                    sx={{ 
-                        display: 'flex', 
+                <Toolbar
+                    sx={{
+                        display: 'flex',
                         justifyContent: 'space-between',
                         padding: isMobile ? '0.5rem' : '0.5rem 1rem',
                     }}
@@ -131,11 +121,11 @@ const BarraAdmin = () => {
                             gap: isMobile ? 1 : 2
                         }}
                     >
-                        <FaTooth 
-                            style={{ 
-                                fontSize: isMobile ? 24 : 32, 
+                        <FaTooth
+                            style={{
+                                fontSize: isMobile ? 24 : 32,
                                 color: colors.primary,
-                            }} 
+                            }}
                         />
                         <Typography
                             variant={isMobile ? "subtitle1" : "h6"}
@@ -158,16 +148,16 @@ const BarraAdmin = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 1 : 2 }}>
                         <IconButton
                             size={isMobile ? "medium" : "large"}
-                            sx={{ 
+                            sx={{
                                 color: colors.iconColor,
-                                '&:hover': { 
+                                '&:hover': {
                                     color: colors.primary,
-                                    backgroundColor: colors.hover 
+                                    backgroundColor: colors.hover
                                 }
                             }}
                         >
-                            <Badge 
-                                badgeContent={pendingNotifications} 
+                            <Badge
+                                badgeContent={pendingNotifications}
                                 color="error"
                                 sx={{
                                     '& .MuiBadge-badge': {
@@ -184,9 +174,9 @@ const BarraAdmin = () => {
                             edge="end"
                             onClick={handleMenuOpen}
                             sx={{
-                                '&:hover': { 
+                                '&:hover': {
                                     transform: 'scale(1.05)',
-                                    backgroundColor: colors.hover 
+                                    backgroundColor: colors.hover
                                 },
                                 transition: 'all 0.2s'
                             }}
@@ -239,15 +229,15 @@ const BarraAdmin = () => {
                                         },
                                     }}
                                 >
-                                    <ListItemIcon 
-                                        sx={{ 
+                                    <ListItemIcon
+                                        sx={{
                                             color: colors.iconColor,
                                             minWidth: isMobile ? 40 : 36
                                         }}
                                     >
                                         <item.icon size={isMobile ? 22 : 20} />
                                     </ListItemIcon>
-                                    <ListItemText 
+                                    <ListItemText
                                         primary={item.text}
                                         primaryTypographyProps={{
                                             fontSize: isMobile ? '1rem' : '0.9rem',
@@ -256,11 +246,11 @@ const BarraAdmin = () => {
                                     />
                                 </MenuItem>
                                 {item.divider && (
-                                    <Divider 
-                                        sx={{ 
+                                    <Divider
+                                        sx={{
                                             my: 1,
                                             borderColor: isDarkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
-                                        }} 
+                                        }}
                                     />
                                 )}
                             </React.Fragment>
@@ -268,7 +258,7 @@ const BarraAdmin = () => {
                     </Menu>
                 </Toolbar>
             </AppBar>
-            <Toolbar /> 
+            <Toolbar />
 
             <Notificaciones
                 open={openNotification}
