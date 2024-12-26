@@ -168,12 +168,12 @@ const PatientsReport = () => {
           setNotificationType('error');
           return;
         }
-  
+
         const response = await axios.put(
           `https://backendodontologia.onrender.com/api/pacientes/${patientToUpdate.id}/status`,
           { estado: 'Inactivo' }
         );
-  
+
         if (response.data.success) {
           // Actualizar el estado local
           const updatedPatients = patients.map(p =>
@@ -181,7 +181,7 @@ const PatientsReport = () => {
           );
           setPatients(updatedPatients);
           setFilteredPatients(updatedPatients);
-          
+
           setNotificationMessage('Estado del paciente actualizado exitosamente');
           setNotificationType('success');
         } else {
@@ -190,7 +190,7 @@ const PatientsReport = () => {
       } catch (error) {
         console.error('Error completo:', error);
         setNotificationMessage(
-          error.response?.data?.message || 
+          error.response?.data?.message ||
           'Error al actualizar el estado del paciente'
         );
         setNotificationType('error');
@@ -426,12 +426,13 @@ const PatientsReport = () => {
             Confirmar cambio de estado
           </DialogTitle>
           <DialogContent>
-            <DialogContentText sx={{ color: colors.text, mb: 2 }}>
+            {/* Cambiamos DialogContentText por Box */}
+            <Box sx={{ color: colors.text, mb: 2 }}>
               Para confirmar la baja del paciente, por favor escriba su nombre completo:
-              <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
-                {patientToUpdate ? `${patientToUpdate.nombre} ${patientToUpdate.aPaterno}` : ''}
-              </Typography>
-            </DialogContentText>
+            </Box>
+            <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
+              {patientToUpdate ? `${patientToUpdate.nombre} ${patientToUpdate.aPaterno}` : ''}
+            </Typography>
             <TextField
               fullWidth
               value={confirmName}
@@ -439,6 +440,7 @@ const PatientsReport = () => {
               label="Nombre del paciente"
               variant="outlined"
               sx={{
+                mt: 2,
                 '& .MuiOutlinedInput-root': {
                   color: colors.text,
                   '& fieldset': {
@@ -473,7 +475,6 @@ const PatientsReport = () => {
             </Button>
           </DialogActions>
         </Dialog>
-
 
         <Dialog
           open={open}
