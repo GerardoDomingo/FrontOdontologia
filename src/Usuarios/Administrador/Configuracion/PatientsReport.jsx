@@ -162,22 +162,37 @@ const PatientsReport = () => {
   const handleConfirmStatusChange = async () => {
     if (confirmName === `${patientToUpdate.nombre} ${patientToUpdate.aPaterno}`) {
       try {
+        // Verificar que patientToUpdate.id existe
+        if (!patientToUpdate?.id) {
+          setNotificationMessage('Error: ID de paciente no válido');
+          setNotificationType('error');
+          return;
+        }
+  
         const response = await axios.put(
           `https://backendodontologia.onrender.com/api/pacientes/${patientToUpdate.id}/status`,
           { estado: 'Inactivo' }
         );
-
-        if (response.status === 200) {
-          setNotificationMessage('Estado del paciente actualizado exitosamente');
-          setNotificationType('success');
+  
+        if (response.data.success) {
+          // Actualizar el estado local
           const updatedPatients = patients.map(p =>
             p.id === patientToUpdate.id ? { ...p, estado: 'Inactivo' } : p
           );
           setPatients(updatedPatients);
           setFilteredPatients(updatedPatients);
+          
+          setNotificationMessage('Estado del paciente actualizado exitosamente');
+          setNotificationType('success');
+        } else {
+          throw new Error(response.data.message);
         }
       } catch (error) {
-        setNotificationMessage('Error al actualizar el estado del paciente');
+        console.error('Error completo:', error);
+        setNotificationMessage(
+          error.response?.data?.message || 
+          'Error al actualizar el estado del paciente'
+        );
         setNotificationType('error');
       } finally {
         setOpenConfirmDialog(false);
