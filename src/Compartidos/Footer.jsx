@@ -4,12 +4,60 @@ import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaWhatsapp } from 'reac
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+// Función auxiliar para formatear URLs de redes sociales
+const formatSocialUrl = (network, url) => {
+  // Eliminar 'https://' o 'http://' si existe
+  const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
+
+  switch (network) {
+    case 'facebook':
+      return `https://facebook.com/${cleanUrl}`;
+    case 'twitter':
+      return `https://twitter.com/${cleanUrl}`;
+    case 'linkedin':
+      return `https://linkedin.com/in/${cleanUrl}`;
+    case 'instagram':
+      return `https://instagram.com/${cleanUrl}`;
+    case 'whatsapp':
+      // Si es un número de teléfono, eliminar caracteres no numéricos
+      const phone = cleanUrl.replace(/\D/g, '');
+      return `https://wa.me/${phone}`;
+    default:
+      return url;
+  }
+};
+
 const availableSocials = [
-  { label: 'Facebook', name: 'facebook', icon: <FaFacebook /> },
-  { label: 'Twitter', name: 'twitter', icon: <FaTwitter /> },
-  { label: 'LinkedIn', name: 'linkedin', icon: <FaLinkedin /> },
-  { label: 'Instagram', name: 'instagram', icon: <FaInstagram /> },
-  { label: 'WhatsApp', name: 'whatsapp', icon: <FaWhatsapp /> },
+  {
+    label: 'Facebook',
+    name: 'facebook',
+    icon: <FaFacebook />,
+    baseUrl: 'https://facebook.com/'
+  },
+  {
+    label: 'Twitter',
+    name: 'twitter',
+    icon: <FaTwitter />,
+    baseUrl: 'https://twitter.com/'
+  },
+  {
+    label: 'LinkedIn',
+    name: 'linkedin',
+    icon: <FaLinkedin />,
+    baseUrl: 'https://linkedin.com/in/'
+  },
+  {
+    label: 'Instagram',
+    name: 'instagram',
+    icon: <FaInstagram />,
+    baseUrl: 'https://instagram.com/'
+  },
+  {
+    label: 'WhatsApp',
+    name: 'whatsapp',
+    icon: <FaWhatsapp />,
+    baseUrl: 'https://wa.me/'
+  }
 ];
 
 const Footer = () => {
@@ -91,6 +139,11 @@ const Footer = () => {
     setModalOpen(true);
   };
 
+  const handleSocialClick = (social) => {
+    const formattedUrl = formatSocialUrl(social.nombre_red, social.url);
+    window.open(formattedUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const handleCloseModal = () => setModalOpen(false);
 
   // Your existing footer JSX remains the same until the Modal component...
@@ -162,21 +215,37 @@ const Footer = () => {
 
           {/* Columna 4: Redes Sociales */}
           <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Síguenos en redes sociales</Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mb: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Síguenos en redes sociales
+            </Typography>
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 1,
+              mb: 1,
+              flexWrap: 'wrap'
+            }}>
               {socials.map((social) => {
-                const socialIcon = availableSocials.find((s) => s.name === social.nombre_red)?.icon;
-                return (
-                  socialIcon && (
-                    <IconButton
-                      key={social.id}
-                      component="a"
-                      href={social.url ? `https://${social.url}` : `tel:${social.url}`}
-                      sx={{ color: '#ffffff', fontSize: '1.5rem' }}
-                    >
-                      {socialIcon}
-                    </IconButton>
-                  )
+                const socialConfig = availableSocials.find(
+                  (s) => s.name === social.nombre_red
+                );
+
+                return socialConfig && (
+                  <IconButton
+                    key={social.id}
+                    onClick={() => handleSocialClick(social)}
+                    sx={{
+                      color: '#ffffff',
+                      fontSize: '1.5rem',
+                      transition: 'transform 0.2s, color 0.2s',
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                        color: '#e0e0e0'
+                      }
+                    }}
+                  >
+                    {socialConfig.icon}
+                  </IconButton>
                 );
               })}
             </Box>
@@ -187,8 +256,8 @@ const Footer = () => {
       </Container>
 
       {/* Enhanced Modal Design */}
-      <Modal 
-        open={modalOpen} 
+      <Modal
+        open={modalOpen}
         onClose={handleCloseModal}
         sx={{
           display: 'flex',
@@ -225,17 +294,17 @@ const Footer = () => {
           }}
         >
           {/* Header */}
-          <Box sx={{ 
-            borderBottom: '1px solid rgba(0, 0, 0, 0.1)', 
-            pb: 2, 
+          <Box sx={{
+            borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+            pb: 2,
             mb: 3,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <Typography 
-              variant="h5" 
-              sx={{ 
+            <Typography
+              variant="h5"
+              sx={{
                 fontWeight: 600,
                 color: '#1a237e',
               }}
@@ -270,8 +339,8 @@ const Footer = () => {
           </Box>
 
           {/* Footer */}
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             justifyContent: 'flex-end',
             borderTop: '1px solid rgba(0, 0, 0, 0.1)',
             pt: 3

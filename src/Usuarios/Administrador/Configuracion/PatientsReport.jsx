@@ -54,18 +54,21 @@ const PatientsReport = () => {
   }, []);
 
   // Definición de colores
-  const colors = {
-    background: isDarkTheme ? '#1B2A3A' : '#F9FDFF',
-    paper: isDarkTheme ? '#243447' : '#ffffff',
-    tableBackground: isDarkTheme ? '#1E2A3A' : '#e3f2fd',
-    text: isDarkTheme ? '#FFFFFF' : '#333333',
-    secondaryText: isDarkTheme ? '#E8F1FF' : '#666666',
-    primary: isDarkTheme ? '#4B9FFF' : '#1976d2',
-    hover: isDarkTheme ? 'rgba(75,159,255,0.15)' : 'rgba(25,118,210,0.1)',
-    inputBorder: isDarkTheme ? '#4B9FFF' : '#1976d2',
-    inputLabel: isDarkTheme ? '#E8F1FF' : '#666666'
-  };
-
+// Definición de colores
+const colors = {
+  background: isDarkTheme ? '#1B2A3A' : '#F9FDFF',
+  paper: isDarkTheme ? '#243447' : '#ffffff',
+  tableBackground: isDarkTheme ? '#1E2A3A' : '#e3f2fd',
+  text: isDarkTheme ? '#FFFFFF' : '#333333',
+  secondaryText: isDarkTheme ? '#E8F1FF' : '#666666',
+  primary: isDarkTheme ? '#4B9FFF' : '#1976d2',
+  hover: isDarkTheme ? 'rgba(75,159,255,0.15)' : 'rgba(25,118,210,0.1)',
+  inputBorder: isDarkTheme ? '#4B9FFF' : '#1976d2',
+  inputLabel: isDarkTheme ? '#E8F1FF' : '#666666',
+  cardBackground: isDarkTheme ? '#1D2B3A' : '#F8FAFC',
+  divider: isDarkTheme ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
+  titleColor: isDarkTheme ? '#4B9FFF' : '#0052A3'
+};
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -247,12 +250,15 @@ const handleStatusChange = async (patient) => {
   };
 
   return (
-    <Card
+<Card
       sx={{
         minHeight: '100vh',
-        backgroundColor: '#F8FAFC', // Fondo muy suave
+        backgroundColor: colors.background, // Usar el color del tema
         borderRadius: '16px',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+        boxShadow: isDarkTheme ? 
+          '0 2px 12px rgba(0,0,0,0.3)' : 
+          '0 2px 12px rgba(0,0,0,0.08)',
+        transition: 'all 0.3s ease' // Agregar transición suave
       }}
     >
       <Box sx={{ padding: { xs: 2, sm: 3, md: 4 } }}> {/* Padding responsivo */}

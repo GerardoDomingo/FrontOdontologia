@@ -69,7 +69,7 @@ const BarraAdmin = () => {
         { icon: FaClock, text: 'Historial', path: '/Administrador/historial', divider: true },
         { icon: FaBell, text: 'Notificaciones', path: '/Administrador/notificaciones', divider: false },
         { icon: FaCog, text: 'Configuración', path: '/Administrador/configuracion', divider: true },
-        { icon: FaSignOutAlt, text: 'Cerrar Sesión', path: null, divider: false },
+        { icon: FaSignOutAlt, text: 'Cerrar Sesión', path: '/', divider: false },
     ];
 
     // Handlers permanecen iguales...

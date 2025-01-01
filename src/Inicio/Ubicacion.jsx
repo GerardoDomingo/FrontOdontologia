@@ -8,11 +8,24 @@ const Ubicacion = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [map, setMap] = useState(null);
   const [loadError, setLoadError] = useState(null);
+  // Theme detection
+  useEffect(() => {
+    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(matchDarkTheme.matches);
 
-  const center = {
-    lat: 21.081734,
-    lng: -98.536002
-  };
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    matchDarkTheme.addEventListener('change', handleThemeChange);
+    return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
+  }, []);
+
+  const darkMapStyle = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] }
+  ];
 
   const mapOptions = {
     zoomControl: true,
@@ -33,22 +46,15 @@ const Ubicacion = () => {
     zoomControlOptions: {
       position: window.google?.maps?.ControlPosition?.RIGHT_CENTER,
     },
-  };
+  }
 
   const streetViewLink = `https://www.google.com/maps/@21.0816681,-98.5359763,19.64z`;
 
-  // Theme detection
-  useEffect(() => {
-    const matchDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(matchDarkTheme.matches);
+  const center = {
+    lat: 21.081734,
+    lng: -98.536002
+  };
 
-    const handleThemeChange = (e) => {
-      setIsDarkMode(e.matches);
-    };
-
-    matchDarkTheme.addEventListener('change', handleThemeChange);
-    return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
-  }, []);
 
   const colors = {
     cardBackground: isDarkMode ? '#0D1B2A' : '#ffffff',
@@ -65,11 +71,7 @@ const Ubicacion = () => {
     marginTop: "20px"
   };
 
-  const darkMapStyle = [
-    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] }
-  ];
+
 
   const { isLoaded, loadError: apiLoadError } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyCjYgHzkG53-aSTcHJkAPYu98TIkGZ2d-w",

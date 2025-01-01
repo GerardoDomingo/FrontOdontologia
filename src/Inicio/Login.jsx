@@ -54,26 +54,7 @@ const Login = () => {
     const recaptchaRef = useRef(null);
     const navigate = useNavigate();
 
-    // Función helper para manejar el timeout en fetch
-    const fetchWithTimeout = async (url, options, timeout = 15000) => {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
 
-        try {
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal
-            });
-            clearTimeout(id);
-            return response;
-        } catch (error) {
-            clearTimeout(id);
-            if (error.name === 'AbortError') {
-                throw new Error('La solicitud tardó demasiado tiempo en responder');
-            }
-            throw error;
-        }
-    };
 
     // Detectar el tema 
     useEffect(() => {
@@ -125,6 +106,70 @@ const Login = () => {
         }
     }, []);
 
+    //recaptcha
+    useEffect(() => {
+        let checkRecaptcha;
+        let timeoutId;
+
+        const loadRecaptcha = () => {
+            setIsCaptchaLoading(true);
+
+            // Limpiar timeout anterior si existe
+            if (timeoutId) clearTimeout(timeoutId);
+
+            // Establecer nuevo timeout
+            timeoutId = setTimeout(() => {
+                if (!window.grecaptcha) {
+                    setIsCaptchaLoading(false);
+                    setErrorMessage('Error al cargar el captcha. Por favoe, verifique su conexión.');
+                }
+            }, 7000); 
+
+            if (window.grecaptcha) {
+                setIsCaptchaLoading(false);
+                clearTimeout(timeoutId);
+            }
+        };
+
+        const handleLoad = () => {
+            loadRecaptcha();
+        };
+
+        loadRecaptcha();
+        window.addEventListener('load', handleLoad);
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            window.removeEventListener('load', handleLoad);
+        };
+    }, []);
+
+    // Función helper para manejar el timeout en fetch
+    const fetchWithTimeout = async (url, options, timeout = 15000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            clearTimeout(id);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return response;
+        } catch (error) {
+            clearTimeout(id);
+            if (error.name === 'AbortError') {
+                throw new Error('La solicitud tardó demasiado tiempo en responder');
+            }
+            throw error;
+        }
+    };
+
     const handleRememberMeChange = (event) => {
         const checked = event.target.checked;
         setRememberMe(checked);
@@ -137,7 +182,6 @@ const Login = () => {
             localStorage.removeItem('savedEmail');
         }
     };
-
 
     // Manejar cambios en los campos del formulario
     const handleChange = (e) => {
@@ -154,53 +198,20 @@ const Login = () => {
         }
     };
 
-    useEffect(() => {
-        let checkRecaptcha;
-
-        const loadRecaptcha = () => {
-            setIsCaptchaLoading(true);
-
-            if (checkRecaptcha) {
-                clearTimeout(checkRecaptcha);
-            }
-
-            if (window.grecaptcha) {
-                setIsCaptchaLoading(false);
-                return;
-            }
-
-            checkRecaptcha = setTimeout(() => {
-                if (!window.grecaptcha) {
-                    setIsCaptchaLoading(false);
-                }
-            }, 3000);
-        };
-
-        loadRecaptcha();
-
-        const handleLoad = () => {
-            loadRecaptcha();
-        };
-
-        window.addEventListener('load', handleLoad);
-
-        return () => {
-            if (checkRecaptcha) {
-                clearTimeout(checkRecaptcha);
-            }
-            window.removeEventListener('load', handleLoad);
-        };
-    }, []);
-
     // Actualiza la función handleCaptchaChange:
     const handleCaptchaChange = (value) => {
-        setCaptchaValue(value);
-        setIsCaptchaLoading(false);
-        if (value) {
+        try {
+            setCaptchaValue(value);
+            setIsCaptchaLoading(false);
             setErrorMessage('');
+        } catch (error) {
+            console.error('Error en el captcha:', error);
+            setErrorMessage('Error con el captcha. Por favor, inténtalo de nuevo.');
+            if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+            }
         }
     };
-
 
     // Manejar el envío del formulario
     const handleSubmit = async (e) => {
@@ -637,15 +648,13 @@ const Login = () => {
                         </Box>
 
                         {/* ReCAPTCHA */}
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                mb: 3,
-                                minHeight: '78px' // Altura mínima para evitar saltos
-                            }}
-                        >
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            mb: 3,
+                            minHeight: '78px'
+                        }}>
                             {isCaptchaLoading ? (
                                 <CircularProgress size={24} />
                             ) : (
@@ -657,7 +666,10 @@ const Login = () => {
                                         setIsCaptchaLoading(false);
                                         setErrorMessage('Error al cargar el captcha. Por favor, recarga la página.');
                                     }}
-                                    onExpired={() => setCaptchaValue(null)}
+                                    onExpired={() => {
+                                        setCaptchaValue(null);
+                                        setErrorMessage('El captcha ha expirado. Por favor, complétalo nuevamente.');
+                                    }}
                                     theme={isDarkMode ? 'dark' : 'light'}
                                 />
                             )}
