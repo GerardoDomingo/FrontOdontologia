@@ -18,6 +18,8 @@ import Preguntas from './Inicio/Preguntas.jsx';
 //Paciente
 import Principal from './Usuarios/Paciente/Principal.jsx';
 import LayoutPaciente from './Usuarios/Paciente/LayoutPaciente';
+import Perfil from './Usuarios/Paciente/Perfil.jsx';
+
 
 //Administrador
 import LayoutAdmin from './Usuarios/Administrador/LayoutAdmin.jsx';
@@ -99,6 +101,7 @@ function App() {
 
         {/* Rutas protegidas de pacientes */}
         <Route path="/Paciente/principal" element={<PrivateRoute><LayoutPaciente><Principal /></LayoutPaciente></PrivateRoute>} />
+        <Route path="/Paciente/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
 
         {/* Rutas protegidas del administrador */}
         <Route path="/Administrador/principal" element={<PrivateRoute><LayoutAdmin><PrincipalAdmin /></LayoutAdmin></PrivateRoute>} />

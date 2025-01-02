@@ -1,35 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Box, 
-  IconButton, 
-  Menu, 
-  MenuItem, 
-  Divider,
-  Badge,
-  Avatar,
-  ListItemIcon,
-  ListItemText
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Box,
+    IconButton,
+    Menu,
+    MenuItem,
+    Divider,
+    Badge,
+    Avatar,
+    ListItemIcon,
+    ListItemText
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  FaUserCircle, 
-  FaCalendarAlt, 
-  FaSignOutAlt, 
-  FaHome, 
-  FaCog, 
-  FaBell, 
-  FaTooth,
-  FaFileAlt,
-  FaPills,
-  FaWallet,
-  FaChartLine,
-  FaComments,
-  FaClinicMedical,
-  FaQuestionCircle,
-  FaFileMedical
+import {
+    FaUserCircle,
+    FaCalendarAlt,
+    FaSignOutAlt,
+    FaHome,
+    FaCog,
+    FaBell,
+    FaTooth,
+    FaFileAlt,
+    FaPills,
+    FaWallet,
+    FaChartLine,
+    FaComments,
+    FaQuestionCircle,
+    FaFileMedical
 } from 'react-icons/fa';
 import Notificaciones from '../../Compartidos/Notificaciones';
 
@@ -52,6 +51,13 @@ const BarraPaciente = () => {
 
         matchDarkTheme.addEventListener('change', handleThemeChange);
         return () => matchDarkTheme.removeEventListener('change', handleThemeChange);
+    }, []);
+
+    useEffect(() => {
+        const updateNotifications = () => {
+            setNotificationCount(prevCount => Math.max(0, prevCount));
+        };
+        updateNotifications();
     }, []);
 
     const menuItems = [
@@ -80,30 +86,55 @@ const BarraPaciente = () => {
 
     const handleLogout = async () => {
         handleMenuClose();
-        setOpenNotification(true);
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
                 credentials: 'include',
+                mode: 'cors',
                 headers: {
-                    'Content-Type': 'application/json',
-                },
+                    'Content-Type': 'application/json'
+                }
             });
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Error al cerrar sesión.');
             }
+
+            // Limpiar almacenamiento local
             localStorage.removeItem('loggedIn');
+
+            // Mostrar notificación de éxito
+            setOpenNotification(true);
+            setNotificationMessage('Has cerrado sesión exitosamente. Redirigiendo...');
+
+            // Verificar que la cookie se haya eliminado
+            console.log('Cookie después del logout:', document.cookie);
+
+            // Esperar un momento antes de redirigir
+            setTimeout(() => {
+                navigate('/', { replace: true }); // Usar replace para evitar volver atrás
+            }, 2000);
+
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
             setNotificationMessage('Error al cerrar sesión. Inténtalo nuevamente.');
-        } finally {
-            setTimeout(() => {
-                navigate('/');
-            }, 2000);
+            setOpenNotification(true);
         }
     };
 
+    // Agregar una función de verificación para debug
+    const checkAuthStatus = () => {
+        const hasSession = document.cookie.includes('cookie');
+        console.log('Estado de autenticación:', hasSession);
+        return hasSession;
+    };
+
+    // Usar useEffect para verificar el estado de la sesión
+    useEffect(() => {
+        const interval = setInterval(checkAuthStatus, 1000); // Verificar cada segundo
+        return () => clearInterval(interval);
+    }, []);
     const handleItemClick = (item) => {
         if (item.text === 'Cerrar Sesión') {
             handleLogout();
@@ -124,8 +155,8 @@ const BarraPaciente = () => {
             >
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <FaTooth style={{ 
-                            fontSize: 32, 
+                        <FaTooth style={{
+                            fontSize: 32,
                             color: '#03427c',
                             filter: isDarkTheme ? 'brightness(1.5)' : 'none'
                         }} />
@@ -152,7 +183,7 @@ const BarraPaciente = () => {
                                 <FaBell />
                             </Badge>
                         </IconButton>
-                        
+
                         <IconButton
                             edge="end"
                             onClick={handleMenuOpen}
@@ -203,7 +234,7 @@ const BarraPaciente = () => {
                                     <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>
                                         <item.icon size={20} />
                                     </ListItemIcon>
-                                    <ListItemText 
+                                    <ListItemText
                                         primary={item.text}
                                         primaryTypographyProps={{
                                             fontSize: '0.9rem',
@@ -221,7 +252,7 @@ const BarraPaciente = () => {
 
             <Notificaciones
                 open={openNotification}
-                message="Has cerrado sesión exitosamente. Redirigiendo.."
+                message={notificationMessage}
                 type="info"
                 handleClose={() => setOpenNotification(false)}
             />

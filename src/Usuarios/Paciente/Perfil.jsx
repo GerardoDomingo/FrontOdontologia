@@ -10,13 +10,12 @@ import {
     Alert,
     CircularProgress,
     IconButton,
-    Fade,
     useTheme,
     InputAdornment
 } from '@mui/material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import {
     Person as PersonIcon,
     Edit as EditIcon,
@@ -85,60 +84,60 @@ const Profile = () => {
     };
 
     // Función para actualizar el perfil
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateFields()) return;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateFields()) return;
 
-    setLoading(true);
-    try {
-        const response = await fetch('https://backendodontologia.onrender.com/api/profile/updateProfile', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(profileData),
-            credentials: 'include'
-        });
+        setLoading(true);
+        try {
+            const response = await fetch('https://backendodontologia.onrender.com/api/profile/updateProfile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(profileData),
+                credentials: 'include'
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Error al actualizar el perfil');
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al actualizar el perfil');
+            }
+
+            setSuccess(true);
+            setIsEditing(false);
+            // Actualizar los datos del perfil con la respuesta del servidor
+            setProfileData(data.updatedProfile);
+            setTimeout(() => setSuccess(false), 3000);
+        } catch (err) {
+            setError(err.message || 'Error al actualizar los datos');
+            console.error('Error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // En el frontend faltan validaciones para campos requeridos que están en el backend
+    const validateFields = () => {
+        const errors = {};
+
+        if (!profileData.nombre) errors.nombre = 'El nombre es obligatorio';
+        if (!profileData.aPaterno) errors.aPaterno = 'El apellido paterno es obligatorio';
+        if (!profileData.aMaterno) errors.aMaterno = 'El apellido materno es obligatorio';
+        if (!profileData.email) errors.email = 'El email es obligatorio';
+
+        if (profileData.telefono && !/^[0-9]{10}$/.test(profileData.telefono)) {
+            errors.telefono = 'Ingresa un número de teléfono válido (10 dígitos)';
         }
 
-        setSuccess(true);
-        setIsEditing(false);
-        // Actualizar los datos del perfil con la respuesta del servidor
-        setProfileData(data.updatedProfile);
-        setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-        setError(err.message || 'Error al actualizar los datos');
-        console.error('Error:', err);
-    } finally {
-        setLoading(false);
-    }
-};
+        if (profileData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileData.email)) {
+            errors.email = 'Ingresa un correo electrónico válido';
+        }
 
-// En el frontend faltan validaciones para campos requeridos que están en el backend
-const validateFields = () => {
-    const errors = {};
-    
-    if (!profileData.nombre) errors.nombre = 'El nombre es obligatorio';
-    if (!profileData.aPaterno) errors.aPaterno = 'El apellido paterno es obligatorio';
-    if (!profileData.aMaterno) errors.aMaterno = 'El apellido materno es obligatorio';
-    if (!profileData.email) errors.email = 'El email es obligatorio';
-    
-    if (profileData.telefono && !/^[0-9]{10}$/.test(profileData.telefono)) {
-        errors.telefono = 'Ingresa un número de teléfono válido (10 dígitos)';
-    }
-    
-    if (profileData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileData.email)) {
-        errors.email = 'Ingresa un correo electrónico válido';
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-};
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         setProfileData(prev => ({
@@ -161,7 +160,15 @@ const validateFields = () => {
         }));
     };
 
-
+    const formatDate = (date) => {
+        if (!date) return '';
+        try {
+            return format(new Date(date), 'dd/MM/yyyy', { locale: es });
+        } catch (error) {
+            console.error('Error al formatear la fecha:', error);
+            return '';
+        }
+    };
 
     const handleCancel = () => {
         setIsEditing(false);
@@ -285,15 +292,31 @@ const validateFields = () => {
                                 </Grid>
 
                                 <Grid item xs={12} sm={6}>
-                                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-                                        <DatePicker
-                                            label="Fecha de Nacimiento"
-                                            value={profileData.fechaNacimiento}
-                                            onChange={handleDateChange}
-                                            disabled={!isEditing}
-                                            renderInput={(params) => <TextField {...params} fullWidth />}
-                                        />
-                                    </LocalizationProvider>
+                                    <TextField
+                                        fullWidth
+                                        label="Fecha de Nacimiento"
+                                        type="date"
+                                        name="fechaNacimiento"
+                                        value={profileData.fechaNacimiento ?
+                                            new Date(profileData.fechaNacimiento).toISOString().split('T')[0]
+                                            : ''
+                                        }
+                                        onChange={(e) => {
+                                            const date = e.target.value ? new Date(e.target.value) : null;
+                                            handleDateChange(date);
+                                        }}
+                                        disabled={!isEditing}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <PersonIcon color="primary" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
                                 </Grid>
 
                                 <Grid item xs={12} sm={6}>
