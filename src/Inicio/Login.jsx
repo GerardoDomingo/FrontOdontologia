@@ -216,13 +216,15 @@ const Login = () => {
     // Manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
+        // Validación de email
         const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
         if (!emailRegex.test(formData.email)) {
             setErrorMessage('Por favor, ingrese un correo electrónico válido');
             return;
         }
-
+    
+        // Validación de captcha
         if (!captchaValue) {
             setErrorMessage('Por favor, completa el captcha.');
             if (recaptchaRef.current) {
@@ -230,67 +232,98 @@ const Login = () => {
             }
             return;
         }
-
+    
+        // Guardar email si rememberMe está activo
         if (rememberMe) {
             localStorage.setItem('savedEmail', formData.email);
         }
+    
         setIsLoading(true);
-
+    
         try {
-            const response = await fetchWithTimeout(
-                'https://backendodontologia.onrender.com/api/users/login',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include', // Ya lo tienes, esto es correcto
-                    body: JSON.stringify({ ...formData, captchaValue }),
-                    mode: 'cors' // Agregar esta línea
+            // Intento de login
+            const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-                15000
-            );
-
+                credentials: 'include', // Importante para las cookies
+                body: JSON.stringify({ 
+                    email: formData.email.trim(),
+                    password: formData.password,
+                    captchaValue 
+                }),
+            });
+    
+            // Verificar si hay cookies en la respuesta
+            const cookies = response.headers.get('set-cookie');
+            console.log('Cookies recibidas:', cookies);
+    
             const data = await response.json();
-
+    
             if (response.ok) {
-                try {
-                    const sendCodeResponse = await fetchWithTimeout(
-                        'https://backendodontologia.onrender.com/api/send-verification-code',
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
+                // Guardar datos de sesión
+                if (data.user && data.user.token) {
+                    localStorage.setItem('userToken', data.user.token);
+                    localStorage.setItem('userType', data.user.tipo);
+                    localStorage.setItem('userName', data.user.nombre);
+                    localStorage.setItem('isLoggedIn', 'true');
+                    
+                    // Verificar si la cookie se guardó
+                    const hasCookie = document.cookie.includes('sessionToken');
+                    console.log('Cookie guardada:', hasCookie);
+    
+                    // Enviar código de verificación
+                    try {
+                        const sendCodeResponse = await fetchWithTimeout(
+                            'https://backendodontologia.onrender.com/api/send-verification-code',
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${data.user.token}`
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify({ 
+                                    email: formData.email.trim() 
+                                }),
                             },
-                            body: JSON.stringify({ email: formData.email }),
-                        },
-                        15000
-                    );
-
-                    if (sendCodeResponse.ok) {
-                        setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
-                        setOpenNotification(true);
-                        setShowVerificationModal(true);
-                        setIsCaptchaLocked(true);
-                    } else {
-                        const errorData = await sendCodeResponse.json();
-                        setErrorMessage(errorData.message || 'Error al enviar el código de verificación. Intenta de nuevo.');
+                            15000
+                        );
+    
+                        if (sendCodeResponse.ok) {
+                            setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
+                            setOpenNotification(true);
+                            setShowVerificationModal(true);
+                            setIsCaptchaLocked(true);
+                        } else {
+                            const errorData = await sendCodeResponse.json();
+                            throw new Error(errorData.message || 'Error al enviar el código de verificación');
+                        }
+                    } catch (error) {
+                        console.error('Error en verificación:', error);
+                        setErrorMessage('Error al enviar el código de verificación. Por favor, intenta nuevamente.');
                     }
-                } catch (error) {
-                    setErrorMessage('Error al enviar el código de verificación. Por favor, intenta nuevamente.');
+                } else {
+                    throw new Error('Respuesta del servidor incompleta');
                 }
-            } else if (data.failedAttempts !== undefined) {
-                setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
-                setOpenNotification(true);
-                setErrorMessage('Contraseña incorrecta.');
-            } else if (data.lockStatus) {
-                const formattedDate = new Date(data.lockUntil).toLocaleString('es-ES');
-                setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
-                setOpenNotification(true);
             } else {
-                setErrorMessage(data.message || 'Error al iniciar sesión.');
+                // Manejar diferentes tipos de errores
+                if (data.failedAttempts !== undefined) {
+                    setNotificationMessage(`Intentos fallidos: ${data.failedAttempts}`);
+                    setOpenNotification(true);
+                    setErrorMessage('Contraseña incorrecta.');
+                } else if (data.lockStatus) {
+                    const formattedDate = new Date(data.lockUntil).toLocaleString('es-ES');
+                    setNotificationMessage(`Cuenta bloqueada hasta ${formattedDate}`);
+                    setOpenNotification(true);
+                } else {
+                    setErrorMessage(data.message || 'Error al iniciar sesión.');
+                }
             }
         } catch (error) {
+            console.error('Error en login:', error);
             if (error.message === 'La solicitud tardó demasiado tiempo en responder') {
                 setErrorMessage('El servidor está tardando en responder. Por favor, intenta nuevamente.');
             } else {
@@ -304,7 +337,6 @@ const Login = () => {
             setCaptchaValue(null);
         }
     };
-
     // Función para reenviar el código
     const handleResendCode = async () => {
         if (!canResend) return;

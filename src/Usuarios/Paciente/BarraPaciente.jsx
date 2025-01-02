@@ -123,6 +123,11 @@ const BarraPaciente = () => {
         }
     };
 
+    const checkAuth = () => {
+        const token = localStorage.getItem('userToken');
+        return !!token;
+    };
+    
     // Agregar una función de verificación para debug
     const checkAuthStatus = () => {
         const hasSession = document.cookie.includes('cookie');
