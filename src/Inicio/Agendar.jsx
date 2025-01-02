@@ -25,6 +25,8 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import Captcha from '../Compartidos/Herramientas/captcha';
+
 // Validation Regex
 const nameRegex = /^[A-Za-zÀ-ÿñÑà-ü\s]+$/;
 const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
@@ -57,6 +59,8 @@ const ReservaCitas = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const [captchaValue, setCaptchaValue] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // System Theme Detection
     useEffect(() => {
@@ -143,7 +147,6 @@ const ReservaCitas = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Modify the handleNextStep to check terms acceptance
     const handleNextStep = () => {
         if (validateStep()) {
             if (step === 1) {
@@ -151,10 +154,24 @@ const ReservaCitas = () => {
                     setOpenSnackbar(true);
                     return;
                 }
+                if (!captchaValue) {
+                    setErrorMessage('Por favor, completa el captcha.');
+                    return;
+                }
             }
             setStep(prevStep => prevStep + 1);
         }
     };
+
+    const handleCaptchaChange = (value) => {
+        setCaptchaValue(value);
+        if (!value) {
+            setErrorMessage('Por favor, completa el captcha nuevamente.');
+        } else {
+            setErrorMessage('');
+        }
+    };
+
     const handlePrevStep = () => {
         setStep(prevStep => prevStep - 1);
     };
@@ -180,6 +197,7 @@ const ReservaCitas = () => {
         setSelectedTime('');
         setErrors({});
         setOpenConfirmDialog(false);
+        setCaptchaValue(null);
     };
 
     // Función para abrir el modal de políticas de privacidad y obtener su contenido si aún no está cargado
@@ -572,6 +590,15 @@ const ReservaCitas = () => {
                                         </Typography>
                                     }
                                 />
+
+                                {allAccepted && (
+                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                        <Captcha
+                                            onCaptchaChange={handleCaptchaChange}
+                                            isDarkMode={isDarkTheme}
+                                        />
+                                    </Box>
+                                )}
                             </Box>
                             <Modal open={openPrivacyModal} onClose={handleClosePrivacyModal}>
                                 <Box
@@ -682,7 +709,8 @@ const ReservaCitas = () => {
                                         !formData.correo ||
                                         !formData.telefono ||
                                         Object.values(errors).some(err => err) ||
-                                        !allAccepted
+                                        !allAccepted ||
+                                        !captchaValue
                                     }
                                 >
                                     Continuar
@@ -1003,6 +1031,7 @@ const ReservaCitas = () => {
                             </Box>
                         </Box>
                     )}
+
                     {step === 4 && (
                         <Box
                             sx={{
@@ -1068,10 +1097,10 @@ const ReservaCitas = () => {
                         </Box>
                     )}
                 </Box>
-            </motion.div>
+            </motion.div >
 
             {/* Snackbar for terms acceptance */}
-            <Snackbar
+            < Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}
                 onClose={handleCloseSnackbar}
@@ -1091,8 +1120,8 @@ const ReservaCitas = () => {
                 >
                     Debe aceptar los términos y condiciones para continuar
                 </Alert>
-            </Snackbar>
-        </Box>
+            </Snackbar >
+        </Box >
     );
 };
 

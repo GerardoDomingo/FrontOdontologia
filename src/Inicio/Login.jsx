@@ -244,10 +244,11 @@ const Login = () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'include',
+                    credentials: 'include', // Ya lo tienes, esto es correcto
                     body: JSON.stringify({ ...formData, captchaValue }),
+                    mode: 'cors' // Agregar esta línea
                 },
-                15000 // 15 segundos de timeout
+                15000
             );
 
             const data = await response.json();
