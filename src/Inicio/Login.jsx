@@ -123,7 +123,7 @@ const Login = () => {
                     setIsCaptchaLoading(false);
                     setErrorMessage('Error al cargar el captcha. Por favoe, verifique su conexión.');
                 }
-            }, 7000); 
+            }, 2000); 
 
             if (window.grecaptcha) {
                 setIsCaptchaLoading(false);
@@ -145,7 +145,7 @@ const Login = () => {
     }, []);
 
     // Función helper para manejar el timeout en fetch
-    const fetchWithTimeout = async (url, options, timeout = 15000) => {
+    const fetchWithTimeout = async (url, options, timeout = 10000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
 
