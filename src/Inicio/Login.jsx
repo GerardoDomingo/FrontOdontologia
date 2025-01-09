@@ -242,20 +242,16 @@ const Login = () => {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
-                credentials: 'include', // Esto es crucial para las cookies
-                body: JSON.stringify({
+                credentials: 'include',  // Importante para las cookies
+                body: JSON.stringify({ 
                     email: formData.email.trim(),
                     password: formData.password,
-                    captchaValue
-                }),
+                    captchaValue 
+                })
             });
-
-            // Verificar si hay cookies en la respuesta
-            const cookies = response.headers.get('set-cookie');
-            console.log('Cookies recibidas:', cookies);
+            console.log('Cookies después del login:', document.cookie);
 
             const data = await response.json();
 
