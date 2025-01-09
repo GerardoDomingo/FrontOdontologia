@@ -108,39 +108,37 @@ const Login = () => {
 
     //recaptcha
     useEffect(() => {
-        let checkRecaptcha;
         let timeoutId;
+        let checkInterval;
 
         const loadRecaptcha = () => {
             setIsCaptchaLoading(true);
 
-            // Limpiar timeout anterior si existe
-            if (timeoutId) clearTimeout(timeoutId);
-
-            // Establecer nuevo timeout
-            timeoutId = setTimeout(() => {
-                if (!window.grecaptcha) {
+            // Solo establecemos el timeout si realmente es necesario
+            if (!window.grecaptcha) {
+                timeoutId = setTimeout(() => {
                     setIsCaptchaLoading(false);
-                    setErrorMessage('Error al cargar el captcha. Por favoe, verifique su conexión.');
-                }
-            }, 2000); 
+                }, 2000);
 
-            if (window.grecaptcha) {
+                // Verificación periódica
+                checkInterval = setInterval(() => {
+                    if (window.grecaptcha) {
+                        setIsCaptchaLoading(false);
+                        clearTimeout(timeoutId);
+                        clearInterval(checkInterval);
+                    }
+                }, 100);
+            } else {
+                // Si ya existe grecaptcha, simplemente quitamos el loading
                 setIsCaptchaLoading(false);
-                clearTimeout(timeoutId);
             }
         };
 
-        const handleLoad = () => {
-            loadRecaptcha();
-        };
-
         loadRecaptcha();
-        window.addEventListener('load', handleLoad);
 
         return () => {
             if (timeoutId) clearTimeout(timeoutId);
-            window.removeEventListener('load', handleLoad);
+            if (checkInterval) clearInterval(checkInterval);
         };
     }, []);
 
@@ -216,14 +214,14 @@ const Login = () => {
     // Manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         // Validación de email
         const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|live|uthh\.edu)\.(com|mx)$/;
         if (!emailRegex.test(formData.email)) {
             setErrorMessage('Por favor, ingrese un correo electrónico válido');
             return;
         }
-    
+
         // Validación de captcha
         if (!captchaValue) {
             setErrorMessage('Por favor, completa el captcha.');
@@ -232,14 +230,14 @@ const Login = () => {
             }
             return;
         }
-    
+
         // Guardar email si rememberMe está activo
         if (rememberMe) {
             localStorage.setItem('savedEmail', formData.email);
         }
-    
+
         setIsLoading(true);
-    
+
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/login', {
                 method: 'POST',
@@ -248,19 +246,19 @@ const Login = () => {
                     'Accept': 'application/json'
                 },
                 credentials: 'include', // Esto es crucial para las cookies
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     email: formData.email.trim(),
                     password: formData.password,
-                    captchaValue 
+                    captchaValue
                 }),
             });
-    
+
             // Verificar si hay cookies en la respuesta
             const cookies = response.headers.get('set-cookie');
             console.log('Cookies recibidas:', cookies);
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 // Guardar datos de sesión
                 if (data.user && data.user.token) {
@@ -268,11 +266,11 @@ const Login = () => {
                     localStorage.setItem('userType', data.user.tipo);
                     localStorage.setItem('userName', data.user.nombre);
                     localStorage.setItem('isLoggedIn', 'true');
-                    
+
                     // Verificar si la cookie se guardó
                     const hasCookie = document.cookie.includes('sessionToken');
                     console.log('Cookie guardada:', hasCookie);
-    
+
                     // Enviar código de verificación
                     try {
                         const sendCodeResponse = await fetchWithTimeout(
@@ -284,13 +282,13 @@ const Login = () => {
                                     'Authorization': `Bearer ${data.user.token}`
                                 },
                                 credentials: 'include',
-                                body: JSON.stringify({ 
-                                    email: formData.email.trim() 
+                                body: JSON.stringify({
+                                    email: formData.email.trim()
                                 }),
                             },
                             15000
                         );
-    
+
                         if (sendCodeResponse.ok) {
                             setNotificationMessage('Se ha enviado un código de verificación a su correo electrónico.');
                             setOpenNotification(true);
@@ -694,6 +692,10 @@ const Login = () => {
                                     ref={recaptchaRef}
                                     sitekey="6Lc74mAqAAAAAL5MmFjf4x0PWP9MtBNEy9ypux_h"
                                     onChange={handleCaptchaChange}
+                                    onLoad={() => {
+                                        setIsCaptchaLoading(false);
+                                        setErrorMessage('');
+                                    }}
                                     onError={() => {
                                         setIsCaptchaLoading(false);
                                         setErrorMessage('Error al cargar el captcha. Por favor, recarga la página.');
