@@ -37,7 +37,8 @@ const BarraPaciente = () => {
     const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [openNotification, setOpenNotification] = useState(false);
-    const [notificationCount, setNotificationCount] = useState(2); // Para ejemplo
+    const [notificationCount, setNotificationCount] = useState(2);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
 
     // Detectar tema del sistema
@@ -76,6 +77,7 @@ const BarraPaciente = () => {
         { icon: FaSignOutAlt, text: 'Cerrar Sesión', path: null, divider: false }
     ];
 
+
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -83,6 +85,48 @@ const BarraPaciente = () => {
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
+
+    // Agregar esta función que falta
+    const handleItemClick = (item) => {
+        if (item.text === 'Cerrar Sesión') {
+            handleLogout();
+        } else {
+            handleMenuClose();
+            if (item.path) {
+                navigate(item.path);
+            }
+        }
+    };
+
+    // Mejorar el checkAuthStatus
+    const checkAuthStatus = () => {
+        try {
+            const cookies = document.cookie.split(';');
+            const carolDentalCookie = cookies.find(cookie =>
+                cookie.trim().startsWith('carolDental=')
+            );
+
+            if (!carolDentalCookie) {
+                setIsAuthenticated(false);
+                navigate('/', { replace: true });
+                return;
+            }
+
+            setIsAuthenticated(true);
+        } catch (error) {
+            console.error('Error checking auth status:', error);
+            setIsAuthenticated(false);
+            navigate('/', { replace: true });
+        }
+    };
+
+    // Agregar dependencias faltantes en useEffect
+    useEffect(() => {
+        checkAuthStatus();
+        const interval = setInterval(checkAuthStatus, 300000); // 5 minutos
+        return () => clearInterval(interval);
+    }, [navigate]); // Agregamos navigate como dependencia
+    // Modificar handleLogout para manejar mejor la eliminación de la cookie
 
     const handleLogout = async () => {
         handleMenuClose();
@@ -97,23 +141,18 @@ const BarraPaciente = () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al cerrar sesión.');
+                throw new Error('Error al cerrar sesión.');
             }
 
-            // Limpiar almacenamiento local
-            localStorage.removeItem('loggedIn');
+            document.cookie = 'carolDental=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            setIsAuthenticated(false);
 
-            // Mostrar notificación de éxito
-            setOpenNotification(true);
+            // Agregar estas líneas para mostrar la notificación
             setNotificationMessage('Has cerrado sesión exitosamente. Redirigiendo...');
+            setOpenNotification(true);
 
-            // Verificar que la cookie se haya eliminado
-            console.log('Cookie después del logout:', document.cookie);
-
-            // Esperar un momento antes de redirigir
             setTimeout(() => {
-                navigate('/', { replace: true }); // Usar replace para evitar volver atrás
+                navigate('/', { replace: true });
             }, 2000);
 
         } catch (error) {
@@ -123,31 +162,10 @@ const BarraPaciente = () => {
         }
     };
 
-    const checkAuth = () => {
-        const token = localStorage.getItem('userToken');
-        return !!token;
-    };
-    
-    // Agregar una función de verificación para debug
-    const checkAuthStatus = () => {
-        const hasSession = document.cookie.includes('cookie');
-        console.log('Estado de autenticación:', hasSession);
-        return hasSession;
-    };
-
-    // Usar useEffect para verificar el estado de la sesión
-    useEffect(() => {
-        const interval = setInterval(checkAuthStatus, 1000); // Verificar cada segundo
-        return () => clearInterval(interval);
-    }, []);
-    const handleItemClick = (item) => {
-        if (item.text === 'Cerrar Sesión') {
-            handleLogout();
-        } else {
-            handleMenuClose();
-        }
-    };
-
+    // Si no hay autenticación, no renderizar la barra
+    if (!isAuthenticated) {
+        return null;
+    }
     return (
         <>
             <AppBar
@@ -264,5 +282,4 @@ const BarraPaciente = () => {
         </>
     );
 }
-
 export default BarraPaciente;
