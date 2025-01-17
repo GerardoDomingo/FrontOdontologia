@@ -101,17 +101,32 @@ const BarraPaciente = () => {
     // Mejorar el checkAuthStatus
     const checkAuthStatus = () => {
         try {
+            console.log('Todas las cookies:', document.cookie); // Ver todas las cookies
+    
+            // Buscar específicamente carolDental
             const cookies = document.cookie.split(';');
-            const carolDentalCookie = cookies.find(cookie =>
+            cookies.forEach(cookie => {
+                console.log('Cookie encontrada:', cookie.trim()); // Ver cada cookie individual
+            });
+    
+            // Buscar por el nombre exacto que aparece en la imagen
+            const carolDentalCookie = cookies.find(cookie => 
                 cookie.trim().startsWith('carolDental=')
             );
-
+            
+            console.log('Cookie carolDental encontrada:', carolDentalCookie);
+    
             if (!carolDentalCookie) {
+                console.log('No se encontró la cookie carolDental');
                 setIsAuthenticated(false);
                 navigate('/', { replace: true });
                 return;
             }
-
+    
+            // Si encontramos la cookie, extraer su valor
+            const cookieValue = carolDentalCookie.split('=')[1];
+            console.log('Valor de la cookie:', cookieValue);
+    
             setIsAuthenticated(true);
         } catch (error) {
             console.error('Error checking auth status:', error);
@@ -119,7 +134,6 @@ const BarraPaciente = () => {
             navigate('/', { replace: true });
         }
     };
-
     // Agregar dependencias faltantes en useEffect
     useEffect(() => {
         checkAuthStatus();
@@ -139,29 +153,30 @@ const BarraPaciente = () => {
                     'Content-Type': 'application/json'
                 }
             });
-
+    
             if (!response.ok) {
                 throw new Error('Error al cerrar sesión.');
             }
-
+    
+            // Eliminar la cookie con el nombre exacto
             document.cookie = 'carolDental=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            console.log('Cookies después de logout:', document.cookie); // Verificar que se eliminó
+    
             setIsAuthenticated(false);
-
-            // Agregar estas líneas para mostrar la notificación
             setNotificationMessage('Has cerrado sesión exitosamente. Redirigiendo...');
             setOpenNotification(true);
-
+    
             setTimeout(() => {
                 navigate('/', { replace: true });
             }, 2000);
-
+    
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
             setNotificationMessage('Error al cerrar sesión. Inténtalo nuevamente.');
             setOpenNotification(true);
         }
     };
-
+    
     // Si no hay autenticación, no renderizar la barra
     if (!isAuthenticated) {
         return null;
