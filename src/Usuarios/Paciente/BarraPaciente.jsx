@@ -190,6 +190,7 @@ const BarraPaciente = () => {
             setOpenNotification(true);
         }
     };
+    
     // Si no hay autenticación, no renderizar la barra
     if (!isAuthenticated) {
         return null;
