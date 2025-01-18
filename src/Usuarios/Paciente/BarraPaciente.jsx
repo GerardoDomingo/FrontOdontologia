@@ -98,85 +98,98 @@ const BarraPaciente = () => {
         }
     };
 
-    // Mejorar el checkAuthStatus
-    const checkAuthStatus = () => {
-        try {
-            console.log('Todas las cookies:', document.cookie); // Ver todas las cookies
-    
-            // Buscar específicamente carolDental
-            const cookies = document.cookie.split(';');
-            cookies.forEach(cookie => {
-                console.log('Cookie encontrada:', cookie.trim()); // Ver cada cookie individual
-            });
-    
-            // Buscar por el nombre exacto que aparece en la imagen
-            const carolDentalCookie = cookies.find(cookie => 
-                cookie.trim().startsWith('carolDental=')
-            );
-            
-            console.log('Cookie carolDental encontrada:', carolDentalCookie);
-    
-            if (!carolDentalCookie) {
-                console.log('No se encontró la cookie carolDental');
-                setIsAuthenticated(false);
-                navigate('/', { replace: true });
-                return;
-            }
-    
-            // Si encontramos la cookie, extraer su valor
-            const cookieValue = carolDentalCookie.split('=')[1];
-            console.log('Valor de la cookie:', cookieValue);
-    
-            setIsAuthenticated(true);
-        } catch (error) {
-            console.error('Error checking auth status:', error);
-            setIsAuthenticated(false);
-            navigate('/', { replace: true });
-        }
-    };
-    // Agregar dependencias faltantes en useEffect
+
+    // useEffect modificado para usar la nueva función
     useEffect(() => {
         checkAuthStatus();
         const interval = setInterval(checkAuthStatus, 300000); // 5 minutos
         return () => clearInterval(interval);
-    }, [navigate]); // Agregamos navigate como dependencia
-    // Modificar handleLogout para manejar mejor la eliminación de la cookie
+    }, [navigate]);
 
+    // Función mejorada de checkAuthStatus para el frontend
+    const checkAuthStatus = async () => {
+        try {
+            const response = await fetch('https://backendodontologia.onrender.com/api/users/check-auth', {
+                method: 'GET',
+                credentials: 'include', // Importante para enviar cookies
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    setIsAuthenticated(false);
+                    navigate('/', { replace: true });
+                    return;
+                }
+                throw new Error('Error en el servidor');
+            }
+
+            const data = await response.json();
+
+            if (data.authenticated && data.user) {
+                setIsAuthenticated(true);
+                localStorage.setItem('userEmail', data.user.email);
+                localStorage.setItem('userName', data.user.nombre);
+                localStorage.setItem('userType', data.user.tipo);
+                localStorage.setItem('userId', data.user.id);
+            } else {
+                setIsAuthenticated(false);
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userType');
+                localStorage.removeItem('userId');
+                navigate('/', { replace: true });
+            }
+        } catch (error) {
+            console.error('Error al verificar autenticación:', error);
+            setNotificationMessage('Error al verificar la autenticación');
+            setOpenNotification(true);
+            setIsAuthenticated(false);
+            navigate('/', { replace: true });
+        }
+    };
+
+    // Función mejorada de handleLogout para el frontend
     const handleLogout = async () => {
-        handleMenuClose();
+        handleMenuClose(); // Cierra el menú si está abierto
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
                 credentials: 'include',
-                mode: 'cors',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                 }
             });
-    
+
             if (!response.ok) {
-                throw new Error('Error al cerrar sesión.');
+                throw new Error('Error al cerrar sesión');
             }
-    
-            // Eliminar la cookie con el nombre exacto
-            document.cookie = 'carolDental=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-            console.log('Cookies después de logout:', document.cookie); // Verificar que se eliminó
-    
+
+            // Limpiar localStorage
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userId');
+
             setIsAuthenticated(false);
-            setNotificationMessage('Has cerrado sesión exitosamente. Redirigiendo...');
+            setNotificationMessage('Sesión cerrada exitosamente');
             setOpenNotification(true);
-    
+
+            // Redirigir después de un breve delay
             setTimeout(() => {
                 navigate('/', { replace: true });
-            }, 2000);
-    
+            }, 1500);
+
         } catch (error) {
-            console.error('Error al cerrar sesión:', error);
-            setNotificationMessage('Error al cerrar sesión. Inténtalo nuevamente.');
+            console.error('Error en logout:', error);
+            setNotificationMessage('Error al cerrar sesión. Intente nuevamente.');
             setOpenNotification(true);
         }
     };
-    
     // Si no hay autenticación, no renderizar la barra
     if (!isAuthenticated) {
         return null;
