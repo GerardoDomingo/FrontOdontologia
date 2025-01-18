@@ -1,33 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import PrivateRoute from './Compartidos/PrivateRoute.jsx';
 
 //Inicio
-import Home from './Inicio/Home';
-import Register from './Inicio/Register';
-import Login from './Inicio/Login.jsx';
 import LayoutConEncabezado from './Compartidos/LayoutConEncabezado';
-import Recuperacion from './Inicio/Recuperacion.jsx';
-import Reset from './Inicio/CambiarContrasena.jsx';
-import Agendar from './Inicio/Agendar.jsx';
 import Acerca from './Inicio/AcerdaDe.jsx';
+import Agendar from './Inicio/Agendar.jsx';
+import Reset from './Inicio/CambiarContrasena.jsx';
 import Contactanos from './Inicio/Contactanos.jsx';
+import Home from './Inicio/Home';
+import Login from './Inicio/Login.jsx';
 import Preguntas from './Inicio/Preguntas.jsx';
+import Recuperacion from './Inicio/Recuperacion.jsx';
+import Register from './Inicio/Register';
 
 //Paciente
-import Principal from './Usuarios/Paciente/Principal.jsx';
 import LayoutPaciente from './Usuarios/Paciente/LayoutPaciente';
 import Perfil from './Usuarios/Paciente/Perfil.jsx';
+import Principal from './Usuarios/Paciente/Principal.jsx';
 
 
 //Administrador
-import LayoutAdmin from './Usuarios/Administrador/LayoutAdmin.jsx';
-import PrincipalAdmin from './Usuarios/Administrador/Principal.jsx';
 import Configuracion from './Usuarios/Administrador/Configuracion.jsx';
-import Reportes from './Usuarios/Administrador/Configuracion/reportes.jsx';
 import Pacientes from './Usuarios/Administrador/Configuracion/PatientsReport.jsx';
 import PerfilEmpresa from './Usuarios/Administrador/Configuracion/PerfilEmpresa.jsx';
+import Reportes from './Usuarios/Administrador/Configuracion/reportes.jsx';
+import LayoutAdmin from './Usuarios/Administrador/LayoutAdmin.jsx';
+import PrincipalAdmin from './Usuarios/Administrador/Principal.jsx';
 
 function App() {
   const [tituloPagina, setTituloPagina] = useState('Mi Empresa'); 

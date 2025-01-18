@@ -4,16 +4,16 @@ import {
     Button,
     Checkbox,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     FormControlLabel,
     IconButton,
     InputAdornment,
     Paper,
     TextField,
     Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
 } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -41,7 +41,7 @@ const Login = () => {
     const [notificationMessage, setNotificationMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [isCaptchaLocked, setIsCaptchaLocked] = useState(false);
+    const [, setIsCaptchaLocked] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [showVerificationModal, setShowVerificationModal] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
