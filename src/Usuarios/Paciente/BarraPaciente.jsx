@@ -111,7 +111,7 @@ const BarraPaciente = () => {
         try {
             const response = await fetch('https://backendodontologia.onrender.com/api/users/check-auth', {
                 method: 'GET',
-                credentials: 'include', // Importante para enviar cookies
+                credentials: 'include',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -120,6 +120,7 @@ const BarraPaciente = () => {
 
             if (!response.ok) {
                 if (response.status === 401) {
+                    console.log('🔴 Sesión no válida o expirada');
                     setIsAuthenticated(false);
                     navigate('/', { replace: true });
                     return;
@@ -130,12 +131,25 @@ const BarraPaciente = () => {
             const data = await response.json();
 
             if (data.authenticated && data.user) {
+                console.log('✅ Usuario autenticado:', {
+                    nombre: data.user.nombre,
+                    email: data.user.email,
+                    tipo: data.user.tipo,
+                    dispositivo: data.user.dispositivo // Asumiendo que el backend envía esta info
+                });
+
+                // Si hay mensaje de sesión en otro dispositivo
+                if (data.sesionPrevia) {
+                    console.log('⚠️ Se cerró sesión en dispositivo anterior:', data.sesionPrevia.dispositivo);
+                }
+
                 setIsAuthenticated(true);
                 localStorage.setItem('userEmail', data.user.email);
                 localStorage.setItem('userName', data.user.nombre);
                 localStorage.setItem('userType', data.user.tipo);
                 localStorage.setItem('userId', data.user.id);
             } else {
+                console.log('❌ Usuario no autenticado');
                 setIsAuthenticated(false);
                 localStorage.removeItem('userEmail');
                 localStorage.removeItem('userName');
@@ -144,7 +158,7 @@ const BarraPaciente = () => {
                 navigate('/', { replace: true });
             }
         } catch (error) {
-            console.error('Error al verificar autenticación:', error);
+            console.error('🔴 Error al verificar autenticación:', error);
             setNotificationMessage('Error al verificar la autenticación');
             setOpenNotification(true);
             setIsAuthenticated(false);
@@ -154,8 +168,9 @@ const BarraPaciente = () => {
 
     // Función mejorada de handleLogout para el frontend
     const handleLogout = async () => {
-        handleMenuClose(); // Cierra el menú si está abierto
+        handleMenuClose();
         try {
+            console.log('🔄 Iniciando proceso de logout...');
             const response = await fetch('https://backendodontologia.onrender.com/api/users/logout', {
                 method: 'POST',
                 credentials: 'include',
@@ -169,7 +184,9 @@ const BarraPaciente = () => {
                 throw new Error('Error al cerrar sesión');
             }
 
-            // Limpiar localStorage
+            const data = await response.json();
+            console.log('✅ Sesión cerrada exitosamente:', data);
+
             localStorage.removeItem('userEmail');
             localStorage.removeItem('userName');
             localStorage.removeItem('userType');
@@ -179,18 +196,17 @@ const BarraPaciente = () => {
             setNotificationMessage('Sesión cerrada exitosamente');
             setOpenNotification(true);
 
-            // Redirigir después de un breve delay
             setTimeout(() => {
                 navigate('/', { replace: true });
             }, 1500);
 
         } catch (error) {
-            console.error('Error en logout:', error);
+            console.error('❌ Error en logout:', error);
             setNotificationMessage('Error al cerrar sesión. Intente nuevamente.');
             setOpenNotification(true);
         }
     };
-    
+
     // Si no hay autenticación, no renderizar la barra
     if (!isAuthenticated) {
         return null;
